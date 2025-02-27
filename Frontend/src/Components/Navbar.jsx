@@ -5,7 +5,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-teal-500 fixed w-full z-20 top-0 start-0 border-b border-teal-400">
+    <nav className="bg-teal-500 fixed w-full z-20 top-0 start-0 border-b border-teal-400 ">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-2.5">
         <a href="#" className="flex items-center space-x-3">
           <img src={logo} alt="Logo" className="w-36" />

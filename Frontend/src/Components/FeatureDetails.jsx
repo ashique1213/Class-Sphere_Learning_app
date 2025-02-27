@@ -60,7 +60,7 @@ const features = [
 const FeatureDetails = () => {
   return (
     <>
-      <div className="text-center px-[25%] py-5">
+      <div className="text-center px-5 md:px-[25%] md:py-5">
         {/* Title Section */}
         <h1 className="text-xl md:text-3xl font-bold">
           <span className="text-blue-800">What is </span>
