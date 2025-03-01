@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import HeaderImage from "../assets/Images/HeaderImage.png";
-import Navbar from "./Navbar";
 
 const Header = () => {
   return (
 <div className="relative w-full bg-teal-500 flex flex-col md:flex-row items-center justify-between px-6 md:px-16 py-10 md:py-20 mt-[60px] md:mt-0">
       <div className="text-center md:text-left max-w-lg z-10 md:w-1/2 px-6 md:px-12">
-      <h1 className="text-white text-3xl md:text-5xl font-bold leading-snug">
+        <h1 className="text-white text-3xl md:text-5xl font-bold leading-snug">
         <span className="text-orange-400">Studying</span> Online is now much easier
       </h1>
       <p className="text-white mt-3">

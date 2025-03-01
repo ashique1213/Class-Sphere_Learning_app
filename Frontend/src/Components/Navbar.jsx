@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/Nav_logo.svg";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,11 +31,35 @@ const Navbar = () => {
             />
           </svg>
         </button>
-        <div className={`absolute md:static top-16 left-0 w-full md:w-auto bg-teal-500 md:bg-transparent shadow-md md:shadow-none p-4 md:p-0 ${isOpen ? "block" : "hidden"} md:flex md:items-center md:space-x-6`}>
-          <a href="#" className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0">Home</a>
-          <a href="#" className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0">About Us</a>
-          <button className="block md:inline-block bg-white text-teal-900 px-4 py-1 rounded-full hover:bg-gray-200 transition w-full md:w-auto mt-2 md:mt-0">Sign In</button>
-          <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">Sign Up</button>
+        <div
+          className={`absolute md:static top-16 left-0 w-full md:w-auto bg-teal-500 md:bg-transparent shadow-md md:shadow-none p-4 md:p-0 ${
+            isOpen ? "block" : "hidden"
+          } md:flex md:items-center md:space-x-6`}
+        >
+          <Link
+            to="/"
+            className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0"
+          >
+            Home
+          </Link>
+
+          <Link
+            to="/"
+            className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0"
+          >
+            About Us
+          </Link>
+
+          <Link to="/signup">
+            <button className="block md:inline-block bg-white text-teal-900 px-4 py-1 rounded-full hover:bg-gray-200 transition w-full md:w-auto mt-2 md:mt-0">
+              Sign In
+            </button>
+          </Link>
+          <Link to="/profile">
+            <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">
+              Sign Up
+            </button>
+          </Link>
         </div>
       </div>
     </nav>

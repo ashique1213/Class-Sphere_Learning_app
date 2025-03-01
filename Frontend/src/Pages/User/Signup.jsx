@@ -1,5 +1,5 @@
 import React from "react";
-import Login_image from "../assets/Images/Login_image.png";
+import Login_image from "../../assets/Images/Login_image.png"
 
 const Signup = () => {
   return (
