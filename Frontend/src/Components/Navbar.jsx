@@ -50,12 +50,12 @@ const Navbar = () => {
             About Us
           </Link>
 
-          <Link to="/signup">
+          <Link to="/signup?mode=signin">
             <button className="block md:inline-block bg-white text-teal-900 px-4 py-1 rounded-full hover:bg-gray-200 transition w-full md:w-auto mt-2 md:mt-0">
               Sign In
             </button>
           </Link>
-          <Link to="/profile">
+          <Link to="/signup?mode=signup">
             <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">
               Sign Up
             </button>
