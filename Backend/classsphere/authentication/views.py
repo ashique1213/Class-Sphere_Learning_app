@@ -7,6 +7,7 @@ from authentication.serializers import UserSerializer
 from .models import OTP
 from .utils import generate_otp, send_otp_email
 
+
 class SignupView(APIView):
     def post(self, request):
         data = request.data
