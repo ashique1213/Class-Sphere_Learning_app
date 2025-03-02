@@ -41,7 +41,7 @@ class OTP(models.Model):
     is_verified = models.BooleanField(default=False)
 
     def is_expired(self):
-        return self.created_at + timezone.timedelta(minutes=10) < timezone.now()
+        return self.created_at + timezone.timedelta(minutes=1) < timezone.now()
 
     def __str__(self):
         return f"{self.email} - {self.otp_code}"

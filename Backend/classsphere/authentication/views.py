@@ -47,28 +47,20 @@ class VerifyOTPView(APIView):
         email = request.data.get("email")
         otp_code = request.data.get("otp")
 
-        print("Received email:", email)
-        print("Received OTP:", otp_code)
-
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
-
-            print("OTP found in DB:", otp_record.otp_code)
-            print("OTP creation time:", otp_record.created_at)
-
-            if str(otp_record.otp_code) != str(otp_code):
-                return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
             if otp_record.is_expired():
                 return Response({"error": "OTP expired. Request a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
-            if User.objects.filter(email=email).exists():
-                return Response({"error": "User already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            if str(otp_record.otp_code) != str(otp_code):
+                return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
+            # OTP verified successfully, create the user
             user = User.objects.create_user(
                 username=otp_record.username,
                 email=otp_record.email,
-                password=make_password(otp_record.password),
+                password=otp_record.password,
                 role=otp_record.role,
             )
 
@@ -80,5 +72,42 @@ class VerifyOTPView(APIView):
         except OTP.DoesNotExist:
             return Response({"error": "OTP not found"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print("Unexpected error:", str(e))
+            return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from django.utils import timezone
+
+class ResendOTPView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        print(f"Request to resend OTP for: {email}")
+
+        # Check if OTP already exists and if it has expired or not
+        try:
+            otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
+
+            if otp_record.is_expired():
+                otp_code = generate_otp()  
+                otp_record.otp_code = otp_code
+                otp_record.created_at = timezone.now()  # Reset the timestamp
+                otp_record.save()
+
+                send_otp_email(email, otp_record.username, otp_code) 
+
+                return Response({"message": "OTP expired. New OTP sent to your email."}, status=status.HTTP_201_CREATED)
+
+            # If OTP exists and is not expired, notify the user
+            return Response({"error": "OTP already sent. Please check your email."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except OTP.DoesNotExist:
+            # If no OTP record exists, generate and send a new OTP
+            otp_code = generate_otp()
+            otp_record = OTP.objects.create(email=email, otp_code=otp_code)
+
+            # Send the new OTP to the email
+            send_otp_email(email, otp_record.username, otp_code) 
+
+            return Response({"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(f"Error: {e}")
             return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
