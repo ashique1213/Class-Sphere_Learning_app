@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.hashers import make_password
 from authentication.models import User
 from authentication.serializers import UserSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 from .models import OTP
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
@@ -48,7 +49,6 @@ class SignupView(APIView):
 
         return Response({'message': 'OTP sent to your email. Please verify to complete registration.'}, status=status.HTTP_201_CREATED)
 
-
 class VerifyOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -57,6 +57,7 @@ class VerifyOTPView(APIView):
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
 
+            # Check for OTP expiration
             if otp_record.is_expired():
                 return Response({"error": "OTP expired. Request a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -74,12 +75,20 @@ class VerifyOTPView(APIView):
             otp_record.is_verified = True
             otp_record.save()
 
-            return Response({"message": "Email verified successfully! Account created."}, status=status.HTTP_201_CREATED)
+            # Generate JWT token
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+
+            return Response({
+                "message": "Email verified successfully! Account created.",
+                "access_token": str(access_token),
+            }, status=status.HTTP_201_CREATED)
 
         except OTP.DoesNotExist:
             return Response({"error": "OTP not found"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 class ResendOTPView(APIView):
@@ -91,6 +100,7 @@ class ResendOTPView(APIView):
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
 
+            # If OTP is expired, regenerate and resend it
             if otp_record.is_expired():
                 otp_code = generate_otp()  
                 otp_record.otp_code = otp_code
@@ -101,7 +111,6 @@ class ResendOTPView(APIView):
 
                 return Response({"message": "OTP expired. New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
-            # If OTP exists and is not expired, notify the user
             return Response({"error": "OTP already sent. Please check your email."}, status=status.HTTP_400_BAD_REQUEST)
 
         except OTP.DoesNotExist:

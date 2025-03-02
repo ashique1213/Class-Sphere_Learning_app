@@ -74,7 +74,6 @@ const Signup = () => {
         setLoading(false);
   
         if (response.ok) {
-          // ✅ Store email before moving to OTP verification
           localStorage.setItem("email", formData.email);
           console.log("Email stored in localStorage:", formData.email);
   
@@ -91,7 +90,7 @@ const Signup = () => {
 
   // Handle OTP Success (After OTP verification, navigate)
   const handleOtpSuccess = () => {
-    navigate("/Profile"); // Redirect after successful OTP verification
+    navigate("/"); // Redirect after successful OTP verification
   };
 
   return (

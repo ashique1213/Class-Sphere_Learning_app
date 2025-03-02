@@ -40,7 +40,7 @@ const Otp = ({ email, onSuccess }) => {
       setError("OTP must be 6 digits");
       return;
     }
-
+  
     try {
       setLoading(true);
       setError(null);
@@ -50,13 +50,19 @@ const Otp = ({ email, onSuccess }) => {
         credentials: "include",
         body: JSON.stringify({ email, otp }),
       });
-
+  
       const data = await response.json();
       setLoading(false);
-
+  
       if (response.ok) {
         setSuccess(true);
-        onSuccess(); // Navigate to profile after OTP verification
+        const authToken = data.access_token;  
+        if (authToken) {
+          localStorage.setItem("authToken", authToken);  
+          onSuccess();  // Proceed with successful login or navigation
+        } else {
+          setError("Failed to get auth token.");
+        }
       } else {
         setError(data.error || "Invalid OTP, try again.");
       }
@@ -65,6 +71,8 @@ const Otp = ({ email, onSuccess }) => {
       setError("Something went wrong. Try again!");
     }
   };
+  
+  
 
   const handleResendOtp = async () => {
     if (isExpired) {

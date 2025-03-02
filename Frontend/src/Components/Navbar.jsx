@@ -1,12 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/Nav_logo.svg";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const authToken = localStorage.getItem("authToken");
+    if (authToken) {
+      setIsAuthenticated(true); 
+    } else {
+      setIsAuthenticated(false); 
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setIsAuthenticated(false);  
+  };
 
   return (
-    <nav className="bg-teal-500 fixed w-full z-20 top-0 start-0 border-b border-teal-400 ">
+    <nav className="bg-teal-500 fixed w-full z-20 top-0 start-0 border-b border-teal-400">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-2.5">
         <a href="#" className="flex items-center space-x-3">
           <img src={logo} alt="Logo" className="w-36" />
@@ -50,16 +65,44 @@ const Navbar = () => {
             About Us
           </Link>
 
-          <Link to="/signup?mode=signin">
-            <button className="block md:inline-block bg-white text-teal-900 px-4 py-1 rounded-full hover:bg-gray-200 transition w-full md:w-auto mt-2 md:mt-0">
-              Sign In
-            </button>
-          </Link>
-          <Link to="/signup?mode=signup">
-            <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">
-              Sign Up
-            </button>
-          </Link>
+          {/* Conditionally render Chat and Logout if authenticated */}
+          {isAuthenticated && (
+            <>
+              <Link
+                to="/"
+                className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0"
+              >
+                Chat
+              </Link>
+              <Link to="/" onClick={handleLogout}>
+                <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">
+                  Sign Out
+                </button>
+              </Link>
+              <Link
+                to="/Profile"
+                className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0"
+              >
+                My Account
+              </Link>
+            </>
+          )}
+
+          {/* Conditionally render Sign In and Sign Up if not authenticated */}
+          {!isAuthenticated && (
+            <>
+              <Link to="/signup?mode=signin">
+                <button className="block md:inline-block bg-white text-teal-900 px-4 py-1 rounded-full hover:bg-gray-200 transition w-full md:w-auto mt-2 md:mt-0">
+                  Sign In
+                </button>
+              </Link>
+              <Link to="/signup?mode=signup">
+                <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition w-full md:w-auto mt-2 md:mt-0">
+                  Sign Up
+                </button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>
