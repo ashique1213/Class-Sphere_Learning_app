@@ -6,6 +6,7 @@ from authentication.models import User
 from authentication.serializers import UserSerializer
 from .models import OTP
 from .utils import generate_otp, send_otp_email
+from django.utils import timezone
 
 
 class SignupView(APIView):
@@ -21,11 +22,17 @@ class SignupView(APIView):
         role = data['role'].strip().lower()
         username = data['username'].strip()
 
-        if role not in ['student', 'teacher', 'staff']: 
+        if role not in ['student', 'teacher', 'staff']:
             return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
             return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
+            otp_record.delete()
+        except OTP.DoesNotExist:
+            pass  
 
         otp_code = generate_otp()
 
@@ -74,7 +81,6 @@ class VerifyOTPView(APIView):
         except Exception as e:
             return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from django.utils import timezone
 
 class ResendOTPView(APIView):
     def post(self, request):
