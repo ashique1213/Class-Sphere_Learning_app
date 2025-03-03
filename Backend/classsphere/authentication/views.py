@@ -5,9 +5,36 @@ from django.contrib.auth.hashers import make_password
 from authentication.models import User
 from authentication.serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
 from .models import OTP
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
+
+class SignInView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+        
+        if not email or not password:
+            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = authenticate(email=email, password=password)
+            if user is None:
+                return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Generate JWT token
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+            
+            return Response({
+                "message": "Login successful.",
+                "access_token": str(access_token),
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
 
 class SignupView(APIView):
@@ -41,7 +68,7 @@ class SignupView(APIView):
             email=email,
             otp_code=otp_code,
             username=username,
-            password=make_password(data['password']),
+            password=data['password'],
             role=role
         )
 
@@ -96,11 +123,9 @@ class ResendOTPView(APIView):
         email = request.data.get("email")
         print(f"Request to resend OTP for: {email}")
 
-        # Check if OTP already exists and if it has expired or not
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
 
-            # If OTP is expired, regenerate and resend it
             if otp_record.is_expired():
                 otp_code = generate_otp()  
                 otp_record.otp_code = otp_code
@@ -114,11 +139,9 @@ class ResendOTPView(APIView):
             return Response({"error": "OTP already sent. Please check your email."}, status=status.HTTP_400_BAD_REQUEST)
 
         except OTP.DoesNotExist:
-            # If no OTP record exists, generate and send a new OTP
             otp_code = generate_otp()
             otp_record = OTP.objects.create(email=email, otp_code=otp_code)
 
-            # Send the new OTP to the email
             send_otp_email(email, otp_record.username, otp_code) 
 
             return Response({"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)

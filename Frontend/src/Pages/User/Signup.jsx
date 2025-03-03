@@ -85,10 +85,41 @@ const Signup = () => {
         setLoading(false);
         setError("Something went wrong. Try again!");
       }
+    } else {
+      // Sign in logic
+      const payload = {
+        email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+      };
+
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch("http://127.0.0.1:8000/api/signin/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        setLoading(false);
+        
+        if (response.ok) {
+          const authToken = data.access_token; 
+          localStorage.setItem("authToken", authToken);
+          localStorage.setItem("email", formData.email);
+          navigate("/"); // Redirect after login
+        } else {
+          setError(data.error || "Login failed");
+        }
+      } catch (err) {
+        setLoading(false);
+        setError("Something went wrong. Try again!");
+      }
     }
   };
 
-  // Handle OTP Success (After OTP verification, navigate)
   const handleOtpSuccess = () => {
     navigate("/"); // Redirect after successful OTP verification
   };
