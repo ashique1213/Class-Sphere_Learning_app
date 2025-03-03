@@ -2,6 +2,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import make_password
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated
 from authentication.models import User
 from authentication.serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,6 +11,10 @@ from django.contrib.auth import authenticate
 from .models import OTP
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
+from rest_framework.parsers import MultiPartParser, FormParser
+import cloudinary # type: ignore
+import cloudinary.uploader # type: ignore
+
 
 
 class SignInView(APIView):
@@ -160,3 +166,40 @@ class ResendOTPView(APIView):
         except Exception as e:
             print(f"Error: {e}")
             return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        """Return user details including Cloudinary image URL."""
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        """Update user details including profile image."""
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            if "profile_image" in request.FILES:
+                image = request.FILES["profile_image"]
+                print(f"Received image: {image}")  # Debugging log
+
+                public_id = f"profile_images/user_{user.id}"
+                
+                try:
+                    upload_result = cloudinary.uploader.upload(
+                        image,
+                        public_id=public_id,
+                        overwrite=True
+                    )
+                    serializer.validated_data["profile_image"] = upload_result["secure_url"]
+                except Exception as e:
+                    return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            serializer.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -16,6 +16,7 @@ class User(AbstractUser):
     gender = models.CharField(max_length=10, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
+    place = models.CharField(max_length=50, blank=True, null=True)
     profile_image = CloudinaryField('profile_image', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
