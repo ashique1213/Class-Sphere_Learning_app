@@ -10,32 +10,43 @@ from .models import OTP
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
 
+
 class SignInView(APIView):
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
-        
-        if not email or not password:
-            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
-        
+        role = request.data.get("role")
+
+        if not email or not password or not role:
+            return Response({"error": "Email, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             user = authenticate(email=email, password=password)
             if user is None:
                 return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
-            
+
+            # Verify user role
+            if user.role.lower() != role.lower():
+                return Response({"error": "Invalid role for this account."}, status=status.HTTP_403_FORBIDDEN)
+
             # Generate JWT token
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
-            
+
             return Response({
                 "message": "Login successful.",
                 "access_token": str(access_token),
+                "user": {
+                    "username": user.username,
+                    "email": user.email,
+                    "role": user.role
+                }
             }, status=status.HTTP_200_OK)
-        
+
         except Exception as e:
             return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
 
+        
 
 class SignupView(APIView):
     def post(self, request):

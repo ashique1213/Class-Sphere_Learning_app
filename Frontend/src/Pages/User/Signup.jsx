@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { loginStart, loginSuccess, loginFailure } from "../../redux/authSlice";
 import Login_image from "../../assets/Images/Login_image.png";
 import Otp from "../../Components/Otp";
 
@@ -10,6 +12,7 @@ const Signup = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Form State
   const [formData, setFormData] = useState({
@@ -17,7 +20,7 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: userType ? userType.toLowerCase() : "",
+    role: "",
   });
 
   const [error, setError] = useState(null);
@@ -25,7 +28,9 @@ const Signup = () => {
 
   // Sync role with formData when userType changes
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, role: userType ? userType : "" }));
+    if (userType) {
+      setFormData((prev) => ({ ...prev, role: userType.toLowerCase() }));
+    }
   }, [userType]);
 
   // Handle mode change (signup/login)
@@ -36,31 +41,72 @@ const Signup = () => {
   // Handle Input Change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null); // Clear errors when user types
+  };
+
+  // Validate form fields
+  const validateForm = () => {
+    if (!userType) {
+      setError("Please select whether you are a Student or a Teacher.");
+      return false;
+    }
+
+    if (isSignUp) {
+      if (!formData.username || formData.username.trim() === "") {
+        setError("Username is required.");
+        return false;
+      }
+      
+      if (!formData.email || formData.email.trim() === "") {
+        setError("Email is required.");
+        return false;
+      }
+      
+      if (!formData.password) {
+        setError("Password is required.");
+        return false;
+      }
+      
+      if (formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match.");
+        return false;
+      }
+    } else {
+      // Login validation
+      if (!formData.email || formData.email.trim() === "") {
+        setError("Email is required.");
+        return false;
+      }
+      
+      if (!formData.password) {
+        setError("Password is required.");
+        return false;
+      }
+    }
+    
+    return true;
   };
 
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!userType) {
-      setError("Please select whether you are a Student or a Teacher.");
+    
+    if (!validateForm()) {
       return;
     }
   
     if (isSignUp) {
-      if (formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
-  
       const payload = {
         username: formData.username.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
         role: userType.toLowerCase(),
       };
+      
+      console.log("Signup payload:", payload); // For debugging
   
       try {
+        dispatch(loginStart());
         setLoading(true);
         setError(null);
         const response = await fetch("http://127.0.0.1:8000/api/signup/", {
@@ -74,15 +120,22 @@ const Signup = () => {
         setLoading(false);
   
         if (response.ok) {
-          localStorage.setItem("email", formData.email);
-          console.log("Email stored in localStorage:", formData.email);
-  
+          // Store in Redux (even though we don't have the token yet)
+          dispatch(loginSuccess({
+            user: { username: formData.username },
+            email: formData.email,
+            role: userType.toLowerCase(),
+            authToken: null // Will be updated after OTP verification
+          }));
+          
           setIsOtpSent(true); // Show OTP input
         } else {
+          dispatch(loginFailure(data.error || "Signup failed"));
           setError(data.error || "Signup failed");
         }
       } catch (err) {
         setLoading(false);
+        dispatch(loginFailure("Something went wrong. Try again!"));
         setError("Something went wrong. Try again!");
       }
     } else {
@@ -90,9 +143,11 @@ const Signup = () => {
       const payload = {
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
+        role: userType.toLowerCase()
       };
 
       try {
+        dispatch(loginStart());
         setLoading(true);
         setError(null);
         const response = await fetch("http://127.0.0.1:8000/api/signin/", {
@@ -106,15 +161,24 @@ const Signup = () => {
         setLoading(false);
         
         if (response.ok) {
-          const authToken = data.access_token; 
-          localStorage.setItem("authToken", authToken);
-          localStorage.setItem("email", formData.email);
+          const authToken = data.access_token;
+          
+          // Store in Redux
+          dispatch(loginSuccess({
+            user: data.user || { email: formData.email },
+            email: formData.email,
+            role: userType.toLowerCase(),
+            authToken: authToken
+          }));
+          
           navigate("/"); // Redirect after login
         } else {
+          dispatch(loginFailure(data.error || "Login failed"));
           setError(data.error || "Login failed");
         }
       } catch (err) {
         setLoading(false);
+        dispatch(loginFailure("Something went wrong. Try again!"));
         setError("Something went wrong. Try again!");
       }
     }
@@ -186,6 +250,7 @@ const Signup = () => {
                         onChange={handleChange}
                         placeholder="Username"
                         className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                        required
                       />
                     )}
                     <input
@@ -195,6 +260,7 @@ const Signup = () => {
                       onChange={handleChange}
                       placeholder="Email"
                       className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                      required
                     />
                     <input
                       type="password"
@@ -203,6 +269,7 @@ const Signup = () => {
                       onChange={handleChange}
                       placeholder="Password"
                       className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                      required
                     />
                     {isSignUp && (
                       <input
@@ -212,10 +279,13 @@ const Signup = () => {
                         onChange={handleChange}
                         placeholder="Re-enter Password"
                         className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                        required
                       />
                     )}
                   </div>
-                  {error && <p className="text-red-500 text-xs">{error}</p>}
+                  {error && (
+                    <p className="text-red-500 text-xs mt-2">{error}</p>
+                  )}
 
                   <button
                     onClick={handleSubmit}

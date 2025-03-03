@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../redux/authSlice";
 
 const Otp = ({ email, onSuccess }) => {
   const [otp, setOtp] = useState("");
@@ -9,6 +11,11 @@ const Otp = ({ email, onSuccess }) => {
   const [timer, setTimer] = useState(60); 
   const [isExpired, setIsExpired] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  // Get role and username from Redux store
+  const { role, user } = useSelector(state => state.auth);
+  const username = user?.username;
 
   useEffect(() => {
     if (!email) {
@@ -44,11 +51,22 @@ const Otp = ({ email, onSuccess }) => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Include username in the verification request if available
+      const payload = { 
+        email, 
+        otp,
+        username: username || undefined,
+        role: role || undefined
+      };
+      
+      console.log("OTP verification payload:", payload); // For debugging
+      
       const response = await fetch("http://127.0.0.1:8000/api/verify-otp/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify(payload),
       });
   
       const data = await response.json();
@@ -58,7 +76,14 @@ const Otp = ({ email, onSuccess }) => {
         setSuccess(true);
         const authToken = data.access_token;  
         if (authToken) {
-          localStorage.setItem("authToken", authToken);  
+          // Update Redux store with token
+          dispatch(loginSuccess({
+            user: data.user || { username, email },
+            email,
+            role,
+            authToken
+          }));
+          
           onSuccess();  // Proceed with successful login or navigation
         } else {
           setError("Failed to get auth token.");
@@ -72,19 +97,26 @@ const Otp = ({ email, onSuccess }) => {
     }
   };
   
-  
-
   const handleResendOtp = async () => {
     if (isExpired) {
       try {
         // Request a new OTP here
         setLoading(true);
         setError(null);
+        
+        const payload = { 
+          email,
+          username: username || undefined,
+          role: role || undefined
+        };
+        
+        console.log("Resend OTP payload:", payload); // For debugging
+        
         const response = await fetch("http://127.0.0.1:8000/api/resend-otp/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ email }), // Sending the email to resend OTP
+          body: JSON.stringify(payload),
         });
 
         const data = await response.json();
