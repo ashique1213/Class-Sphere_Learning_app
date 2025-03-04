@@ -16,7 +16,6 @@ import cloudinary # type: ignore
 import cloudinary.uploader # type: ignore
 
 
-
 class SignInView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -42,6 +41,7 @@ class SignInView(APIView):
             return Response({
                 "message": "Login successful.",
                 "access_token": str(access_token),
+                "refresh_token": str(refresh),
                 "user": {
                     "username": user.username,
                     "email": user.email,
@@ -126,6 +126,7 @@ class VerifyOTPView(APIView):
             return Response({
                 "message": "Email verified successfully! Account created.",
                 "access_token": str(access_token),
+                "refresh_token": str(refresh),
             }, status=status.HTTP_201_CREATED)
 
         except OTP.DoesNotExist:

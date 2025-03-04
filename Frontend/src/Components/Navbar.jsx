@@ -8,17 +8,14 @@ const Navbar = () => {
 
   useEffect(() => {
     const authToken = localStorage.getItem("authToken");
-    if (authToken) {
-      setIsAuthenticated(true); 
-    } else {
-      setIsAuthenticated(false); 
-    }
+    setIsAuthenticated(authToken && authToken !== "false");
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.clear();
-    setIsAuthenticated(false);  
+    setIsAuthenticated(false);
+    window.location.reload();
   };
 
   return (

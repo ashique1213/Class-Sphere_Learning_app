@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginStart, loginSuccess, loginFailure } from "../../redux/authSlice";
 import Login_image from "../../assets/Images/Login_image.png";
 import Otp from "../../Components/Otp";
+import { signup,signin } from "../../api/authapi";
 
 const Signup = () => {
   const [userType, setUserType] = useState(null);
@@ -117,12 +118,13 @@ const Signup = () => {
         dispatch(loginStart());
         setLoading(true);
         setError(null);
-        const response = await fetch("http://127.0.0.1:8000/api/signup/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
+        // const response = await fetch("http://127.0.0.1:8000/api/signup/", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   credentials: "include",
+        //   body: JSON.stringify(payload),
+        // });
+        const response = await signup(payload);
 
         const data = await response.json();
         setLoading(false);
@@ -134,7 +136,7 @@ const Signup = () => {
               user: { username: formData.username },
               email: formData.email,
               role: userType.toLowerCase(),
-              authToken: null, // Will be updated after OTP verification
+              authToken: false, // Will be updated after OTP verification
             })
           );
 
@@ -160,18 +162,22 @@ const Signup = () => {
         dispatch(loginStart());
         setLoading(true);
         setError(null);
-        const response = await fetch("http://127.0.0.1:8000/api/signin/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
+
+        // const response = await fetch("http://127.0.0.1:8000/api/signin/", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   credentials: "include",
+        //   body: JSON.stringify(payload),
+        // });
+
+        const response = await signin(payload);
 
         const data = await response.json();
         setLoading(false);
 
         if (response.ok) {
           const authToken = data.access_token;
+          const refreshToken = data.refresh_token; // Store the refresh token
 
           // Store in Redux
           dispatch(
@@ -180,6 +186,7 @@ const Signup = () => {
               email: formData.email,
               role: userType.toLowerCase(),
               authToken: authToken,
+              refreshToken: refreshToken, // Include refresh token
             })
           );
 

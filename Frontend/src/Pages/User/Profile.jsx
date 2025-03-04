@@ -4,7 +4,7 @@ import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import axios from "axios";
+import { fetchUserDetails, updateUserProfile } from "../../api/profileapi"
 
 const Profile = () => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -21,33 +21,27 @@ const Profile = () => {
       return;
     }
 
-    const fetchUserDetails = async () => {
+    const loadUserDetails = async () => {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/profile/", {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
-        setUser(response.data);
-        setEditedUser(response.data);
-        if (response.data.profile_image) {
-          // For Cloudinary, we need to get the URL from the profile_image field
-          setImagePreview(getCloudinaryUrl(response.data.profile_image));
+        const userData = await fetchUserDetails(authToken);
+        setUser(userData);
+        setEditedUser(userData);
+        if (userData.profile_image) {
+          setImagePreview(getCloudinaryUrl(userData.profile_image));
         }
       } catch (error) {
-        console.error("Error fetching user details:", error);
+        console.error("Error loading user details:", error);
       }
     };
 
-    fetchUserDetails();
+    loadUserDetails();
   }, [authToken, navigate]);
 
-  // Helper function to get Cloudinary URL from public_id
-  // Ensure this function correctly returns the Cloudinary image URL
   const getCloudinaryUrl = (profileImage) => {
     if (!profileImage) return null;
-    if (profileImage.startsWith("http")) return profileImage; 
+    if (profileImage.startsWith("http")) return profileImage;
     return `https://res.cloudinary.com/dajeitt4m/image/upload/${profileImage}`;
   };
-  
 
   const handleInputChange = (e) => {
     setEditedUser({ ...editedUser, [e.target.name]: e.target.value });
@@ -64,30 +58,10 @@ const Profile = () => {
 
   const handleSubmit = async () => {
     try {
-      const formData = new FormData();
-      formData.append("gender", editedUser.gender || "");
-      formData.append("phone", editedUser.phone || "");
-      formData.append("place", editedUser.place || "");
-      formData.append("dob", editedUser.dob || "");
-      if (editedUser.profile_image instanceof File) {
-        formData.append("profile_image", editedUser.profile_image);
-      }
-
-      const response = await axios.put(
-        "http://127.0.0.1:8000/api/profile/",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setUser(response.data);
-      // Update image preview with the Cloudinary URL
-      if (response.data.profile_image) {
-        setImagePreview(getCloudinaryUrl(response.data.profile_image));
+      const updatedUserData = await updateUserProfile(authToken, editedUser);
+      setUser(updatedUserData);
+      if (updatedUserData.profile_image) {
+        setImagePreview(getCloudinaryUrl(updatedUserData.profile_image));
       }
       setIsEditing(false);
     } catch (error) {
@@ -96,7 +70,6 @@ const Profile = () => {
   };
 
   if (!user) return <div className="text-center mt-10">Loading...</div>;
-
   return (
     <>
       <Navbar />

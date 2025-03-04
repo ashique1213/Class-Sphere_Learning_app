@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginSuccess } from "../redux/authSlice";
+import { verifyOtp,resendOtp } from "../api/authapi";
 
 const Otp = ({ email, onSuccess }) => {
   const [otp, setOtp] = useState("");
@@ -62,26 +63,30 @@ const Otp = ({ email, onSuccess }) => {
       
       console.log("OTP verification payload:", payload); // For debugging
       
-      const response = await fetch("http://127.0.0.1:8000/api/verify-otp/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-  
+      // const response = await fetch("http://127.0.0.1:8000/api/verify-otp/", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   credentials: "include",
+      //   body: JSON.stringify(payload),
+      // });
+      const response = await verifyOtp(payload);
+      
       const data = await response.json();
       setLoading(false);
   
       if (response.ok) {
         setSuccess(true);
         const authToken = data.access_token;  
+        const refreshToken = data.refresh_token; // Store the refresh token
+        
         if (authToken) {
           // Update Redux store with token
           dispatch(loginSuccess({
             user: data.user || { username, email },
             email,
             role,
-            authToken
+            authToken,
+            refreshToken, // Include refresh token
           }));
           
           onSuccess();  // Proceed with successful login or navigation
@@ -96,7 +101,7 @@ const Otp = ({ email, onSuccess }) => {
       setError("Something went wrong. Try again!");
     }
   };
-  
+
   const handleResendOtp = async () => {
     if (isExpired) {
       try {
@@ -112,12 +117,13 @@ const Otp = ({ email, onSuccess }) => {
         
         console.log("Resend OTP payload:", payload); // For debugging
         
-        const response = await fetch("http://127.0.0.1:8000/api/resend-otp/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payload),
-        });
+        // const response = await fetch("http://127.0.0.1:8000/api/resend-otp/", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   credentials: "include",
+        //   body: JSON.stringify(payload),
+        // });
+        const response = await resendOtp(payload);
 
         const data = await response.json();
         setLoading(false);
