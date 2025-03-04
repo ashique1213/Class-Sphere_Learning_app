@@ -14,6 +14,7 @@ from rest_framework import generics
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAdminUser
 import cloudinary # type: ignore
 import cloudinary.uploader # type: ignore
 
@@ -249,3 +250,34 @@ class StudentListView(generics.ListAPIView):
 class TeacherListView(generics.ListAPIView):
     queryset = User.objects.filter(role='teacher')
     serializer_class = UserSerializer
+
+
+class BlockUserView(APIView):
+    permission_classes = [IsAdminUser]  
+
+    def post(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            if user.is_verified:
+                user.is_verified = False
+                user.save()
+                return Response({"message": f"User {user.username} has been blocked."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": f"User {user.username} is already blocked."}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class UnblockUserView(APIView):
+    permission_classes = [IsAdminUser] 
+
+    def post(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+                return Response({"message": f"User {user.username} has been unblocked."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": f"User {user.username} is already unblocked."}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)

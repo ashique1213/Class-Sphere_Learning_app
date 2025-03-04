@@ -3,7 +3,7 @@ import { FaSearch, FaSignOutAlt } from "react-icons/fa";
 import axios from "axios";
 import { FaUserCircle } from "react-icons/fa";
 import { logout } from "../redux/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const StudentsTable = () => {
@@ -15,22 +15,80 @@ const StudentsTable = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Get auth token from Redux store
+  const authToken = useSelector((state) => state.auth.authToken);
+
+  // Create an axios instance with default headers
+  const axiosInstance = axios.create({
+    baseURL: "http://127.0.0.1:8000/api/",
+    headers: {
+      'Authorization': `Bearer ${authToken}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
   const handleLogout = () => {
     dispatch(logout());
-
     navigate("/adminlogin");
   };
 
+  // Fetch students
+  const fetchStudents = async () => {
+    try {
+      const response = await axiosInstance.get("students/");
+      setStudents(response.data);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+
+      // If unauthorized, logout
+      if (error.response && error.response.status === 401) {
+        dispatch(logout());
+        navigate("/adminlogin");
+      }
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/students/")
-      .then((response) => {
-        setStudents(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching students:", error);
-      });
+    fetchStudents();
   }, []);
+
+  // Block student functionality
+  const handleBlockUser = async (userId) => {
+    try {
+      await axiosInstance.post(`block/${userId}/`);
+      fetchStudents();
+    } catch (error) {
+      console.error("Error blocking user:", error);
+
+      if (error.response && error.response.status === 401) {
+        dispatch(logout());
+        navigate("/adminlogin");
+      }
+
+      // Show error message
+      alert(error.response?.data?.message || "Failed to block user");
+    }
+  };
+
+  // Unblock student functionality
+  const handleUnblockUser = async (userId) => {
+    try {
+      await axiosInstance.post(`unblock/${userId}/`);
+      // Refresh the students list
+      fetchStudents();
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+
+      // If unauthorized, logout
+      if (error.response && error.response.status === 401) {
+        dispatch(logout());
+        navigate("/adminlogin");
+      }
+
+      // Show error message
+      alert(error.response?.data?.message || "Failed to unblock user");
+    }
+  };
 
   // Filter students based on search query
   const filteredStudents = students.filter((student) =>
@@ -47,7 +105,7 @@ const StudentsTable = () => {
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   return (
-    <div className="flex-1 p-6 ">
+    <div className="flex-1 p-6">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold">Students</h2>
@@ -84,12 +142,13 @@ const StudentsTable = () => {
               <th className="p-2">Phone</th>
               <th className="p-2">City</th>
               <th className="p-2">Verified</th>
+              <th className="p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {currentStudents.length > 0 ? (
               currentStudents.map((student) => (
-                <tr key={student.id} className="border-b  ">
+                <tr key={student.id} className="border-b">
                   <td className="p-2">{student.id}</td>
                   <td className="p-2">
                     {student.profile_image ? (
@@ -109,13 +168,39 @@ const StudentsTable = () => {
                   <td className="p-2">{student.dob || "None"}</td>
                   <td className="p-2">{student.phone || "None"}</td>
                   <td className="p-2">{student.place || "None"}</td>
-
-                  <td className="p-2">{student.is_verified ? "Yes" : "No"}</td>
+                  <td className="p-2">
+                    <span
+                      className={`px-2 py-1 rounded ${
+                        student.is_verified
+                          ? "bg-green-500 text-white"
+                          : "bg-red-500 text-white"
+                      }`}
+                    >
+                      {student.is_verified ? "Verified" : "Blocked"}
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    {student.is_verified ? (
+                      <button
+                        onClick={() => handleBlockUser(student.id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        Block
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUnblockUser(student.id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                      >
+                        Unblock
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="p-4 text-center">
+                <td colSpan="11" className="p-4 text-center">
                   No students found
                 </td>
               </tr>
