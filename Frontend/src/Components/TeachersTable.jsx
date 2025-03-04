@@ -6,11 +6,12 @@ import { logout } from "../redux/authSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const StudentsTable = () => {
-  const [students, setStudents] = useState([]);
+
+const TeachersTable = () => {
+  const [teachers, setTeachers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 7;
+  const teachersPerPage = 7;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -23,34 +24,34 @@ const StudentsTable = () => {
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/students/")
+      .get("http://127.0.0.1:8000/api/teachers/")
       .then((response) => {
-        setStudents(response.data);
+        setTeachers(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching students:", error);
+        console.error("Error fetching teachers:", error);
       });
   }, []);
 
-  // Filter students based on search query
-  const filteredStudents = students.filter((student) =>
-    student.username.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter teachers based on search query
+  const filteredTeachers = teachers.filter((teacher) =>
+    teacher.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination Logic
-  const indexOfLastStudent = currentPage * studentsPerPage;
-  const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = filteredStudents.slice(
-    indexOfFirstStudent,
-    indexOfLastStudent
+  const indexOfLastTeacher = currentPage * teachersPerPage;
+  const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
+  const currentTeachers = filteredTeachers.slice(
+    indexOfFirstTeacher,
+    indexOfLastTeacher
   );
-  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+  const totalPages = Math.ceil(filteredTeachers.length / teachersPerPage);
 
   return (
-    <div className="flex-1 p-6 ">
+    <div className="flex-1 p-6">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Students</h2>
+        <h2 className="text-2xl font-semibold">Teachers</h2>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <input
@@ -62,10 +63,7 @@ const StudentsTable = () => {
             />
             <FaSearch className="absolute right-3 top-3 text-gray-400" />
           </div>
-          <FaSignOutAlt
-            onClick={handleLogout}
-            className="text-lg cursor-pointer"
-          />
+          <FaSignOutAlt onClick={handleLogout} className="text-lg cursor-pointer" />
         </div>
       </div>
 
@@ -87,14 +85,14 @@ const StudentsTable = () => {
             </tr>
           </thead>
           <tbody>
-            {currentStudents.length > 0 ? (
-              currentStudents.map((student) => (
-                <tr key={student.id} className="border-b  ">
-                  <td className="p-2">{student.id}</td>
+            {currentTeachers.length > 0 ? (
+              currentTeachers.map((teacher) => (
+                <tr key={teacher.id} className="border-b">
+                  <td className="p-2">{teacher.id}</td>
                   <td className="p-2">
-                    {student.profile_image ? (
+                    {teacher.profile_image ? (
                       <img
-                        src={student.profile_image}
+                        src={teacher.profile_image}
                         alt="Profile"
                         className="w-10 h-10 rounded-full"
                       />
@@ -102,21 +100,20 @@ const StudentsTable = () => {
                       <FaUserCircle className="w-10 h-10 text-gray-400" />
                     )}
                   </td>
-                  <td className="p-2 capitalize">{student.username}</td>
-                  <td className="p-2">{student.email}</td>
-                  <td className="p-2 capitalize">{student.role}</td>
-                  <td className="p-2">{student.gender || "None"}</td>
-                  <td className="p-2">{student.dob || "None"}</td>
-                  <td className="p-2">{student.phone || "None"}</td>
-                  <td className="p-2">{student.place || "None"}</td>
-
-                  <td className="p-2">{student.is_verified ? "Yes" : "No"}</td>
+                  <td className="p-2 capitalize">{teacher.username}</td>
+                  <td className="p-2">{teacher.email}</td>
+                  <td className="p-2 capitalize">{teacher.role}</td>
+                  <td className="p-2">{teacher.gender || "None"}</td>
+                  <td className="p-2">{teacher.dob || "None"}</td>
+                  <td className="p-2">{teacher.phone || "None"}</td>
+                  <td className="p-2">{teacher.place || "None"}</td>
+                  <td className="p-2">{teacher.is_verified ? "Yes" : "No"}</td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan="10" className="p-4 text-center">
-                  No students found
+                  No teachers found
                 </td>
               </tr>
             )}
@@ -144,4 +141,4 @@ const StudentsTable = () => {
   );
 };
 
-export default StudentsTable;
+export default TeachersTable;

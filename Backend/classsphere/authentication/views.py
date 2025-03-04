@@ -3,12 +3,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import make_password
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from authentication.models import User
 from authentication.serializers import UserSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import OTP
+from rest_framework import generics
 from .utils import generate_otp, send_otp_email
 from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -135,7 +137,6 @@ class VerifyOTPView(APIView):
             return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
 class ResendOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -204,3 +205,47 @@ class UserProfileView(APIView):
             return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class AdminLoginView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        password = request.data.get("password")
+
+        if not email or not password:
+            return Response({"error": "Email and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(email=email, password=password)
+        
+        if user is None:
+            return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure user has admin/staff role
+        if user.role not in ["admin", "staff"]:
+            return Response({"error": "Unauthorized access."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+
+        return Response({
+            "message": "Login successful.",
+            "access_token": str(access_token),
+            "refresh_token": str(refresh),
+            "user": {
+                "username": user.username,
+                "email": user.email,
+                "role": user.role
+            }
+        }, status=status.HTTP_200_OK)
+    
+
+class StudentListView(generics.ListAPIView):
+    queryset = User.objects.filter(role='student')
+    serializer_class = UserSerializer
+
+
+class TeacherListView(generics.ListAPIView):
+    queryset = User.objects.filter(role='teacher')
+    serializer_class = UserSerializer
