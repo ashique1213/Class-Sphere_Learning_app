@@ -5,7 +5,7 @@ from cloudinary.models import CloudinaryField # type: ignore
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'role', 'gender', 'dob', 'phone', 'place', 'profile_image', 'is_verified']
+        fields = ['id', 'username', 'email', 'role', 'gender', 'dob', 'phone', 'place', 'profile_image', 'is_block']
 
     def to_representation(self, instance):
         """Modify the response to return Cloudinary URL instead of the CloudinaryResource object."""

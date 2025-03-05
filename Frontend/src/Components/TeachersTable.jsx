@@ -168,24 +168,24 @@ const TeachersTable = () => {
                   <td className="p-2">{teacher.place || "None"}</td>
                   <td className="p-2">
                     <span className={`
-                      px-2 py-1 rounded 
-                      ${teacher.is_verified ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}
+                      px-2 py-1 rounded text-sm font-bold 
+                      ${teacher.is_block ? 'bg-teal-400 text-white' : 'bg-red-400 text-white'}
                     `}>
-                      {teacher.is_verified ? 'Verified' : 'Blocked'}
+                      {teacher.is_block ? 'Block' : 'UnBlock'}
                     </span>
                   </td>
-                  <td className="p-2">
-                    {teacher.is_verified ? (
+                  <td className="p-2 text-sm font-bold">
+                    {teacher.is_block ? (
                       <button 
                         onClick={() => handleBlockUser(teacher.id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
                         Block
                       </button>
                     ) : (
                       <button 
                         onClick={() => handleUnblockUser(teacher.id)}
-                        className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
                         Unblock
                       </button>

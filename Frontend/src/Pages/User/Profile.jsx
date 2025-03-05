@@ -4,7 +4,9 @@ import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { fetchUserDetails, updateUserProfile } from "../../api/profileapi"
+import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Profile = () => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -57,6 +59,42 @@ const Profile = () => {
   };
 
   const handleSubmit = async () => {
+    //Validation
+    if (editedUser.phone && !/^\d{10}$/.test(editedUser.phone)) {
+      toast.error("Phone number must be 10 digits.");
+      return;
+    }
+
+    if (
+      editedUser.gender &&
+      !["Male", "Female", "Other"].includes(editedUser.gender)
+    ) {
+      toast.error("Invalid gender selected.");
+      return;
+    }
+
+    if (editedUser.dob && isNaN(new Date(editedUser.dob).getTime())) {
+      toast.error("Invalid date of birth.");
+      return;
+    }
+
+    if (editedUser.place && editedUser.place.length < 3) {
+      toast.error("Place must be at least 3 characters long.");
+      return;
+    }
+
+    try {
+      const updatedUserData = await updateUserProfile(authToken, editedUser);
+      setUser(updatedUserData);
+      if (updatedUserData.profile_image) {
+        setImagePreview(getCloudinaryUrl(updatedUserData.profile_image));
+      }
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile. Please try again.");
+    }
     try {
       const updatedUserData = await updateUserProfile(authToken, editedUser);
       setUser(updatedUserData);
@@ -169,7 +207,7 @@ const Profile = () => {
                   className="border rounded-md px-2 py-1 flex-1"
                 />
               ) : (
-                <span>{user.phone || "N/A"}</span>
+                <span>{user.phone || "None"}</span>
               )}
             </div>
 
@@ -188,7 +226,7 @@ const Profile = () => {
                   <option value="Other">Other</option>
                 </select>
               ) : (
-                <span>{user.gender || "N/A"}</span>
+                <span>{user.gender || "None"}</span>
               )}
             </div>
 
@@ -203,7 +241,7 @@ const Profile = () => {
                   className="border rounded-md px-2 py-1 flex-1"
                 />
               ) : (
-                <span>{user.dob || "N/A"}</span>
+                <span>{user.dob || "None"}</span>
               )}
             </div>
 
@@ -218,7 +256,7 @@ const Profile = () => {
                   className="border rounded-md px-2 py-1 flex-1"
                 />
               ) : (
-                <span>{user.place || "N/A"}</span>
+                <span>{user.place || "None"}</span>
               )}
             </div>
           </div>
@@ -252,15 +290,16 @@ const Profile = () => {
                 Edit Details
               </button>
             )}
-            <button
+            {/* <button
               className="px-4 py-2 bg-red-400 text-white rounded-md text-sm w-full md:w-40 hover:bg-red-400 transition"
               onClick={() => navigate("")}
             >
               Reset Password
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
+      <ToastContainer/>
 
       <Footer />
     </>

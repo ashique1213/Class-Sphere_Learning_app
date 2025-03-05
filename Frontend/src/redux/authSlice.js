@@ -40,6 +40,7 @@ const initialState = {
   refreshToken: localStorage.getItem("refreshToken") || null,
   email: localStorage.getItem("email") || null,
   role: localStorage.getItem("role") || null,
+  is_block: localStorage.getItem("is_block") === "true",
   isLoading: false,
   error: null,
   tokenExpiry: localStorage.getItem("tokenExpiry") || null,
@@ -60,6 +61,7 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
       state.email = action.payload.email;
       state.role = action.payload.role;
+      state.is_block = action.payload.is_block ?? false;
       
       // Calculate token expiry (assuming 15 minutes from now)
       const expiryTime = new Date().getTime() + 15 * 60 * 1000;
@@ -70,6 +72,7 @@ const authSlice = createSlice({
       localStorage.setItem("refreshToken", action.payload.refreshToken);
       localStorage.setItem("email", action.payload.email);
       localStorage.setItem("role", action.payload.role);
+      localStorage.setItem("is_block", action.payload.is_block);
       localStorage.setItem("tokenExpiry", expiryTime);
     },
     loginFailure: (state, action) => {
@@ -83,10 +86,12 @@ const authSlice = createSlice({
       state.email = null;
       state.role = null;
       state.tokenExpiry = null;
+      state.is_block = null;
       localStorage.removeItem("authToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("email");
       localStorage.removeItem("role");
+      localStorage.removeItem("is_block");
       localStorage.removeItem("tokenExpiry");
     },
     updateUserInfo: (state, action) => {

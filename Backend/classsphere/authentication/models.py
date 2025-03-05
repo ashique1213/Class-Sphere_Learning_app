@@ -18,7 +18,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, null=True)
     place = models.CharField(max_length=50, blank=True, null=True)
     profile_image = CloudinaryField('profile_image', blank=True, null=True)
-    is_verified = models.BooleanField(default=False)
+    is_block = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,3 +46,13 @@ class OTP(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.otp_code}"
+
+
+class PasswordResetOTP(models.Model):
+    email = models.EmailField()
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+    
+    def is_expired(self):
+        return timezone.now() - self.created_at > timezone.timedelta(minutes=10)
