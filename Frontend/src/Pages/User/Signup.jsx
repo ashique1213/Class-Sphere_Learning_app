@@ -9,7 +9,6 @@ import { signup, signin } from "../../api/authapi";
 import ResetPassword from "../../Components/Resetpassword";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import GoogleSignIn from "../../Components/GoogleSignIn";
 
 const Signup = () => {
   const [userType, setUserType] = useState(null);
