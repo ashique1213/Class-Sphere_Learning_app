@@ -18,6 +18,30 @@ from rest_framework.permissions import IsAdminUser
 import cloudinary # type: ignore
 import cloudinary.uploader # type: ignore
 import re
+from dj_rest_auth.registration.views import SocialLoginView # type: ignore
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # type: ignore
+
+
+
+
+class GoogleLoginView(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    permission_classes = [AllowAny]  
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+
+        if 'access' in response.data:
+            user = self.user
+            if user:
+                refresh = RefreshToken.for_user(user)
+                
+                response.data["refresh"] = str(refresh) 
+                response.data["access"] = str(refresh.access_token) 
+            else:
+                return Response({"error": "User not found"}, status=400)
+
+        return response
 
 
 class SignInView(APIView):
@@ -160,7 +184,6 @@ class VerifyOTPView(APIView):
 class ResendOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
-        print(f"Request to resend OTP for: {email}")
 
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
@@ -186,7 +209,6 @@ class ResendOTPView(APIView):
             return Response({"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            print(f"Error: {e}")
             return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -207,7 +229,6 @@ class UserProfileView(APIView):
         if serializer.is_valid():
             if "profile_image" in request.FILES:
                 image = request.FILES["profile_image"]
-                print(f"Received image: {image}")  # Debugging log
 
                 public_id = f"profile_images/user_{user.id}"
                 
@@ -257,7 +278,6 @@ class VerifyPasswordResetOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
         otp_code = request.data.get("otp")
-        print("Hi")
         try:
             otp_record = PasswordResetOTP.objects.filter(email=email, is_verified=False).latest("created_at")
 

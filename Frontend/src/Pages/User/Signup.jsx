@@ -9,6 +9,7 @@ import { signup, signin } from "../../api/authapi";
 import ResetPassword from "../../Components/Resetpassword";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleSignIn from "../../Components/GoogleSignIn";
 
 const Signup = () => {
   const [userType, setUserType] = useState(null);
@@ -305,10 +306,12 @@ const Signup = () => {
                   Sign Up
                 </button>
               </div>
-              <button className="flex items-center justify-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md mt-3 w-full text-sm">
+              {/* <button className="flex items-center justify-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md mt-3 w-full text-sm">
                 <span className="text-gray-600">G+</span>{" "}
                 {isSignUp ? "Sign up with Google" : "Sign in with Google"}
-              </button>
+              </button> */}
+                  <GoogleSignIn isSignUp={true} />
+
               <div className="mt-4 space-y-3">
                 {isSignUp && (
                   <input

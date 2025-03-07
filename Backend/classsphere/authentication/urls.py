@@ -12,7 +12,8 @@ from .views import (
     UnblockUserView,
     RequestPasswordResetView,
     VerifyPasswordResetOTPView,
-    ResetPasswordView
+    ResetPasswordView,
+    GoogleLoginView
 )
 
 urlpatterns = [
@@ -37,4 +38,5 @@ urlpatterns = [
         name="verify-password-reset-otp",
     ),
     path("password-reset/reset/", ResetPasswordView.as_view(), name="reset-password"),
+    path("auth/social/google/", GoogleLoginView.as_view(), name="google-login"),
 ]
