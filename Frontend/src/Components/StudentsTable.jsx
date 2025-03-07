@@ -141,7 +141,7 @@ const StudentsTable = () => {
               <th className="p-2">DOB</th>
               <th className="p-2">Phone</th>
               <th className="p-2">City</th>
-              <th className="p-2">Verified</th>
+              <th className="p-2">Status</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
@@ -172,8 +172,8 @@ const StudentsTable = () => {
                     <span
                       className={`px-2 py-1 text-sm font-bold rounded ${
                         student.is_block
-                          ? "bg-teal-400 text-white"
-                          : "bg-red-400 text-white"
+                          ? " text-red-500"
+                          :    " text-teal-400"
                       }`}
                     >
                       {student.is_block ? "Block" : "UnBlock"}
@@ -183,16 +183,16 @@ const StudentsTable = () => {
                     {student.is_block ? (
                       <button
                         onClick={() => handleBlockUser(student.id)}
-                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
+                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
-                        Block
+                        UnBlock
                       </button>
                     ) : (
                       <button
                         onClick={() => handleUnblockUser(student.id)}
-                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
+                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
-                        Unblock
+                        Block
                       </button>
                     )}
                   </td>

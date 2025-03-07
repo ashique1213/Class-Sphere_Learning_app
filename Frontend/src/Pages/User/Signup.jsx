@@ -7,8 +7,9 @@ import Login_image from "../../assets/Images/Login_image.png";
 import Otp from "../../Components/Otp";
 import { signup, signin } from "../../api/authapi";
 import ResetPassword from "../../Components/Resetpassword";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoogleSignIn from "../../Components/GoogleSignIn";
 
 const Signup = () => {
   const [userType, setUserType] = useState(null);
@@ -38,7 +39,6 @@ const Signup = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Sync role with formData when userType changes
   useEffect(() => {
     if (userType) {
       setFormData((prev) => ({ ...prev, role: userType.toLowerCase() }));
@@ -63,45 +63,49 @@ const Signup = () => {
       toast.error("Please select whether you are a Student or a Teacher.");
       return false;
     }
-  
+
     if (isSignUp) {
       if (!formData.username || formData.username.trim() === "") {
         setError("Username is required.");
         toast.error("Username is required.");
         return false;
       }
-  
+
       if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.username)) {
         setError("Username must be 3-20 chars, only letters, numbers");
         toast.error("Username must be 3-20 chars, only letters, numbers");
         return false;
       }
-  
+
       if (!formData.email || formData.email.trim() === "") {
         setError("Email is required.");
         toast.error("Email is required.");
         return false;
       }
-  
+
       if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
         setError("Invalid email format.");
         toast.error("Invalid email format.");
         return false;
       }
-  
+
       if (!formData.password) {
         setError("Password is required.");
         toast.error("Password is required.");
         return false;
       }
-  
-      if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}/.test(formData.password)) {
+
+      if (
+        !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}/.test(
+          formData.password
+        )
+      ) {
         setError("Password must be 6+ chars with A-Z, a-z, 0-9 & symbol.");
         toast.error("Password must be 6+ chars with A-Z, a-z, 0-9 & symbol.");
 
         return false;
       }
-  
+
       if (formData.password !== formData.confirmPassword) {
         setError("Passwords do not match.");
         toast.error("Passwords do not match.");
@@ -113,19 +117,18 @@ const Signup = () => {
         toast.error("Email is required.");
         return false;
       }
-  
+
       if (!formData.password) {
         setError("Password is required.");
         toast.error("Password is required.");
         return false;
       }
     }
-  
+
     setError(null); // Clear any previous errors
     return true;
   };
-  
-  
+
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -152,7 +155,6 @@ const Signup = () => {
         setLoading(false);
 
         if (response.ok) {
-          // Store in Redux (even though we don't have the token yet)
           dispatch(
             loginSuccess({
               user: { username: formData.username },
@@ -221,7 +223,7 @@ const Signup = () => {
 
   const handleOtpSuccess = () => {
     toast.success("Login Successful!");
-    navigate("/"); 
+    navigate("/");
   };
 
   const handleForgotPassword = () => {
@@ -389,7 +391,6 @@ const Signup = () => {
         </div>
       </div>
       <ToastContainer />
-
     </div>
   );
 };

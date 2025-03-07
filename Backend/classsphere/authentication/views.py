@@ -33,6 +33,9 @@ class SignInView(APIView):
             user = authenticate(email=email, password=password)
             if user is None:
                 return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if user.is_block:
+                return Response({"error": "Your account has been blocked. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
 
             # Verify user role
             if user.role.lower() != role.lower():
@@ -341,7 +344,6 @@ class BlockUserView(APIView):
     permission_classes = [IsAdminUser]  
 
     def post(self, request, user_id):
-        print("hi")
         try:
             user = User.objects.get(id=user_id)
             if user.is_block:
@@ -357,7 +359,6 @@ class UnblockUserView(APIView):
     permission_classes = [IsAdminUser] 
 
     def post(self, request, user_id):
-        print("hi")
 
         try:
             user = User.objects.get(id=user_id)

@@ -139,7 +139,7 @@ const TeachersTable = () => {
               <th className="p-2">DOB</th>
               <th className="p-2">Phone</th>
               <th className="p-2">City</th>
-              <th className="p-2">Verified</th>
+              <th className="p-2">Status</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
@@ -169,7 +169,7 @@ const TeachersTable = () => {
                   <td className="p-2">
                     <span className={`
                       px-2 py-1 rounded text-sm font-bold 
-                      ${teacher.is_block ? 'bg-teal-400 text-white' : 'bg-red-400 text-white'}
+                      ${teacher.is_block ?  ' text-red-500':  ' text-teal-500' }
                     `}>
                       {teacher.is_block ? 'Block' : 'UnBlock'}
                     </span>
@@ -178,16 +178,16 @@ const TeachersTable = () => {
                     {teacher.is_block ? (
                       <button 
                         onClick={() => handleBlockUser(teacher.id)}
-                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
+                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
-                        Block
+                        UnBlock
                       </button>
                     ) : (
                       <button 
                         onClick={() => handleUnblockUser(teacher.id)}
-                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
+                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
-                        Unblock
+                        Block
                       </button>
                     )}
                   </td>
