@@ -36,14 +36,14 @@ export const refreshToken = createAsyncThunk(
 
 const initialState = {
   user: null,
-  authToken: localStorage.getItem("authToken") || null,
-  refreshToken: localStorage.getItem("refreshToken") || null,
-  email: localStorage.getItem("email") || null,
-  role: localStorage.getItem("role") || null,
-  is_block: localStorage.getItem("is_block") === "true",
+  authToken: null,
+  refreshToken: null,
+  email: null,
+  role: null,
+  is_block: false,
   isLoading: false,
   error: null,
-  tokenExpiry: localStorage.getItem("tokenExpiry") || null,
+  tokenExpiry: null,
 };
 
 const authSlice = createSlice({
@@ -66,14 +66,6 @@ const authSlice = createSlice({
       // Calculate token expiry (assuming 15 minutes from now)
       const expiryTime = new Date().getTime() + 15 * 60 * 1000;
       state.tokenExpiry = expiryTime;
-      
-      // Store in localStorage
-      localStorage.setItem("authToken", action.payload.authToken);
-      localStorage.setItem("refreshToken", action.payload.refreshToken);
-      localStorage.setItem("email", action.payload.email);
-      localStorage.setItem("role", action.payload.role);
-      localStorage.setItem("is_block", action.payload.is_block);
-      localStorage.setItem("tokenExpiry", expiryTime);
     },
     loginFailure: (state, action) => {
       state.isLoading = false;
@@ -86,13 +78,7 @@ const authSlice = createSlice({
       state.email = null;
       state.role = null;
       state.tokenExpiry = null;
-      state.is_block = null;
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("email");
-      localStorage.removeItem("role");
-      localStorage.removeItem("is_block");
-      localStorage.removeItem("tokenExpiry");
+      state.is_block = false;
     },
     updateUserInfo: (state, action) => {
       if (action.payload.user) state.user = action.payload.user;
@@ -102,17 +88,14 @@ const authSlice = createSlice({
     updateTokens: (state, action) => {
       if (action.payload.authToken) {
         state.authToken = action.payload.authToken;
-        localStorage.setItem("authToken", action.payload.authToken);
         
         // Update expiry time
         const expiryTime = new Date().getTime() + 15 * 60 * 1000;
         state.tokenExpiry = expiryTime;
-        localStorage.setItem("tokenExpiry", expiryTime);
       }
       
       if (action.payload.refreshToken) {
         state.refreshToken = action.payload.refreshToken;
-        localStorage.setItem("refreshToken", action.payload.refreshToken);
       }
     }
   },
@@ -128,9 +111,6 @@ const authSlice = createSlice({
         // Update expiry time
         const expiryTime = new Date().getTime() + 15 * 60 * 1000;
         state.tokenExpiry = expiryTime;
-        
-        localStorage.setItem("authToken", action.payload.authToken);
-        localStorage.setItem("tokenExpiry", expiryTime);
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.isLoading = false;
@@ -142,11 +122,6 @@ const authSlice = createSlice({
         state.email = null;
         state.role = null;
         state.tokenExpiry = null;
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("email");
-        localStorage.removeItem("role");
-        localStorage.removeItem("tokenExpiry");
       });
   }
 });
