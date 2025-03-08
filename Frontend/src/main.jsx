@@ -6,8 +6,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./redux/store.js";
 import "./index.css";
 
-const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-console.log(GOOGLE_CLIENT_ID)
+const GOOGLE_CLIENT_ID = "46026572444-qtcre16p8h1vdbs9a3drsr6qjr96om4i.apps.googleusercontent.com";
 
 const root = ReactDOM.createRoot(document.getElementById("root")); 
 

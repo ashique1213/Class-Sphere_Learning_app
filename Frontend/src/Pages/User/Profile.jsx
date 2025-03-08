@@ -32,7 +32,8 @@ const Profile = () => {
           setImagePreview(getCloudinaryUrl(userData.profile_image));
         }
       } catch (error) {
-        console.error("Error loading user details:", error);
+        // console.error("Error loading user details:", error);
+        toast.error("Error loading user details:", error);
       }
     };
 
@@ -92,7 +93,7 @@ const Profile = () => {
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("Error updating profile:", error);
+      // console.error("Error updating profile:", error);
       toast.error("Failed to update profile. Please try again.");
     }
     try {
@@ -103,7 +104,8 @@ const Profile = () => {
       }
       setIsEditing(false);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      // console.error("Error updating profile:", error);
+      toast.error("Error updating profile:", error);
     }
   };
 

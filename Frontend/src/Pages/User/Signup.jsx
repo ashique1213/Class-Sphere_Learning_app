@@ -310,7 +310,7 @@ const Signup = () => {
                 <span className="text-gray-600">G+</span>{" "}
                 {isSignUp ? "Sign up with Google" : "Sign in with Google"}
               </button> */}
-                  <GoogleSignIn isSignUp={true} />
+              <GoogleSignIn isSignUp={isSignUp} userType={userType} />
 
               <div className="mt-4 space-y-3">
                 {isSignUp && (

@@ -20,29 +20,7 @@ import cloudinary.uploader # type: ignore
 import re
 from dj_rest_auth.registration.views import SocialLoginView # type: ignore
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # type: ignore
-
-
-
-
-class GoogleLoginView(SocialLoginView):
-    adapter_class = GoogleOAuth2Adapter
-    permission_classes = [AllowAny]  
-
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-
-        if 'access' in response.data:
-            user = self.user
-            if user:
-                refresh = RefreshToken.for_user(user)
-                
-                response.data["refresh"] = str(refresh) 
-                response.data["access"] = str(refresh.access_token) 
-            else:
-                return Response({"error": "User not found"}, status=400)
-
-        return response
-
+import requests # type: ignore
 
 class SignInView(APIView):
     def post(self, request):
@@ -84,9 +62,7 @@ class SignInView(APIView):
 
         except Exception as e:
             return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        
-
+         
 class SignupView(APIView):
     def post(self, request):
         data = request.data
@@ -211,6 +187,100 @@ class ResendOTPView(APIView):
         except Exception as e:
             return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class GoogleLoginView(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    permission_classes = [AllowAny]  
+
+    def post(self, request, *args, **kwargs):
+        role = request.data.get('role')
+        is_signup = request.data.get('is_signup', False)
+        
+        access_token = request.data.get('access_token')
+        if access_token and is_signup and role:
+            try:
+                # Fetch user info from Google to get email
+                user_info_response = requests.get(
+                    'https://www.googleapis.com/oauth2/v3/userinfo',
+                    headers={'Authorization': f'Bearer {access_token}'}
+                )
+                if user_info_response.status_code == 200:
+                    user_info = user_info_response.json()
+                    email = user_info.get('email')
+                    
+                    # Check if user already exists with a different role
+                    if email:
+                        existing_user = User.objects.filter(email=email).first()
+                        if existing_user:
+                            # Get the existing user's role
+                            existing_role = None
+                            if hasattr(existing_user, 'role'):
+                                existing_role = existing_user.role
+                            elif hasattr(existing_user, 'profile') and hasattr(existing_user.profile, 'role'):
+                                existing_role = existing_user.profile.role
+                            elif existing_user.groups.exists():
+                                existing_role = existing_user.groups.first().name
+                            
+                            if existing_role and existing_role != role:
+                                return Response(
+                                    {"error": f"Please use a different email or sign in with the correct role."},
+                                    status=400
+                                )
+            except Exception as e:
+                # Log the error but continue with social auth
+                print(f"Error validating user role: {str(e)}")
+        
+        # Proceed with social auth
+        response = super().post(request, *args, **kwargs)
+
+        if 'access' in response.data:
+            user = self.user
+            if user:
+                # For sign up or login, ensure role consistency
+                current_role = None
+                if hasattr(user, 'role'):
+                    current_role = user.role
+                elif hasattr(user, 'profile') and hasattr(user.profile, 'role'):
+                    current_role = user.profile.role
+                elif user.groups.exists():
+                    current_role = user.groups.first().name
+                
+                if role and (not current_role or current_role == role):
+                    if not current_role and role in ['student', 'teacher', 'staff']:
+                        if hasattr(user, 'role'):
+                            user.role = role
+                            user.save()
+                        elif hasattr(user, 'profile') and hasattr(user.profile, 'role'):
+                            user.profile.role = role
+                            user.profile.save()
+                        else:
+                            from django.contrib.auth.models import Group
+                            user.groups.clear()
+                            role_group, _ = Group.objects.get_or_create(name=role)
+                            user.groups.add(role_group)
+                            user.save()
+                elif role and current_role and current_role != role:
+                    return Response(
+                        {"error": f"Please use a different email or sign in with the correct role."},
+                        status=400
+                    )
+                
+                refresh = RefreshToken.for_user(user)
+                response.data["refresh"] = str(refresh) 
+                response.data["access"] = str(refresh.access_token)
+                
+                # Include user data and role in the response
+                response.data["user"] = {
+                    "id": user.id,
+                    "email": user.email,
+                    "username": user.username,
+                    "role": current_role or role or 'student',
+                    "is_block": getattr(user, 'is_block', False)
+                }
+            else:
+                return Response({"error": "User not found"}, status=400)
+
+        return response
+    
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -390,4 +460,3 @@ class UnblockUserView(APIView):
                 return Response({"message": f"User {user.username} is already unblocked."}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-            
