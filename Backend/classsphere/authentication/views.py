@@ -27,7 +27,7 @@ class SignInView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         role = request.data.get("role")
-
+        print(email,password)
         if not email or not password or not role:
             return Response({"error": "Email, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,7 +36,7 @@ class SignInView(APIView):
             if user is None:
                 return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
             
-            if user.is_block:
+            if not user.is_active:
                 return Response({"error": "Your account has been blocked. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
 
             # Verify user role
@@ -47,7 +47,7 @@ class SignInView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
 
-            is_block= user.is_block
+            is_active= user.is_active
             return Response({
                 "message": "Login successful.",
                 "access_token": str(access_token),
@@ -56,7 +56,7 @@ class SignInView(APIView):
                     "username": user.username,
                     "email": user.email,
                     "role": user.role,
-                    "is_block": is_block
+                    "is_active": is_active
                 }
             }, status=status.HTTP_200_OK)
 
@@ -274,7 +274,7 @@ class GoogleLoginView(SocialLoginView):
                     "email": user.email,
                     "username": user.username,
                     "role": current_role or role or 'student',
-                    "is_block": getattr(user, 'is_block', False)
+                    "is_active": getattr(user, 'is_active', False)
                 }
             else:
                 return Response({"error": "User not found"}, status=400)
@@ -436,8 +436,8 @@ class BlockUserView(APIView):
     def post(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
-            if user.is_block:
-                user.is_block = False
+            if user.is_active: 
+                user.is_active = False  
                 user.save()
                 return Response({"message": f"User {user.username} has been blocked."}, status=status.HTTP_200_OK)
             else:
@@ -445,18 +445,19 @@ class BlockUserView(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
 class UnblockUserView(APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsAdminUser]  
 
     def post(self, request, user_id):
-
         try:
             user = User.objects.get(id=user_id)
-            if not user.is_block:
-                user.is_block = True
+            if not user.is_active:  
+                user.is_active = True  
                 user.save()
                 return Response({"message": f"User {user.username} has been unblocked."}, status=status.HTTP_200_OK)
             else:
                 return Response({"message": f"User {user.username} is already unblocked."}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
