@@ -5,7 +5,7 @@ import Footer from "../../Components/Footer";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Profile = () => {
@@ -123,19 +123,19 @@ const Profile = () => {
         </div>
 
         {/* Profile Header */}
-        <div className="bg-white max-w-5xl mx-auto rounded-lg shadow-md overflow-hidden">
-          <div className="bg-teal-100 p-6 flex flex-col md:flex-row capitalize items-center md:items-start text-center md:text-left">
+        <div className="bg-white max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden capitalize">
+          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-6 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
             <div className="relative group">
               {imageError || (!imagePreview && !user.profile_image) ? (
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
-                  <FaUserCircle className="text-5xl text-gray-500" />
+                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-md">
+                  <FaUserCircle className="text-5xl text-teal-500" />
                 </div>
               ) : (
                 <div className="relative">
                   <img
                     src={imagePreview || user.profile_image}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-2 border-white"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
                     onError={() => {
                       console.error(
                         "Image load error for:",
@@ -150,7 +150,7 @@ const Profile = () => {
               {isEditing && (
                 <label
                   htmlFor="profileImage"
-                  className="absolute bottom-0 right-0 bg-teal-500 text-white p-2 rounded-full cursor-pointer shadow-md hover:bg-teal-600 transition"
+                  className="absolute bottom-0 right-0 bg-white text-teal-600 p-2 rounded-full cursor-pointer shadow-md hover:bg-gray-100 transition"
                   title="Change profile picture"
                 >
                   <FaCamera />
@@ -165,10 +165,12 @@ const Profile = () => {
               )}
             </div>
             <div className="ml-4 mt-3 md:mt-0">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl sm:text-2xl font-semibold text-white">
                 {user.username}
               </h2>
-              <p className="text-gray-600">{user.role || "Student"}</p>
+              <p className="text-white text-sm sm:text-base opacity-90">
+                {user.role || "Student"}
+              </p>
             </div>
           </div>
         </div>
@@ -198,22 +200,9 @@ const Profile = () => {
               <span>{user.role || "N/A"}</span>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <strong>Phone:</strong>
-              {isEditing ? (
-                <input
-                  type="text"
-                  name="phone"
-                  value={editedUser.phone || ""}
-                  onChange={handleInputChange}
-                  className="border rounded-md px-2 py-1 flex-1"
-                />
-              ) : (
-                <span>{user.phone || "None"}</span>
-              )}
-            </div>
+            
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               <strong>Gender:</strong>
               {isEditing ? (
                 <select
@@ -233,7 +222,7 @@ const Profile = () => {
             </div>
 
             <div className="flex items-center space-x-2">
-              <strong>DOB:</strong>
+              <strong>DOB :</strong>
               {isEditing ? (
                 <input
                   type="date"
@@ -246,7 +235,20 @@ const Profile = () => {
                 <span>{user.dob || "None"}</span>
               )}
             </div>
-
+            <div className="flex items-center space-x-2">
+              <strong>Phone :</strong>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name="phone"
+                  value={editedUser.phone || ""}
+                  onChange={handleInputChange}
+                  className="border rounded-md px-2 py-1 flex-1"
+                />
+              ) : (
+                <span>{user.phone || "None"}</span>
+              )}
+            </div>
             <div className="flex items-center space-x-2">
               <strong>Place:</strong>
               {isEditing ? (
@@ -301,7 +303,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
 
       <Footer />
     </>

@@ -54,7 +54,7 @@ const GoogleSignIn = ({ isSignUp, userType }) => {
                 refreshToken: data.refresh,
                 email: userInfo.email || data.user?.email || "",
                 role: data.user?.role || userType.toLowerCase(),
-                is_block: data.user?.is_block || false,
+                is_active: data.user?.is_active || true,
               })
             );
 

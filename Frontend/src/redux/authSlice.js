@@ -40,7 +40,7 @@ const initialState = {
   refreshToken: null,
   email: null,
   role: null,
-  is_block: false,
+  is_active: null,
   isLoading: false,
   error: null,
   tokenExpiry: null,
@@ -61,7 +61,7 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
       state.email = action.payload.email;
       state.role = action.payload.role;
-      state.is_block = action.payload.is_block ?? false;
+      state.is_active = action.payload.is_active ?? true;
       
       // Calculate token expiry (assuming 15 minutes from now)
       const expiryTime = new Date().getTime() + 15 * 60 * 1000;
@@ -78,7 +78,7 @@ const authSlice = createSlice({
       state.email = null;
       state.role = null;
       state.tokenExpiry = null;
-      state.is_block = false;
+      state.is_active = null; 
     },
     updateUserInfo: (state, action) => {
       if (action.payload.user) state.user = action.payload.user;
@@ -121,6 +121,7 @@ const authSlice = createSlice({
         state.refreshToken = null;
         state.email = null;
         state.role = null;
+        state.is_active = action.payload.is_active ?? state.is_active;
         state.tokenExpiry = null;
       });
   }

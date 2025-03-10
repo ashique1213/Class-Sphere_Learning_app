@@ -22,9 +22,9 @@ const StudentsTable = () => {
   const axiosInstance = axios.create({
     baseURL: "http://127.0.0.1:8000/api/",
     headers: {
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
   });
 
   const handleLogout = () => {
@@ -171,28 +171,26 @@ const StudentsTable = () => {
                   <td className="p-2">
                     <span
                       className={`px-2 py-1 text-sm font-bold rounded ${
-                        student.is_block
-                          ? " text-red-500"
-                          :    " text-teal-400"
+                        student.is_active ? "text-teal-400" : "text-red-500"
                       }`}
                     >
-                      {student.is_block ? "Block" : "UnBlock"}
+                      {student.is_active ? "Unblocked" : "Blocked"}
                     </span>
                   </td>
                   <td className="p-2 text-sm font-bold">
-                    {student.is_block ? (
+                    {student.is_active ? (
                       <button
-                        onClick={() => handleBlockUser(student.id)}
-                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-red-800"
+                        onClick={() => handleBlockUser(student.id)} // Corrected: Block action should deactivate user
+                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
-                        UnBlock
+                        Block
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleUnblockUser(student.id)}
-                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-teal-800"
+                        onClick={() => handleUnblockUser(student.id)} // Corrected: Unblock action should activate user
+                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
-                        Block
+                        Unblock
                       </button>
                     )}
                   </td>

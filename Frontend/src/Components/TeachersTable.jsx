@@ -21,9 +21,9 @@ const TeachersTable = () => {
   const axiosInstance = axios.create({
     baseURL: "http://127.0.0.1:8000/api/",
     headers: {
-      'Authorization': `Bearer ${authToken}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
   });
 
   const handleLogout = () => {
@@ -38,7 +38,7 @@ const TeachersTable = () => {
       setTeachers(response.data);
     } catch (error) {
       console.error("Error fetching teachers:", error);
-      
+
       // If unauthorized, logout
       if (error.response && error.response.status === 401) {
         dispatch(logout());
@@ -59,13 +59,13 @@ const TeachersTable = () => {
       fetchTeachers();
     } catch (error) {
       console.error("Error blocking user:", error);
-      
+
       // If unauthorized, logout
       if (error.response && error.response.status === 401) {
         dispatch(logout());
         navigate("/adminlogin");
       }
-      
+
       // Show error message
       alert(error.response?.data?.message || "Failed to block user");
     }
@@ -79,13 +79,13 @@ const TeachersTable = () => {
       fetchTeachers();
     } catch (error) {
       console.error("Error unblocking user:", error);
-      
+
       // If unauthorized, logout
       if (error.response && error.response.status === 401) {
         dispatch(logout());
         navigate("/adminlogin");
       }
-      
+
       // Show error message
       alert(error.response?.data?.message || "Failed to unblock user");
     }
@@ -121,7 +121,10 @@ const TeachersTable = () => {
             />
             <FaSearch className="absolute right-3 top-3 text-gray-400" />
           </div>
-          <FaSignOutAlt onClick={handleLogout} className="text-lg cursor-pointer" />
+          <FaSignOutAlt
+            onClick={handleLogout}
+            className="text-lg cursor-pointer"
+          />
         </div>
       </div>
 
@@ -167,27 +170,29 @@ const TeachersTable = () => {
                   <td className="p-2">{teacher.phone || "None"}</td>
                   <td className="p-2">{teacher.place || "None"}</td>
                   <td className="p-2">
-                    <span className={`
+                    <span
+                      className={`
                       px-2 py-1 rounded text-sm font-bold 
-                      ${teacher.is_block ?  ' text-red-500':  ' text-teal-500' }
-                    `}>
-                      {teacher.is_block ? 'Block' : 'UnBlock'}
+                      ${teacher.is_active ? "text-teal-500" : "text-red-500"}
+                    `}
+                    >
+                      {teacher.is_active ? "Unblock" : "Block"}
                     </span>
                   </td>
                   <td className="p-2 text-sm font-bold">
-                    {teacher.is_block ? (
-                      <button 
-                        onClick={() => handleBlockUser(teacher.id)}
-                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-red-800"
-                      >
-                        UnBlock
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => handleUnblockUser(teacher.id)}
-                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-teal-800"
+                    {teacher.is_active ? (
+                      <button
+                        onClick={() => handleBlockUser(teacher.id)} // Corrected logic
+                        className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
                         Block
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUnblockUser(teacher.id)} // Corrected logic
+                        className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
+                      >
+                        Unblock
                       </button>
                     )}
                   </td>

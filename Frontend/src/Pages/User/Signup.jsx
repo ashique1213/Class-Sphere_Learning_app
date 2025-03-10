@@ -182,7 +182,7 @@ const Signup = () => {
         password: formData.password,
         role: userType.toLowerCase(),
       };
-
+      console.log(payload)
       try {
         dispatch(loginStart());
         setLoading(true);
@@ -193,6 +193,7 @@ const Signup = () => {
         const data = await response.json();
         setLoading(false);
 
+        console.log(data)
         if (response.ok) {
           const authToken = data.access_token;
           const refreshToken = data.refresh_token; // Store the refresh token
@@ -204,7 +205,7 @@ const Signup = () => {
               role: userType.toLowerCase(),
               authToken: authToken,
               refreshToken: refreshToken, // Include refresh token
-              is_block: data.user.is_block,
+              is_active: data.user.is_active,
             })
           );
           navigate("/"); // Redirect after login

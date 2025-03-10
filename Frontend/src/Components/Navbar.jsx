@@ -12,6 +12,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    persistor.flush();
     window.location.reload();
   };
 
