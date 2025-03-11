@@ -6,7 +6,7 @@ from .models import Classroom,Student
 #         model = Classroom
 #         fields = "__all__"  
 #         extra_kwargs = {"teacher": {"read_only": True}} 
-    
+ 
 class ClassroomSerializer(serializers.ModelSerializer):
     students = serializers.SerializerMethodField()
     teacher = serializers.CharField(source="teacher.username", read_only=True)

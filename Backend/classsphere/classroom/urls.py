@@ -8,3 +8,4 @@ urlpatterns = [
     path("joined-classes/", JoinedClassesView.as_view(), name="joined-classes"),
 
 ]
+ 

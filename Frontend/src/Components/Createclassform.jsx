@@ -16,7 +16,7 @@ const Createclassform = ({ onClose }) => {
     end_datetime: "",
     description: "",
   });
-
+ 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

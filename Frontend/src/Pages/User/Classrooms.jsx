@@ -4,71 +4,59 @@ import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
 
 const Classrooms = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [joinedClasses, setJoinedClasses] = useState([]); 
+  const [joinedClasses, setJoinedClasses] = useState([]);
   const [classInput, setClassInput] = useState("");
   const [showInput, setShowInput] = useState(false);
   const authToken = useSelector((state) => state.auth.authToken);
+  const { studentname } = useParams();
 
   useEffect(() => {
     if (authToken) {
       const fetchJoinedClasses = async () => {
         try {
-          const response = await axios.get("http://127.0.0.1:8000/api/joined-classes/", {
-            headers: { Authorization: `Bearer ${authToken}` },
-          });
-  
-          setJoinedClasses(response.data); 
+          const response = await axios.get(
+            "http://127.0.0.1:8000/api/joined-classes/",
+            {
+              headers: { Authorization: `Bearer ${authToken}` },
+            }
+          );
+
+          setJoinedClasses(response.data);
         } catch (error) {
           console.error("Error fetching joined classrooms:", error);
         }
       };
-  
+
       fetchJoinedClasses();
     }
-  }, [authToken]);  
-  
+  }, [authToken]);
 
   // Handle joining a class
   const handleJoinClass = async () => {
     try {
       const slug = classInput.split("/").pop();
-  
+
       if (!slug) {
         alert("Invalid class link! Please enter a valid class URL.");
         return;
       }
-  
+
       const response = await axios.post(
         "http://127.0.0.1:8000/api/join-class/",
         { class_id: slug },
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
-  
-      setJoinedClasses((prev) => [response.data.classroom, ...prev]); 
+
+      setJoinedClasses((prev) => [response.data.classroom, ...prev]);
       setClassInput("");
       setShowInput(false);
     } catch (error) {
       console.error("Error joining class:", error);
       alert("Failed to join class. Please try again.");
-    }
-  };
-  
-  
-  const handleLeaveClass = async (classId) => {
-    try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/leave-class/",
-        { class_id: classId },
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-
-      setJoinedClasses(joinedClasses.filter((classroom) => classroom.id !== classId));
-    } catch (error) {
-      console.error("Error leaving class:", error);
-      alert("Failed to leave class. Please try again.");
     }
   };
 
@@ -84,9 +72,10 @@ const Classrooms = () => {
       <Navbar />
       <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:py-20 md:px-10 lg:px-40">
         {/* Breadcrumbs */}
-        <div className="p-4 text-gray-600 text-sm max-w-6xl mx-auto">
+        <div className="p-4 text-black text-sm max-w-5xl mx-auto">
           Home | My Account |{" "}
-          <span className="text-gray-800 font-semibold">Classroom</span>
+          <span className="font-semibold capitalize"> {studentname} </span>
+          <span className="font-semibold">| Classroom</span>
         </div>
 
         {/* Classroom Header */}
@@ -161,12 +150,12 @@ const Classrooms = () => {
                   {classroom.name}
                 </h3>
                 <p className="text-sm text-gray-500">{classroom.category}</p>
-                <button
-                  className="mt-4 w-full py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-all"
-                  onClick={() => handleLeaveClass(classroom.id)}
+                <Link
+                  to={`/classroom/${classroom.slug}`} 
+                  className="mt-4 block w-full text-center bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600 transition"
                 >
-                  Leave Class
-                </button>
+                  View Class
+                </Link>
               </div>
             ))
           ) : (

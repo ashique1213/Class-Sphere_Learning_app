@@ -5,6 +5,9 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Classroom, Student
+from rest_framework.views import APIView
+from .serializers import StudentSerializer
+
 
 class ClassroomListCreateView(generics.ListCreateAPIView):
     serializer_class = ClassroomSerializer
@@ -19,12 +22,12 @@ class ClassroomListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(teacher=self.request.user)
 
-
 class ClassroomDetailView(generics.RetrieveAPIView):
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
     permission_classes = [IsAuthenticated]  
     lookup_field = "slug"
+ 
 
 
 class JoinClassView(generics.GenericAPIView):
@@ -41,14 +44,10 @@ class JoinClassView(generics.GenericAPIView):
         student, created = Student.objects.get_or_create(user=request.user)
         student.joined_classes.add(classroom)
 
-        classroom_data = ClassroomSerializer(classroom).data  # Serialize classroom
+        classroom_data = ClassroomSerializer(classroom).data  
 
         return Response({"classroom": classroom_data}, status=status.HTTP_200_OK)
 
-
-
-from rest_framework.views import APIView
-from .serializers import StudentSerializer
 
 class JoinedClassesView(APIView):
     permission_classes = [IsAuthenticated]

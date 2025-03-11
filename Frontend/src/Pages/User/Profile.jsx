@@ -59,7 +59,7 @@ const Profile = () => {
       setImageError(false);
     }
   };
-
+ 
   const handleSubmit = async () => {
     //Validation
     if (editedUser.phone && !/^\d{10}$/.test(editedUser.phone)) {

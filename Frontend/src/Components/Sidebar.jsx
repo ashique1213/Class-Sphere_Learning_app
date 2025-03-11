@@ -7,8 +7,8 @@ import logo from "../assets/Nav_logo.svg";
 
 const Sidebar = () => {
   const [active, setActive] = useState("");
-  const navigate = useNavigate(); // Use navigate for routing
-  const location = useLocation(); // This will help in getting the current path
+  const navigate = useNavigate(); 
+  const location = useLocation(); 
 
   const menuItems = [
     { name: "Dashboard", icon: <MdDashboard className="text-lg" />, path: "/admindashboard" },

@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { FaUsers, FaSearch, FaClipboardList, FaVideo, FaCheckCircle, FaFileAlt } from "react-icons/fa";
+import {FaUsers,FaSearch,FaClipboardList,FaVideo,FaCheckCircle,FaFileAlt,} from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 
 const ClassDetails = () => {
-  const { slug } = useParams();  // Get slug from URL
+  const { slug } = useParams();
   const [classroom, setClassroom] = useState(null);
   const [loading, setLoading] = useState(true);
   const authToken = useSelector((state) => state.auth.authToken);
@@ -40,31 +40,36 @@ const ClassDetails = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50 p-6 sm:p-8 md:py-16 md:px-10 lg:px-40">
-        
+      <div className="min-h-screen bg-gray-50 p-6 sm:p-8 md:py-20 md:px-10 lg:px-40">
         {/* Breadcrumbs */}
-        <div className="p-4 text-gray-600 text-sm max-w-6xl mx-auto">
-          Home | My Account | <span className="font-bold">{classroom.name}</span>
+        <div className="p-4 text-black text-sm max-w-6xl mx-auto">
+          Home | My Account |{" "}
+          <span className="font-bold">{classroom.name}</span>
         </div>
 
         {/* Header */}
         <div className="bg-white max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-6 sm:p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white flex items-center justify-center text-teal-500 shadow-md">
+          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-6 sm:p-8 flex flex-col md:flex-row md:items-center text-center md:text-left">
+            {/* Icon Section */}
+            <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white flex items-center justify-center text-teal-500 shadow-md">
               <FaUsers className="text-4xl sm:text-5xl" />
             </div>
-            <div className="ml-4 mt-3 md:mt-0">
+
+            {/* Class Info Section */}
+            <div className="flex-1 ml-4 mt-3 md:mt-0">
               <h2 className="text-xl sm:text-2xl font-semibold text-white">
                 {classroom.name} - {classroom.category}
               </h2>
-              <p className="text-white text-sm sm:text-base opacity-90">
+              <p className="text-white sm:text-sm opacity-90 leading-relaxed break-words">
                 {classroom.description || "No description available."}
               </p>
               <p className="text-white text-sm mt-2 capitalize">
-                <strong>Teacher:</strong> {classroom.teacher|| "Unknown"}
+                <strong>Teacher:</strong> {classroom.teacher || "Unknown"}
               </p>
             </div>
-            <div className="ml-auto">
+
+            {/* Button Section */}
+            <div className="flex-shrink-0 mt-4 md:mt-0">
               <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
                 Edit Class
               </button>
@@ -114,8 +119,12 @@ const ClassDetails = () => {
                     <div className="w-12 h-12 bg-teal-500 capitalize text-white flex items-center justify-center rounded-full text-lg font-semibold">
                       {student.username.charAt(0)}
                     </div>
-                    <span className="text-gray-800 font-medium capitalize">{student.username}</span>
-                    <span className="text-gray-800 font-medium">Email: {student.email}</span>
+                    <span className="text-gray-800 font-medium capitalize">
+                      {student.username}
+                    </span>
+                    <span className="text-gray-800 font-medium">
+                      Email: {student.email}
+                    </span>
                   </div>
                   <div className="flex gap-3">
                     <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md">

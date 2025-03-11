@@ -78,7 +78,7 @@ const Createclass = () => {
             </div>
           </div>
         </div>
-
+ 
         {/* Show Create Class Form */}
         {showForm && (
           <div className="max-w-4xl mx-auto mb-6">
@@ -139,7 +139,7 @@ const Createclass = () => {
 
                   {/* View Class Button */}
                   <Link
-                    to={`/classroom/${classItem.slug}`}
+                    to={`/classdetails/${classItem.slug}`}
                     className="mt-4 w-full text-center bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600 transition"
                   >
                     View Class

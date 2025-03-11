@@ -1,4 +1,14 @@
-import { BrowserRouter as Router, Routes, Route,Navigate  } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import {
+  PrivateRoute,
+  RoleRoute,
+  AdminRoute,
+} from "./Protectedroute/ProtectedRoutes";
 import Home from "./Pages/User/Home";
 import Profile from "./Pages/User/Profile";
 import Signup from "./Pages/User/Signup";
@@ -6,39 +16,73 @@ import AdminLogin from "./Pages/Admin/AdminLogin";
 import AdminDashboard from "./Pages/Admin/AdminDashboard";
 import Students from "./Pages/Admin/Students";
 import Teachers from "./Pages/Admin/Teachers";
-import { useSelector } from "react-redux";
 import Createclass from "./Pages/User/Createclass";
 import Classrooms from "./Pages/User/Classrooms";
 import ClassDetails from "./Pages/User/ClassDetails";
 import Notfound from "./Pages/Notfound";
+import { useSelector } from "react-redux";
+import Classroom from "./Pages/User/Classroom";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
   const role = useSelector((state) => state.auth.role);
-  
-  const PrivateRoute = ({ element }) => {
-    return authToken ? element : <Navigate to="/signup" />;
-  };
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/adminlogin" element={authToken ? <Navigate to="/admindashboard" /> : <AdminLogin />} />
-        <Route path="/admindashboard" element={authToken && role === "staff" ? <AdminDashboard /> : <Navigate to="/adminlogin" />}/>
-        <Route path="/students" element={authToken && (role === "staff") ? <Students /> : <Navigate to="/adminlogin" />} />
-        <Route path="/teachers" element={authToken && role === "staff" ? <Teachers /> : <Navigate to="/adminlogin" />} />
+        <Route
+          path="/signup"
+          element={!authToken ? <Signup /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/adminlogin"
+          element={
+            authToken && role === "staff" ? (
+              <Navigate to="/admindashboard" />
+            ) : (
+              <AdminLogin />
+            )
+          }
+        />
+        <Route path="/notfound" element={<Notfound />} />
 
-        <Route path="/myclassrooms/:teachername" element={<PrivateRoute element={<Createclass />} />} />
-        <Route path="/classrooms/:studentname" element={<PrivateRoute element={<Classrooms />} />} />
-        <Route path="/classroom/:slug" element={<PrivateRoute element={<ClassDetails />} />} />
+        {/* Protected routes (only for authenticated users) */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/profile" element={<Profile />} />
+        </Route>
 
-        <Route path="/notfound" element={<Notfound/>}/>
+        {/* Teacher-specific routes */}
+        <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
+          <Route path="/myclassrooms/:teachername" element={<Createclass />} />
+        </Route>
+
+        {/* Routes for both students and teachers */}
+        <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
+          <Route path="/classdetails/:slug" element={<ClassDetails />} />
+        </Route>
+
+        {/* Student-specific routes */}
+        <Route element={<RoleRoute allowedRoles={["student"]} />}>
+          <Route path="/classrooms/:studentname" element={<Classrooms />} />
+        </Route>
+
+        <Route element={<RoleRoute allowedRoles={["student"]} />}>
+          <Route path="/classroom/:slug" element={<Classroom />} />
+        </Route>
+
+        {/* Admin-only routes */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/students" element={<Students />} />
+          <Route path="/teachers" element={<Teachers />} />
+        </Route>
+
+        {/* Catch-all route (redirect invalid URLs) */}
+        <Route path="*" element={<Navigate to="/notfound" />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-
