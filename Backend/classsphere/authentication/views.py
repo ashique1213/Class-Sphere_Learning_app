@@ -23,6 +23,8 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # t
 import requests # type: ignore
 
 class SignInView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -389,6 +391,8 @@ class ResetPasswordView(APIView):
 
 
 class AdminLoginView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")

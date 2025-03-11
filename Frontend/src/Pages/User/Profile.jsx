@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -115,16 +116,16 @@ const Profile = () => {
       <Navbar />
       {/* Breadcrumbs */}
       <div className="min-h-screen bg-gray-100 p-6 md:py-20">
-        <div className="p-4 text-gray-600 text-sm max-w-5xl mx-auto">
+        <div className="p-4 text-black text-sm max-w-5xl mx-auto">
           Home | My Account |{" "}
-          <span className="text-gray-800 font-semibold capitalize">
+          <span className="text-gray-800 font-bold capitalize">
             {user.username}
           </span>
         </div>
 
         {/* Profile Header */}
         <div className="bg-white max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden capitalize">
-          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-6 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
+          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
             <div className="relative group">
               {imageError || (!imagePreview && !user.profile_image) ? (
                 <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-md">
@@ -176,13 +177,23 @@ const Profile = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 px-6 py-4">
-          <button className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 px-6 py-4 font-bold">
+          <Link
+            to="/Profile"
+            className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm"
+          >
             About
-          </button>
-          <button className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md text-sm text-center">
-            Classroom
-          </button>
+          </Link>
+          <Link
+            to={
+              user?.role === "teacher"
+                ? `/myclassrooms/${user?.username}`
+                : `/classrooms/${user?.username}`
+            }
+            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md text-sm text-center font-bold"
+          >
+            {user?.role === "teacher" ? "My Classrooms" : "Joined Classrooms"}
+          </Link>
         </div>
 
         {/* Profile Details */}
@@ -197,10 +208,8 @@ const Profile = () => {
 
             <div className="flex items-center space-x-2 capitalize">
               <strong>Role:</strong>
-              <span>{user.role || "N/A"}</span>
+              <span>{user.role || "None"}</span>
             </div>
-
-            
 
             <div className="flex items-center space-x-1">
               <strong>Gender:</strong>
