@@ -22,6 +22,9 @@ import ClassDetails from "./Pages/User/ClassDetails";
 import Notfound from "./Pages/Notfound";
 import { useSelector } from "react-redux";
 import Classroom from "./Pages/User/Classroom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -29,6 +32,7 @@ function App() {
 
   return (
     <Router>
+            <ToastContainer /> 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route

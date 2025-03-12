@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from .models import Classroom, Student
 from rest_framework.views import APIView
 from .serializers import StudentSerializer
+from rest_framework import generics, permissions
 
 
 class ClassroomListCreateView(generics.ListCreateAPIView):
@@ -29,6 +30,27 @@ class ClassroomDetailView(generics.RetrieveAPIView):
     lookup_field = "slug"
  
 
+class ClassroomUpdateView(generics.UpdateAPIView):
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Classroom.objects.filter(teacher=self.request.user)
+
+
+class ClassroomDeleteView(generics.DestroyAPIView):
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Classroom.objects.filter(teacher=self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        classroom = self.get_object()
+        classroom.delete()
+        return Response({"message": "Classroom deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 class JoinClassView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]

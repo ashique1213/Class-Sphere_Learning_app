@@ -5,12 +5,14 @@ import Footer from "../../Components/Footer";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
   const [classroom, setClassroom] = useState(null);
-  const { slug } = useParams();  
+  const { slug } = useParams();
   const authToken = useSelector((state) => state.auth.authToken);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchClassroom = async () => {
@@ -36,7 +38,8 @@ const Classroom = () => {
       <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:py-20 md:px-10 lg:px-40">
         {/* Breadcrumbs */}
         <div className="p-4 text-black text-sm max-w-5xl mx-auto">
-          Home | My Account | Classroom |{" "}
+          Home | My Account |
+          {" "}<Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
           <span className="font-bold">{classroom?.name || "Loading..."}</span>
         </div>
 
@@ -56,14 +59,13 @@ const Classroom = () => {
                 </p>
               </div>
               <div className="ml-auto flex flex-col gap-2">
-              <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
-                Join Now
-              </button>
-              <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
-                Join Kritsin
-              </button>
-            </div>
-
+                <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
+                  Join Now
+                </button>
+                <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
+                  Join Kritsin
+                </button>
+              </div>
             </div>
           </div>
         ) : (

@@ -2,15 +2,38 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import {FaUsers,FaSearch,FaClipboardList,FaVideo,FaCheckCircle,FaFileAlt,} from "react-icons/fa";
+import {
+  FaUsers,
+  FaSearch,
+  FaClipboardList,
+  FaVideo,
+  FaCheckCircle,
+  FaFileAlt,
+} from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
+import { Link } from "react-router-dom";
+import CreateClassForm from "../../Components/Createclassform";
+import { FaSpinner } from "react-icons/fa";
+import { toast,ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ClassDetails = () => {
   const { slug } = useParams();
   const [classroom, setClassroom] = useState(null);
   const [loading, setLoading] = useState(true);
   const authToken = useSelector((state) => state.auth.authToken);
+  const { user } = useSelector((state) => state.auth);
+  const [isEditing, setIsEditing] = useState(false);
+  const message = localStorage.getItem("toastMessage");
+
+
+  useEffect(() => {
+    if (message) {
+      toast.success(message);
+      localStorage.removeItem("toastMessage"); 
+    }
+  }, []);
 
   useEffect(() => {
     if (!authToken) {
@@ -35,15 +58,31 @@ const ClassDetails = () => {
       });
   }, [slug, authToken]);
 
-  if (!classroom) return <div>Classroom not found</div>;
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCloseEditForm = () => {
+    setIsEditing(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+      </div>
+    );
+  }
 
   return (
     <>
       <Navbar />
+      <ToastContainer/>
       <div className="min-h-screen bg-gray-50 p-6 sm:p-8 md:py-20 md:px-10 lg:px-40">
         {/* Breadcrumbs */}
         <div className="p-4 text-black text-sm max-w-6xl mx-auto">
           Home | My Account |{" "}
+          <Link to={`/myclassrooms/${user?.username}`}>Classroom</Link> |{" "}
           <span className="font-bold">{classroom.name}</span>
         </div>
 
@@ -69,8 +108,11 @@ const ClassDetails = () => {
             </div>
 
             {/* Button Section */}
-            <div className="flex-shrink-0 mt-4 md:mt-0">
-              <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition">
+            <div className="mt-4 md:mt-0">
+              <button
+                onClick={handleEditClick}
+                className="bg-white text-teal-600 px-4 py-2 rounded-md border border-teal-500 shadow-md hover:bg-gray-100"
+              >
                 Edit Class
               </button>
             </div>
@@ -104,6 +146,16 @@ const ClassDetails = () => {
             </button>
           ))}
         </div>
+
+        {/* Show Form when Editing */}
+        {isEditing && (
+          <div className="p-2">
+            <CreateClassForm
+              onClose={handleCloseEditForm}
+              existingClass={classroom}
+            />
+          </div>
+        )}
 
         {/* Student List */}
         <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden p-6">
