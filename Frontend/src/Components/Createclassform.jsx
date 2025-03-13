@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useSelector } from "react-redux";
-import { toast, ToastContainer } from "react-toastify";
+import { updateClassroom,createClassroom } from "../api/classroomapi";
 import "react-toastify/dist/ReactToastify.css";
 
-const API_URL = "http://127.0.0.1:8000/api/classrooms/";
 
 const CreateClassForm = ({ onClose, existingClass }) => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -41,15 +39,11 @@ const CreateClassForm = ({ onClose, existingClass }) => {
     try {
       if (existingClass) {
         // Update existing class
-        await axios.put(`${API_URL}${existingClass.id}/update/`, formData, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        await updateClassroom(existingClass.id, formData, authToken);
         localStorage.setItem("toastMessage", "Classroom updated successfully!");
       } else {
         // Create new class
-        await axios.post(API_URL, { ...formData, teacher_email: userEmail }, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        await createClassroom(formData, authToken, userEmail);
         localStorage.setItem("toastMessage", "Classroom created successfully!");
       }
 

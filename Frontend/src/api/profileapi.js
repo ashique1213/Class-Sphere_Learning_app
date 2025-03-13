@@ -1,10 +1,12 @@
+// profileapi.js
+
 import axios from "axios";
 
-const API_BASE_URL = "http://127.0.0.1:8000/api/profile/";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const fetchUserDetails = async (authToken) => {
   try {
-    const response = await axios.get(API_BASE_URL, {
+    const response = await axios.get(`${BASE_URL}/profile/`, {
       headers: { Authorization: `Bearer ${authToken}` },
     });
     return response.data;
@@ -25,7 +27,7 @@ export const updateUserProfile = async (authToken, editedUser) => {
       formData.append("profile_image", editedUser.profile_image);
     }
 
-    const response = await axios.put(API_BASE_URL, formData, {
+    const response = await axios.put(`${BASE_URL}/profile/`, formData, {
       headers: {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "multipart/form-data",

@@ -1,5 +1,6 @@
 // authapi.js
-const BASE_URL = "http://127.0.0.1:8000/api";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const signup = async (payload) => {
     try {
@@ -161,3 +162,37 @@ export const resetPassword = async (email, otp, newPassword) => {
     };
   }
 };
+
+
+
+export const fetchGoogleUserInfo = async (accessToken) => {
+  try {
+    const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return await response.json();
+  } catch (error) {
+    throw new Error("Failed to fetch Google user info");
+  }
+};
+
+
+export const authenticateWithGoogle = async (accessToken, userType, isSignUp) => {
+  try {
+    const response = await fetch(`${BASE_URL}/auth/social/google/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_token: accessToken,
+        role: userType.toLowerCase(),
+        is_signup: isSignUp,
+      }),
+      credentials: "include",
+    });
+
+    return response.ok ? await response.json() : Promise.reject(await response.json());
+  } catch (error) {
+    throw new Error(error?.message || "Google login failed!");
+  }
+};
+

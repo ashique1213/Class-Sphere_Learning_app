@@ -9,30 +9,30 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { fetchClasses,deleteClassroom } from "../../api/classroomapi";
 
-const API_URL = "http://127.0.0.1:8000/api/classrooms/";
 
 const Createclass = () => {
   const { teachername } = useParams();
   const [showForm, setShowForm] = useState(false);
   const [classrooms, setClassrooms] = useState([]);
-  const authToken = useSelector((state) => state.auth.authToken);
   const [deleteId, setDeleteId] = useState(null);
+  const authToken = useSelector((state) => state.auth.authToken);
 
-  // Fetch classrooms from API
-  const fetchClasses = async () => {
-    try {
-      const response = await axios.get(`${API_URL}?teacher=${teachername}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      setClassrooms(response.data);
-    } catch (error) {
-      console.error("Error fetching classrooms:", error);
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const data = await fetchClasses(teachername, authToken);
+        setClassrooms(data);
+      } catch (error) {
+        toast.error("Failed to fetch classrooms");
+      }
+    };
+
+    if (authToken) {
+      loadClasses();
     }
-  };
+  }, [authToken, teachername]);
 
   const confirmDelete = (id) => {
     setDeleteId(id); // Set the ID of the classroom to be deleted
@@ -42,16 +42,7 @@ const Createclass = () => {
     if (!deleteId) return;
 
     try {
-      await axios.delete(
-        `http://localhost:8000/api/classrooms/${deleteId}/delete/`,
-        {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
+      await deleteClassroom(deleteId, authToken);
       setClassrooms((prevClassrooms) =>
         prevClassrooms.filter((classItem) => classItem.id !== deleteId)
       );
@@ -63,10 +54,6 @@ const Createclass = () => {
       alert("Failed to delete classroom. Please try again.");
     }
   };
-
-  useEffect(() => {
-    fetchClasses();
-  }, [authToken]); // Runs when authToken changes
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
@@ -166,7 +153,7 @@ const Createclass = () => {
                   >
                     <FaShareAlt className="text-md sm:text-md" />
                   </button>
-                  
+
 
                   {/* Classroom Name */}
                   <h3 className="text-lg font-semibold text-gray-800 mt-10 sm:mt-12">

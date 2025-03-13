@@ -6,6 +6,8 @@ import { logout } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
 const StudentsTable = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,7 +22,7 @@ const StudentsTable = () => {
 
   // Create an axios instance with default headers
   const axiosInstance = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/",
+    baseURL: BASE_URL,
     headers: {
       Authorization: `Bearer ${authToken}`,
       "Content-Type": "application/json",

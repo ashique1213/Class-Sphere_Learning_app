@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import { FaSearch, FaUsers, FaClock, FaBook, FaPlus } from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
+import { fetchJoinedClasses,joinClass } from "../../api/classroomapi";
 
 const Classrooms = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,48 +15,30 @@ const Classrooms = () => {
   const { studentname } = useParams();
 
   useEffect(() => {
-    if (authToken) {
-      const fetchJoinedClasses = async () => {
-        try {
-          const response = await axios.get(
-            "http://127.0.0.1:8000/api/joined-classes/",
-            {
-              headers: { Authorization: `Bearer ${authToken}` },
-            }
-          );
+    const loadJoinedClasses = async () => {
+      if (!authToken) return;
+      try {
+        const data = await fetchJoinedClasses(authToken);
+        setJoinedClasses(data);
+      } catch {
+        toast.error("Failed to fetch joined classrooms.");
+      }
+    };
 
-          setJoinedClasses(response.data);
-        } catch (error) {
-          console.error("Error fetching joined classrooms:", error);
-        }
-      };
-
-      fetchJoinedClasses();
-    }
+    loadJoinedClasses();
   }, [authToken]);
+
 
   // Handle joining a class
   const handleJoinClass = async () => {
     try {
-      const slug = classInput.split("/").pop();
-
-      if (!slug) {
-        alert("Invalid class link! Please enter a valid class URL.");
-        return;
-      }
-
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/join-class/",
-        { class_id: slug },
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-
-      setJoinedClasses((prev) => [response.data.classroom, ...prev]);
+      const newClass = await joinClass(classInput, authToken);
+      setJoinedClasses((prev) => [newClass, ...prev]);
       setClassInput("");
       setShowInput(false);
+      toast.success("Class joined successfully!");
     } catch (error) {
-      console.error("Error joining class:", error);
-      alert("Failed to join class. Please try again.");
+      toast.error(error.message || "Failed to join class.");
     }
   };
 
@@ -149,9 +131,14 @@ const Classrooms = () => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   {classroom.name}
                 </h3>
-                <p className="text-sm text-gray-500">{classroom.category}</p>
+                <p className="text-sm text-gray-700">{classroom.category}</p>
+                <p className="text-sm text-gray-500 pt-1">
+                  {classroom.description.length > 200
+                    ? classroom.description.slice(0, 200) + "....."
+                    : classroom.description}
+                </p>
                 <Link
-                  to={`/classroom/${classroom.slug}`} 
+                  to={`/classroom/${classroom.slug}`}
                   className="mt-4 block w-full text-center bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600 transition"
                 >
                   View Class

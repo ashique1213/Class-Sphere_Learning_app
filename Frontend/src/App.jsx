@@ -61,7 +61,6 @@ function App() {
           <Route path="/myclassrooms/:teachername" element={<Createclass />} />
         </Route>
 
-        {/* Routes for both students and teachers */}
         <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/classdetails/:slug" element={<ClassDetails />} />
         </Route>

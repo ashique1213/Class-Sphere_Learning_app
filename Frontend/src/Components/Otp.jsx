@@ -62,13 +62,7 @@ const Otp = ({ email, onSuccess }) => {
       };
       
       console.log("OTP verification payload:", payload); // For debugging
-      
-      // const response = await fetch("http://127.0.0.1:8000/api/verify-otp/", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   credentials: "include",
-      //   body: JSON.stringify(payload),
-      // });
+
       const response = await verifyOtp(payload);
       
       const data = await response.json();
@@ -117,12 +111,6 @@ const Otp = ({ email, onSuccess }) => {
         
         console.log("Resend OTP payload:", payload); // For debugging
         
-        // const response = await fetch("http://127.0.0.1:8000/api/resend-otp/", {
-        //   method: "POST",
-        //   headers: { "Content-Type": "application/json" },
-        //   credentials: "include",
-        //   body: JSON.stringify(payload),
-        // });
         const response = await resendOtp(payload);
 
         const data = await response.json();

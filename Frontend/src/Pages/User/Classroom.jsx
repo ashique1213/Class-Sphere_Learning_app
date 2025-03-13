@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { FaUsers, FaClock, FaBook } from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { fetchClassroom } from "../../api/classroomapi"; 
+import { toast } from "react-toastify";
 
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
@@ -15,19 +15,17 @@ const Classroom = () => {
   const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const fetchClassroom = async () => {
+    const loadClassroom = async () => {
+      if (!authToken) return;
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/api/classrooms/${slug}/`, // Fetch by slug
-          { headers: { Authorization: `Bearer ${authToken}` } }
-        );
-        setClassroom(response.data);
-      } catch (error) {
-        console.error("Error fetching classroom details:", error);
+        const data = await fetchClassroom(slug, authToken);
+        setClassroom(data);
+      } catch {
+        toast.error("Failed to fetch classroom details.");
       }
     };
 
-    if (authToken) fetchClassroom();
+    loadClassroom();
   }, [slug, authToken]);
 
   const tabs = ["About", "Materials", "Assignments", "Exams", "Attendance"];
@@ -38,8 +36,8 @@ const Classroom = () => {
       <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:py-20 md:px-10 lg:px-40">
         {/* Breadcrumbs */}
         <div className="p-4 text-black text-sm max-w-5xl mx-auto">
-          Home | My Account |
-          {" "}<Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
+          Home | My Account |{" "}
+          <Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
           <span className="font-bold">{classroom?.name || "Loading..."}</span>
         </div>
 

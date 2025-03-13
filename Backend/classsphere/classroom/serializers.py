@@ -1,11 +1,6 @@
 from rest_framework import serializers
 from .models import Classroom,Student
 
-# class ClassroomSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Classroom
-#         fields = "__all__"  
-#         extra_kwargs = {"teacher": {"read_only": True}} 
  
 class ClassroomSerializer(serializers.ModelSerializer):
     students = serializers.SerializerMethodField()

@@ -2,14 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import {
-  FaUsers,
-  FaSearch,
-  FaClipboardList,
-  FaVideo,
-  FaCheckCircle,
-  FaFileAlt,
-} from "react-icons/fa";
+import {FaUsers,FaSearch,FaClipboardList,FaVideo,FaCheckCircle,FaFileAlt} from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import { Link } from "react-router-dom";
@@ -17,6 +10,7 @@ import CreateClassForm from "../../Components/Createclassform";
 import { FaSpinner } from "react-icons/fa";
 import { toast,ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { fetchClassroom } from "../../api/classroomapi";
 
 const ClassDetails = () => {
   const { slug } = useParams();
@@ -36,26 +30,24 @@ const ClassDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (!authToken) {
-      console.error("No Auth Token Found!");
-      setLoading(false);
-      return;
-    }
-
-    axios
-      .get(`http://127.0.0.1:8000/api/classrooms/${slug}/`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      })
-      .then((response) => {
-        // console.log("Classroom Data:", response.data);
-        setClassroom(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching classroom:", error);
-      })
-      .finally(() => {
+    const loadClassroom = async () => {
+      if (!authToken) {
+        console.error("No Auth Token Found!");
         setLoading(false);
-      });
+        return;
+      }
+
+      try {
+        const data = await fetchClassroom(slug, authToken);
+        setClassroom(data);
+      } catch {
+        toast.error("Failed to fetch classroom details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClassroom();
   }, [slug, authToken]);
 
   const handleEditClick = () => {
