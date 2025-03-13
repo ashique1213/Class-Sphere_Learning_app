@@ -50,7 +50,7 @@ const CreateClassForm = ({ onClose, existingClass }) => {
         await axios.post(API_URL, { ...formData, teacher_email: userEmail }, {
           headers: { Authorization: `Bearer ${authToken}` },
         });
-        toast.success("Classroom created successfully!");
+        localStorage.setItem("toastMessage", "Classroom created successfully!");
       }
 
       onClose();

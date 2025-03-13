@@ -22,6 +22,7 @@ from dj_rest_auth.registration.views import SocialLoginView # type: ignore
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # type: ignore
 import requests # type: ignore
 
+
 class SignInView(APIView):
     permission_classes = [AllowAny]
 
@@ -346,6 +347,7 @@ class RequestPasswordResetView(APIView):
 
         return Response({"message": "OTP sent to your email."}, status=status.HTTP_200_OK)
 
+
 class VerifyPasswordResetOTPView(APIView):
     def post(self, request):
         email = request.data.get("email")
@@ -366,6 +368,7 @@ class VerifyPasswordResetOTPView(APIView):
 
         except PasswordResetOTP.DoesNotExist:
             return Response({"error": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ResetPasswordView(APIView):
     def post(self, request):

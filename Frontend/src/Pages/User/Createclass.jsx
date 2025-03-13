@@ -157,7 +157,7 @@ const Createclass = () => {
                   {/* Share Icon */}
                   <button
                     onClick={() =>
-                      navigator.clipboard.writeText(
+                      copyToClipboard(
                         `${window.location.origin}/classroom/${classItem.slug}`
                       )
                     }
@@ -166,6 +166,7 @@ const Createclass = () => {
                   >
                     <FaShareAlt className="text-md sm:text-md" />
                   </button>
+                  
 
                   {/* Classroom Name */}
                   <h3 className="text-lg font-semibold text-gray-800 mt-10 sm:mt-12">
