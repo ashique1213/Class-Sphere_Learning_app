@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
-import axios from "axios";
-import { logout } from "../redux/authSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/authSlice";
 import { useNavigate } from "react-router-dom";
-
-const BASE_URL = import.meta.env.VITE_BASE_URL
+import { CheckCircle, XCircle } from "lucide-react";
+import { fetchTeachers, verifyTeacher, blockUser, unblockUser } from "../api/adminapi";
 
 const TeachersTable = () => {
   const [teachers, setTeachers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [verifyId, setVerifyId] = useState(null);
+  const [blockUserId, setBlockUserId] = useState(null);
   const teachersPerPage = 7;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Get auth token from Redux store
   const authToken = useSelector((state) => state.auth.authToken);
-
-  // Create an axios instance with default headers
-  const axiosInstance = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-  });
 
   const handleLogout = () => {
     dispatch(logout());
@@ -34,77 +24,56 @@ const TeachersTable = () => {
   };
 
   // Fetch teachers
-  const fetchTeachers = async () => {
+  const getTeachers = async () => {
     try {
-      const response = await axiosInstance.get("teachers/");
-      setTeachers(response.data);
+      const data = await fetchTeachers();
+      setTeachers(data);
     } catch (error) {
-      console.error("Error fetching teachers:", error);
+      console.error("Error in getTeachers:", error.message);
+      // Rely on api.js interceptor for 401 handling
+    }
+  };
 
-      // If unauthorized, logout
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
+  const handleVerifyUser = async () => {
+    try {
+      await verifyTeacher(verifyId);
+      await getTeachers(); // Refresh list
+      setVerifyId(null);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  const handleBlockUnblockUser = async () => {
+    try {
+      const user = teachers.find((t) => t.id === blockUserId);
+      if (user.is_active) {
+        await blockUser(blockUserId);
+      } else {
+        await unblockUser(blockUserId);
       }
+      await getTeachers(); // Refresh list
+      setBlockUserId(null);
+    } catch (error) {
+      alert(error.message);
     }
   };
 
   useEffect(() => {
-    fetchTeachers();
-  }, []);
-
-  // Block user functionality
-  const handleBlockUser = async (userId) => {
-    try {
-      await axiosInstance.post(`block/${userId}/`);
-      // Refresh the teachers list
-      fetchTeachers();
-    } catch (error) {
-      console.error("Error blocking user:", error);
-
-      // If unauthorized, logout
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
-      }
-
-      // Show error message
-      alert(error.response?.data?.message || "Failed to block user");
+    if (authToken) {
+      getTeachers();
+    } else {
+      navigate("/adminlogin");
     }
-  };
+  }, [authToken]);
 
-  // Unblock user functionality
-  const handleUnblockUser = async (userId) => {
-    try {
-      await axiosInstance.post(`unblock/${userId}/`);
-      // Refresh the teachers list
-      fetchTeachers();
-    } catch (error) {
-      console.error("Error unblocking user:", error);
-
-      // If unauthorized, logout
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
-      }
-
-      // Show error message
-      alert(error.response?.data?.message || "Failed to unblock user");
-    }
-  };
-
-  // Filter teachers based on search query
+  // Filter and Pagination Logic
   const filteredTeachers = teachers.filter((teacher) =>
     teacher.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Pagination Logic
   const indexOfLastTeacher = currentPage * teachersPerPage;
   const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
-  const currentTeachers = filteredTeachers.slice(
-    indexOfFirstTeacher,
-    indexOfLastTeacher
-  );
+  const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
   const totalPages = Math.ceil(filteredTeachers.length / teachersPerPage);
 
   return (
@@ -123,10 +92,7 @@ const TeachersTable = () => {
             />
             <FaSearch className="absolute right-3 top-3 text-gray-400" />
           </div>
-          <FaSignOutAlt
-            onClick={handleLogout}
-            className="text-lg cursor-pointer"
-          />
+          <FaSignOutAlt onClick={handleLogout} className="text-lg cursor-pointer" />
         </div>
       </div>
 
@@ -144,8 +110,9 @@ const TeachersTable = () => {
               <th className="p-2">DOB</th>
               <th className="p-2">Phone</th>
               <th className="p-2">City</th>
-              <th className="p-2">Status</th>
+              <th className="p-2">B-Status</th>
               <th className="p-2">Actions</th>
+              <th className="p-2">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -155,11 +122,7 @@ const TeachersTable = () => {
                   <td className="p-2">{teacher.id}</td>
                   <td className="p-2">
                     {teacher.profile_image ? (
-                      <img
-                        src={teacher.profile_image}
-                        alt="Profile"
-                        className="w-10 h-10 rounded-full"
-                      />
+                      <img src={teacher.profile_image} alt="Profile" className="w-10 h-10 rounded-full" />
                     ) : (
                       <FaUserCircle className="w-10 h-10 text-gray-400" />
                     )}
@@ -173,10 +136,9 @@ const TeachersTable = () => {
                   <td className="p-2">{teacher.place || "None"}</td>
                   <td className="p-2">
                     <span
-                      className={`
-                      px-2 py-1 rounded text-sm font-bold 
-                      ${teacher.is_active ? "text-teal-500" : "text-red-500"}
-                    `}
+                      className={`px-2 py-1 rounded text-sm font-bold ${
+                        teacher.is_active ? "text-teal-500" : "text-red-500"
+                      }`}
                     >
                       {teacher.is_active ? "Unblock" : "Block"}
                     </span>
@@ -184,27 +146,45 @@ const TeachersTable = () => {
                   <td className="p-2 text-sm font-bold">
                     {teacher.is_active ? (
                       <button
-                        onClick={() => handleBlockUser(teacher.id)} // Corrected logic
+                        onClick={() => setBlockUserId(teacher.id)}
                         className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
                         Block
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleUnblockUser(teacher.id)} // Corrected logic
+                        onClick={() => setBlockUserId(teacher.id)}
                         className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
                         Unblock
                       </button>
                     )}
                   </td>
+                  <td className="p-1 text-center">
+                    <button
+                      onClick={() => setVerifyId(teacher.id)}
+                      className={`flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-md shadow-md transition-all duration-300 ${
+                        teacher.is_verified
+                          ? "bg-teal-500 hover:bg-teal-600 text-white border-teal-600"
+                          : "bg-red-500 hover:bg-red-600 text-white border-red-600"
+                      }`}
+                    >
+                      {teacher.is_verified ? (
+                        <>
+                          <CheckCircle size={19} /> Verified
+                        </>
+                      ) : (
+                        <>
+                          <XCircle size={19} /> Unverified
+                        </>
+                      )}
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="11" className="p-4 text-center">
-                  No teachers found
-                </td>
+                <td colSpan="11" className="p-4 text-center">No teachers found</td>
               </tr>
             )}
           </tbody>
@@ -218,15 +198,69 @@ const TeachersTable = () => {
             key={index + 1}
             onClick={() => setCurrentPage(index + 1)}
             className={`px-4 py-2 rounded-full ${
-              currentPage === index + 1
-                ? "bg-teal-500 text-white"
-                : "bg-gray-200"
+              currentPage === index + 1 ? "bg-teal-500 text-white" : "bg-gray-200"
             }`}
           >
             {index + 1}
           </button>
         ))}
       </div>
+
+      {/* Verification Modal */}
+      {verifyId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
+            <h3 className="text-lg font-semibold">Confirm Verification</h3>
+            <p className="text-gray-600 my-3">
+              Are you sure you want to{" "}
+              {teachers.find((t) => t.id === verifyId)?.is_verified ? "unverify" : "verify"}{" "}
+              this user?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleVerifyUser}
+                className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setVerifyId(null)}
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block/Unblock Confirmation Modal */}
+      {blockUserId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
+            <h3 className="text-lg font-semibold">Confirm Action</h3>
+            <p className="text-gray-600 my-3">
+              Are you sure you want to{" "}
+              {teachers.find((t) => t.id === blockUserId)?.is_active ? "block" : "unblock"}{" "}
+              this user?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleBlockUnblockUser}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setBlockUserId(null)}
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

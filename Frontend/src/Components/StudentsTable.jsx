@@ -1,33 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaSignOutAlt } from "react-icons/fa";
-import axios from "axios";
-import { FaUserCircle } from "react-icons/fa";
-import { logout } from "../redux/authSlice";
+import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/authSlice";
 import { useNavigate } from "react-router-dom";
-
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+import { fetchStudents, blockUser, unblockUser } from "../api/adminapi";
 
 const StudentsTable = () => {
   const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [blockUserId, setBlockUserId] = useState(null);
   const studentsPerPage = 7;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  // Get auth token from Redux store
   const authToken = useSelector((state) => state.auth.authToken);
-
-  // Create an axios instance with default headers
-  const axiosInstance = axios.create({
-    baseURL: BASE_URL,
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-  });
 
   const handleLogout = () => {
     dispatch(logout());
@@ -35,75 +22,47 @@ const StudentsTable = () => {
   };
 
   // Fetch students
-  const fetchStudents = async () => {
+  const getStudents = async () => {
     try {
-      const response = await axiosInstance.get("students/");
-      setStudents(response.data);
+      const data = await fetchStudents();
+      setStudents(data);
     } catch (error) {
-      console.error("Error fetching students:", error);
+      console.error("Error in getStudents:", error.message);
+      // Rely on api.js interceptor for 401 handling
+    }
+  };
 
-      // If unauthorized, logout
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
+  // Block/Unblock student
+  const handleBlockUnblockUser = async () => {
+    try {
+      const user = students.find((t) => t.id === blockUserId);
+      if (user.is_active) {
+        await blockUser(blockUserId);
+      } else {
+        await unblockUser(blockUserId);
       }
+      await getStudents(); // Refresh list
+      setBlockUserId(null);
+    } catch (error) {
+      alert(error.message);
     }
   };
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  // Block student functionality
-  const handleBlockUser = async (userId) => {
-    try {
-      await axiosInstance.post(`block/${userId}/`);
-      fetchStudents();
-    } catch (error) {
-      console.error("Error blocking user:", error);
-
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
-      }
-
-      // Show error message
-      alert(error.response?.data?.message || "Failed to block user");
+    if (authToken) {
+      getStudents();
+    } else {
+      navigate("/adminlogin");
     }
-  };
+  }, [authToken]);
 
-  // Unblock student functionality
-  const handleUnblockUser = async (userId) => {
-    try {
-      await axiosInstance.post(`unblock/${userId}/`);
-      // Refresh the students list
-      fetchStudents();
-    } catch (error) {
-      console.error("Error unblocking user:", error);
-
-      // If unauthorized, logout
-      if (error.response && error.response.status === 401) {
-        dispatch(logout());
-        navigate("/adminlogin");
-      }
-
-      // Show error message
-      alert(error.response?.data?.message || "Failed to unblock user");
-    }
-  };
-
-  // Filter students based on search query
+  // Filter and Pagination Logic
   const filteredStudents = students.filter((student) =>
     student.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Pagination Logic
   const indexOfLastStudent = currentPage * studentsPerPage;
   const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-  const currentStudents = filteredStudents.slice(
-    indexOfFirstStudent,
-    indexOfLastStudent
-  );
+  const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
   return (
@@ -122,10 +81,7 @@ const StudentsTable = () => {
             />
             <FaSearch className="absolute right-3 top-3 text-gray-400" />
           </div>
-          <FaSignOutAlt
-            onClick={handleLogout}
-            className="text-lg cursor-pointer"
-          />
+          <FaSignOutAlt onClick={handleLogout} className="text-lg cursor-pointer" />
         </div>
       </div>
 
@@ -182,14 +138,14 @@ const StudentsTable = () => {
                   <td className="p-2 text-sm font-bold">
                     {student.is_active ? (
                       <button
-                        onClick={() => handleBlockUser(student.id)} // Corrected: Block action should deactivate user
+                        onClick={() => setBlockUserId(student.id)}
                         className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-800"
                       >
                         Block
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleUnblockUser(student.id)} // Corrected: Unblock action should activate user
+                        onClick={() => setBlockUserId(student.id)}
                         className="bg-teal-400 text-white px-3 py-1 rounded hover:bg-teal-800"
                       >
                         Unblock
@@ -200,9 +156,7 @@ const StudentsTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="11" className="p-4 text-center">
-                  No students found
-                </td>
+                <td colSpan="11" className="p-4 text-center">No students found</td>
               </tr>
             )}
           </tbody>
@@ -216,15 +170,41 @@ const StudentsTable = () => {
             key={index + 1}
             onClick={() => setCurrentPage(index + 1)}
             className={`px-4 py-2 rounded-full ${
-              currentPage === index + 1
-                ? "bg-teal-500 text-white"
-                : "bg-gray-200"
+              currentPage === index + 1 ? "bg-teal-500 text-white" : "bg-gray-200"
             }`}
           >
             {index + 1}
           </button>
         ))}
       </div>
+
+      {/* Block/Unblock Confirmation Modal */}
+      {blockUserId && (
+        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
+            <h3 className="text-lg font-semibold">Confirm Action</h3>
+            <p className="text-gray-600 my-3">
+              Are you sure you want to{" "}
+              {students.find((t) => t.id === blockUserId)?.is_active ? "block" : "unblock"}{" "}
+              this user?
+            </p>
+            <div className="flex justify-center gap-4 mt-4">
+              <button
+                onClick={handleBlockUnblockUser}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setBlockUserId(null)}
+                className="bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

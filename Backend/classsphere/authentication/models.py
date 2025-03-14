@@ -18,7 +18,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=15, blank=True, null=True)
     place = models.CharField(max_length=50, blank=True, null=True)
     profile_image = CloudinaryField('profile_image', blank=True, null=True)
-    is_block = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -438,7 +438,7 @@ class AdminLoginView(APIView):
         if user is None:
             return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if user.role not in ["admin", "staff"]:
+        if user.role not in ["admin","staff"]:
             return Response({"error": "Unauthorized access."}, status=status.HTTP_403_FORBIDDEN)
 
         # Generate JWT tokens
@@ -498,3 +498,22 @@ class UnblockUserView(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
+from django.shortcuts import get_object_or_404
+
+class VerifyTeacherView(APIView):
+    permission_classes = [IsAdminUser]  # Only admins can verify teachers
+
+    def post(self, request, user_id):
+        print("h")
+        """Toggle verification status for a teacher."""
+        teacher = get_object_or_404(User, id=user_id)
+
+        if teacher.role != 'teacher':
+            return Response({"message": "User is not a teacher"}, status=400)
+
+        teacher.is_verified = not teacher.is_verified
+        teacher.save()
+
+        status_message = "Teacher verified" if teacher.is_verified else "Teacher unverified"
+        return Response({"message": status_message, "is_verified": teacher.is_verified})
