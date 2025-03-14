@@ -1,19 +1,44 @@
 import React, { useState } from "react";
 import logo from "../assets/Nav_logo.svg";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../redux/authSlice";
+import { persistor } from "../redux/store";
+import api from "../api/api";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  const { authToken } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+  const { authToken, refreshToken } = useSelector((state) => state.auth); // Get refreshToken
   const isAuthenticated = !!authToken;
 
-  const handleLogout = () => {
-    dispatch(logout());
-    persistor.flush();
-    window.location.reload();
+  const handleLogout = async () => {
+    try {
+      if (refreshToken) {
+        await api.post(
+          "/logout/",
+          { refresh: refreshToken },
+          {
+            headers: { Authorization: `Bearer ${authToken}` },
+            withCredentials: true,
+          }
+        );
+        toast.success(response.data.message || "Logged out successfully");
+      }
+
+      dispatch(logout()); // Clear Redux state
+      await persistor.flush(); // Persist cleared state
+      navigate("/"); 
+      // window.location.reload(); 
+    } catch (error) {
+      console.error("Logout failed:", error.response?.data || error.message);
+      dispatch(logout());
+      await persistor.flush();
+      navigate("/");
+      // window.location.reload();
+    }
   };
 
   return (
@@ -53,15 +78,12 @@ const Navbar = () => {
           >
             Home
           </Link>
-
           <Link
             to="/"
             className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0 border-b border-transparent hover:border-teal-200 md:hover:border-b"
           >
             About Us
           </Link>
-
-          {/* Conditionally render Chat and Logout if authenticated */}
           {isAuthenticated && (
             <>
               <Link
@@ -83,8 +105,6 @@ const Navbar = () => {
               </Link>
             </>
           )}
-
-          {/* Conditionally render Sign In and Sign Up if not authenticated */}
           {!isAuthenticated && (
             <>
               <Link to="/signup?mode=signin">

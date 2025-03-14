@@ -1,16 +1,15 @@
 // adminapi.js
+import api from "./api"; // Axios instance
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const adminLogin = async (email, password) => {
   try {
-    const response = await fetch(`${BASE_URL}/adminlogin/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+    const response = await api.post("/adminlogin/", {
+      email,
+      password,
     });
 
-    const data = await response.json();
+    const data = response.data;
 
     if (!response.ok) {
       throw new Error(data.error || "Login failed.");
@@ -18,6 +17,6 @@ export const adminLogin = async (email, password) => {
 
     return data; 
   } catch (error) {
-    throw new Error(error.message);
+    throw new Error(error.message || "Admin login failed.");
   }
 };

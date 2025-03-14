@@ -7,7 +7,7 @@ import authReducer from "./authSlice";
 const persistConfig = {
   key: 'auth',
   storage,
-  whitelist: ['authToken', 'refreshToken', 'role', 'user','eamil', 'tokenExpiry'] 
+  whitelist: ['authToken', 'refreshToken', 'role', 'user', 'email', 'tokenExpiry'] 
 };
 
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
@@ -19,7 +19,6 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        // Ignore these action types
         ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
       },
     }),

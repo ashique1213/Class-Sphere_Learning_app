@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../redux/authSlice";
-import { fetchGoogleUserInfo,authenticateWithGoogle } from "../api/authapi";
+import { fetchGoogleUserInfo, authenticateWithGoogle } from "../api/authapi";
 
 const GoogleSignIn = ({ isSignUp, userType }) => {
   const dispatch = useDispatch();
@@ -17,6 +17,7 @@ const GoogleSignIn = ({ isSignUp, userType }) => {
           return;
         }
 
+        console.log("Google Code Response:", codeResponse); // Debug
         const userInfo = await fetchGoogleUserInfo(codeResponse.access_token);
         const authData = await authenticateWithGoogle(codeResponse.access_token, userType, isSignUp);
 
@@ -34,15 +35,19 @@ const GoogleSignIn = ({ isSignUp, userType }) => {
 
           toast.success("Google Login Successful!");
           navigate("/");
+        } else {
+          throw new Error("Missing access or refresh token in response.");
         }
       } catch (error) {
-        toast.error(error.message || "Something went wrong!");
+        console.error("Google Login Error:", error); // Full error
+        const errorMessage = error.error || error.message || "Something went wrong!";
+        toast.error(errorMessage); // Show backend error if available
       }
     },
     onError: () => {
       toast.error("Google login failed!");
     },
-    ux_mode: "redirect",
+    ux_mode: "redirect", // Consider "popup" for debugging
     responseType: "code",
   });
 

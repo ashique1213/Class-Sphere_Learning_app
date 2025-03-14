@@ -47,13 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "rest_framework.authtoken",
-    'corsheaders',
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt.token_blacklist",
+    'corsheaders',
     'cloudinary',
     'cloudinary_storage',
-    'authentication',
     "django.contrib.sites",
     "allauth",
     "allauth.account",
@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    'authentication',
     "classroom"
 ]
 
@@ -127,12 +128,21 @@ REST_FRAMEWORK = {
 }
 
 
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_RETURN_EXPIRATION': True,  
+  
+}
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  # Adjust token expiry
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),     
+    "ROTATE_REFRESH_TOKENS": True,                  
+    "BLACKLIST_AFTER_ROTATION": True,                
     "AUTH_HEADER_TYPES": ("Bearer",),
+    "UPDATE_LAST_LOGIN": False,
+    "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
+    "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
 }
 
 TEMPLATES = [
@@ -212,7 +222,7 @@ REST_AUTH = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,

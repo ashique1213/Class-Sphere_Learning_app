@@ -1,18 +1,13 @@
 // profileapi.js
-
-import axios from "axios";
-
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+import api from "./api"; //Axios instance
 
 export const fetchUserDetails = async (authToken) => {
   try {
-    const response = await axios.get(`${BASE_URL}/profile/`, {
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+    const response = await api.get("/profile/");
     return response.data;
   } catch (error) {
     console.error("Error fetching user details:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };
 
@@ -27,9 +22,8 @@ export const updateUserProfile = async (authToken, editedUser) => {
       formData.append("profile_image", editedUser.profile_image);
     }
 
-    const response = await axios.put(`${BASE_URL}/profile/`, formData, {
+    const response = await api.put("/profile/", formData, {
       headers: {
-        Authorization: `Bearer ${authToken}`,
         "Content-Type": "multipart/form-data",
       },
     });
@@ -37,6 +31,6 @@ export const updateUserProfile = async (authToken, editedUser) => {
     return response.data;
   } catch (error) {
     console.error("Error updating profile:", error);
-    throw error;
+    throw error.response?.data || error;
   }
 };

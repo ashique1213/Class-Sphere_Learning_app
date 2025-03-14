@@ -21,6 +21,8 @@ import re
 from dj_rest_auth.registration.views import SocialLoginView # type: ignore
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # type: ignore
 import requests # type: ignore
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 
 class SignInView(APIView):
@@ -30,7 +32,6 @@ class SignInView(APIView):
         email = request.data.get("email")
         password = request.data.get("password")
         role = request.data.get("role")
-        print(email,password)
         if not email or not password or not role:
             return Response({"error": "Email, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -284,6 +285,35 @@ class GoogleLoginView(SocialLoginView):
 
         return response
     
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklist the provided refresh token
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            # Get the user from the request (authenticated via access token)
+            user = request.user
+
+            # Blacklist all outstanding tokens for this user
+            outstanding_tokens = OutstandingToken.objects.filter(user=user)
+            for outstanding_token in outstanding_tokens:
+                if not BlacklistedToken.objects.filter(token=outstanding_token).exists():
+                    BlacklistedToken.objects.create(token=outstanding_token)
+
+            return Response({"message": "Logged out successfully, all tokens invalidated"}, status=status.HTTP_200_OK)
+        except TokenError as e:
+            return Response({"error": f"Invalid refresh token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Something went wrong: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]

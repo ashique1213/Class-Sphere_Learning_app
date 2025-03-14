@@ -1,85 +1,66 @@
 // authapi.js
+import api from "./api"; //Axios instance
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const signup = async (payload) => {
     try {
-      const response = await fetch(`${BASE_URL}/signup/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
+      const response = await api.post("/signup/", payload, {
+        withCredentials: true,
       });
   
       return response; 
     } catch (error) {
       console.error("Signup request failed:", error);
-      throw error;
+      throw error.response?.data || error;
     }
   };
 
 export const signin = async (payload) => {
     try {
-      const response = await fetch(`${BASE_URL}/signin/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
+      const response = await api.post("/signin/", payload, {
+        withCredentials: true,
       });
   
       return response; 
     } catch (error) {
       console.error("Sign-in request failed:", error);
-      throw error; 
+      throw error.response?.data || error; 
     }
   };
 
-  export const verifyOtp = async (payload) => {
+export const verifyOtp = async (payload) => {
     try {
-      const response = await fetch(`${BASE_URL}/verify-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
+      const response = await api.post("/verify-otp/", payload, {
+        withCredentials: true,
       });
   
       return response; 
     } catch (error) {
       console.error("OTP verification request failed:", error);
-      throw error;
+      throw error.response?.data || error;
     }
   };
   
-
-  export const resendOtp = async (payload) => {
+export const resendOtp = async (payload) => {
     try {
-      const response = await fetch(`${BASE_URL}/resend-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
+      const response = await api.post("/resend-otp/", payload, {
+        withCredentials: true,
       });
   
       return response;
     } catch (error) {
       console.error("Resend OTP request failed:", error);
-      throw error;
+      throw error.response?.data || error;
     }
 };
-  
 
 export const sendOtp = async (email) => {
   try {
-    const response = await fetch(`${BASE_URL}/password-reset/request/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+    const response = await api.post("/password-reset/request/", { email });
 
-    const data = await response.json();
+    const data = response.data;
 
     if (!response.ok) {
-      // Handle non-200 status codes
       return {
         success: false,
         message: data.error || "Failed to send OTP"
@@ -101,13 +82,9 @@ export const sendOtp = async (email) => {
 
 export const verifyotp = async (email, otp) => {
   try {
-    const response = await fetch(`${BASE_URL}/password-reset/verify-otp/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp }),
-    });
+    const response = await api.post("/password-reset/verify-otp/", { email, otp });
 
-    const data = await response.json();
+    const data = response.data;
 
     if (!response.ok) {
       return {
@@ -131,17 +108,13 @@ export const verifyotp = async (email, otp) => {
 
 export const resetPassword = async (email, otp, newPassword) => {
   try {
-    const response = await fetch(`${BASE_URL}/password-reset/reset/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        email, 
-        otp, 
-        new_password: newPassword 
-      }),
+    const response = await api.post("/password-reset/reset/", { 
+      email, 
+      otp, 
+      new_password: newPassword 
     });
 
-    const data = await response.json();
+    const data = response.data;
 
     if (!response.ok) {
       return {
@@ -163,36 +136,32 @@ export const resetPassword = async (email, otp, newPassword) => {
   }
 };
 
-
-
 export const fetchGoogleUserInfo = async (accessToken) => {
   try {
     const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     throw new Error("Failed to fetch Google user info");
   }
 };
 
-
 export const authenticateWithGoogle = async (accessToken, userType, isSignUp) => {
   try {
-    const response = await fetch(`${BASE_URL}/auth/social/google/`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_token: accessToken,
-        role: userType.toLowerCase(),
-        is_signup: isSignUp,
-      }),
-      credentials: "include",
+    const payload = {
+      access_token: accessToken,
+      role: userType.toLowerCase(),
+      is_signup: isSignUp,
+    };
+    const response = await api.post("/auth/social/google/", payload, {
+      withCredentials: true,
     });
 
-    return response.ok ? await response.json() : Promise.reject(await response.json());
+    return response.data; // Simply return the data
   } catch (error) {
-    throw new Error(error?.message || "Google login failed!");
+    console.error("Google Auth Error:", error.response?.data || error);
+    throw error.response?.data || new Error("Google login failed!");
   }
 };
-

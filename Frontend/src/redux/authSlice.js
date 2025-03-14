@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
+const BASE_URL = import.meta.env.VITE_BASE_URL; 
 
-// Create an async thunk for refreshing the token
 export const refreshToken = createAsyncThunk(
   "auth/refreshToken",
   async (_, { getState, rejectWithValue }) => {
@@ -14,7 +13,7 @@ export const refreshToken = createAsyncThunk(
         return rejectWithValue("No refresh token available");
       }
 
-      const response = await fetch(`${BASE_URL}token/refresh/`, {
+      const response = await fetch(`${BASE_URL}/token/refresh/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -28,7 +27,8 @@ export const refreshToken = createAsyncThunk(
       }
 
       return {
-        authToken: data.access_token || data.access,
+        authToken: data.access,  // Match SIMPLE_JWT default key
+        refreshToken: data.refresh,  // Capture new refresh token
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -65,7 +65,7 @@ const authSlice = createSlice({
       state.role = action.payload.role;
       state.is_active = action.payload.is_active ?? true;
       
-      // Calculate token expiry (assuming 15 minutes from now)
+      // Align with SIMPLE_JWT ACCESS_TOKEN_LIFETIME (15 minutes)
       const expiryTime = new Date().getTime() + 15 * 60 * 1000;
       state.tokenExpiry = expiryTime;
     },
@@ -80,7 +80,7 @@ const authSlice = createSlice({
       state.email = null;
       state.role = null;
       state.tokenExpiry = null;
-      state.is_active = null; 
+      state.is_active = null;
     },
     updateUserInfo: (state, action) => {
       if (action.payload.user) state.user = action.payload.user;
@@ -90,43 +90,39 @@ const authSlice = createSlice({
     updateTokens: (state, action) => {
       if (action.payload.authToken) {
         state.authToken = action.payload.authToken;
-        
-        // Update expiry time
-        const expiryTime = new Date().getTime() + 15 * 60 * 1000;
+        const expiryTime = new Date().getTime() + 15 * 60 * 1000; // 15 minutes
         state.tokenExpiry = expiryTime;
       }
-      
       if (action.payload.refreshToken) {
         state.refreshToken = action.payload.refreshToken;
       }
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(refreshToken.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.isLoading = false;
         state.authToken = action.payload.authToken;
-        
-        // Update expiry time
-        const expiryTime = new Date().getTime() + 15 * 60 * 1000;
+        state.refreshToken = action.payload.refreshToken; // Update refresh token
+        const expiryTime = new Date().getTime() + 15 * 60 * 1000; // 15 minutes
         state.tokenExpiry = expiryTime;
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-        // On refresh failure, log the user out
         state.user = null;
         state.authToken = null;
         state.refreshToken = null;
         state.email = null;
         state.role = null;
-        state.is_active = action.payload.is_active ?? state.is_active;
+        state.is_active = null;
         state.tokenExpiry = null;
       });
-  }
+  },
 });
 
 export const { 

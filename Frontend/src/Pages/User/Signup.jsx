@@ -182,42 +182,48 @@ const Signup = () => {
         password: formData.password,
         role: userType.toLowerCase(),
       };
-      console.log(payload)
+      console.log(payload);
       try {
         dispatch(loginStart());
         setLoading(true);
         setError(null);
-
+    
         const response = await signin(payload);
-
-        const data = await response.json();
         setLoading(false);
-
-        console.log(data)
-        if (response.ok) {
-          const authToken = data.access_token;
-          const refreshToken = data.refresh_token; // Store the refresh token
-          // Store in Redux
+    
+        console.log("Signin Response:", response.data); // Debug
+    
+        if (response.status === 200) {
+          const authToken = response.data.access_token;
+          const refreshToken = response.data.refresh_token;
+    
+          if (!authToken || !refreshToken) {
+            throw new Error("Missing tokens in response");
+          }
+    
           dispatch(
             loginSuccess({
-              user: data.user || { email: formData.email },
+              user: response.data.user || { email: formData.email },
               email: formData.email,
               role: userType.toLowerCase(),
               authToken: authToken,
-              refreshToken: refreshToken, // Include refresh token
-              is_active: data.user.is_active,
+              refreshToken: refreshToken,
+              is_active: response.data.user?.is_active ?? true,
             })
           );
-          navigate("/"); // Redirect after login
+          navigate("/");
         } else {
-          dispatch(loginFailure(data.error || "Login failed"));
-          setError(data.error || "Login failed");
-          toast.error(data.error || "Login failed");
+          const errorMsg = response.data.error || "Login failed";
+          dispatch(loginFailure(errorMsg));
+          setError(errorMsg);
+          toast.error(errorMsg); 
         }
       } catch (err) {
         setLoading(false);
-        dispatch(loginFailure("Something went wrong. Try again!"));
-        setError("Something went wrong. Try again!");
+        const errorMsg = err.error || err.message || "Something went wrong. Try again!";
+        dispatch(loginFailure(errorMsg));
+        setError(errorMsg);
+        toast.error(errorMsg); // Show specific error
       }
     }
   };
