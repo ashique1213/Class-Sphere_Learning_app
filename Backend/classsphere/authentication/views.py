@@ -23,6 +23,7 @@ from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter # t
 import requests # type: ignore
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.exceptions import TokenError
+from django.shortcuts import get_object_or_404
 
 
 class SignInView(APIView):
@@ -499,7 +500,6 @@ class UnblockUserView(APIView):
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
-from django.shortcuts import get_object_or_404
 
 class VerifyTeacherView(APIView):
     permission_classes = [IsAdminUser]  # Only admins can verify teachers

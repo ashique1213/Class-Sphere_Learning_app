@@ -12,50 +12,52 @@ const Dashboardcontent = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-
     navigate("/adminlogin");
   };
 
   return (
-    <div className="flex-1 p-6 overflow-x-auto">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">Dashboard</h2>
-        <div className="flex items-center space-x-4 mt-2 md:mt-0">
+    <div className="flex-1 p-4 sm:p-6">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4">
+        <h2 className="text-xl sm:text-2xl font-semibold">Dashboard</h2>
+        <div className="flex items-center space-x-4">
           <FaSignOutAlt
             onClick={handleLogout}
-            className="text-lg cursor-pointer"
+            className="text-lg sm:text-xl cursor-pointer"
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
         <div className="bg-white p-4 rounded-lg shadow-md flex items-center">
-          <HiOutlineUsers className="text-4xl text-teal-500 mr-4" />
+          <HiOutlineUsers className="text-3xl sm:text-4xl text-teal-500 mr-3 sm:mr-4" />
           <div>
-            <p className="text-gray-500">Students</p>
-            <p className="text-xl font-bold">932</p>
+            <p className="text-gray-500 text-sm sm:text-base">Students</p>
+            <p className="text-lg sm:text-xl font-bold">932</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-md flex items-center">
-          <HiOutlineUsers className="text-4xl text-orange-500 mr-4" />
+          <HiOutlineUsers className="text-3xl sm:text-4xl text-orange-500 mr-3 sm:mr-4" />
           <div>
-            <p className="text-gray-500">Teachers</p>
-            <p className="text-xl font-bold">754</p>
+            <p className="text-gray-500 text-sm sm:text-base">Teachers</p>
+            <p className="text-lg sm:text-xl font-bold">754</p>
           </div>
         </div>
         <div className="bg-white p-4 rounded-lg shadow-md flex items-center">
-          <IoWalletOutline className="text-4xl text-yellow-500 mr-4" />
+          <IoWalletOutline className="text-3xl sm:text-4xl text-yellow-500 mr-3 sm:mr-4" />
           <div>
-            <p className="text-gray-500">Finance</p>
-            <p className="text-xl font-bold">40</p>
+            <p className="text-gray-500 text-sm sm:text-base">Finance</p>
+            <p className="text-lg sm:text-xl font-bold">40</p>
           </div>
         </div>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">User Performance</h3>
-        <div className="w-full h-64">
-          {" "}
-          {/* Placeholder for the graph */}
-          <p className="text-gray-400 text-center">Graph Placeholder</p>
+
+      {/* Graph Section */}
+      <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+        <h3 className="text-base sm:text-lg font-semibold mb-4">User Performance</h3>
+        <div className="w-full h-48 sm:h-64">
+          <p className="text-gray-400 text-center text-sm sm:text-base">Graph Placeholder</p>
         </div>
       </div>
     </div>

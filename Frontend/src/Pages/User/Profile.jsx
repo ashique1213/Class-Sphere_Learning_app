@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
+import { FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
 
 const Profile = () => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -33,7 +33,6 @@ const Profile = () => {
           setImagePreview(getCloudinaryUrl(userData.profile_image));
         }
       } catch (error) {
-        // console.error("Error loading user details:", error);
         toast.error("Error loading user details:", error);
       }
     };
@@ -59,9 +58,8 @@ const Profile = () => {
       setImageError(false);
     }
   };
- 
+
   const handleSubmit = async () => {
-    //Validation
     if (editedUser.phone && !/^\d{10}$/.test(editedUser.phone)) {
       toast.error("Phone number must be 10 digits.");
       return;
@@ -94,29 +92,19 @@ const Profile = () => {
       setIsEditing(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
-      // console.error("Error updating profile:", error);
       toast.error("Failed to update profile. Please try again.");
-    }
-    try {
-      const updatedUserData = await updateUserProfile(authToken, editedUser);
-      setUser(updatedUserData);
-      if (updatedUserData.profile_image) {
-        setImagePreview(getCloudinaryUrl(updatedUserData.profile_image));
-      }
-      setIsEditing(false);
-    } catch (error) {
-      // console.error("Error updating profile:", error);
-      toast.error("Error updating profile:", error);
     }
   };
 
   if (!user) return <div className="text-center mt-10">Loading...</div>;
+
   return (
     <>
       <Navbar />
-      {/* Breadcrumbs */}
-      <div className="min-h-screen bg-gray-100 p-6 md:py-20">
-        <div className="p-4 text-black text-sm max-w-5xl mx-auto">
+      {/* Main Content with padding-top to avoid overlap */}
+      <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-24">
+        {/* Breadcrumbs */}
+        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto">
           Home | My Account |{" "}
           <span className="text-gray-800 font-bold capitalize">
             {user.username}
@@ -124,37 +112,30 @@ const Profile = () => {
         </div>
 
         {/* Profile Header */}
-        <div className="bg-white max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden capitalize">
-          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-8 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
+        <div className="bg-white max-w-full sm:max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden mt-4 capitalize">
+          <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-6 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
             <div className="relative group">
               {imageError || (!imagePreview && !user.profile_image) ? (
-                <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-md">
-                  <FaUserCircle className="text-5xl text-teal-500" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white flex items-center justify-center shadow-md">
+                  <FaUserCircle className="text-4xl sm:text-5xl text-teal-500" />
                 </div>
               ) : (
                 <div className="relative">
                   <img
                     src={imagePreview || user.profile_image}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
-                    onError={() => {
-                      console.error(
-                        "Image load error for:",
-                        imagePreview || user.profile_image
-                      );
-                      setImageError(true);
-                    }}
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white shadow-md"
+                    onError={() => setImageError(true)}
                   />
                 </div>
               )}
-
               {isEditing && (
                 <label
                   htmlFor="profileImage"
-                  className="absolute bottom-0 right-0 bg-white text-teal-600 p-2 rounded-full cursor-pointer shadow-md hover:bg-gray-100 transition"
+                  className="absolute bottom-0 right-0 bg-white text-teal-600 p-1 sm:p-2 rounded-full cursor-pointer shadow-md hover:bg-gray-100 transition"
                   title="Change profile picture"
                 >
-                  <FaCamera />
+                  <FaCamera className="text-sm sm:text-base" />
                   <input
                     type="file"
                     id="profileImage"
@@ -165,60 +146,90 @@ const Profile = () => {
                 </label>
               )}
             </div>
-            <div className="ml-4 mt-3 md:mt-0">
-              <h2 className="text-xl sm:text-2xl font-semibold text-white">
+            <div className="mt-4 md:mt-0 md:ml-4">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">
                 {user.username}
               </h2>
-              <p className="text-white text-sm sm:text-base opacity-90">
+              <p className="text-white text-sm opacity-90">
                 {user.role || "Student"}
               </p>
+            </div>
+            {/* Verification Button */}
+            <div className="w-full md:w-auto mt-4 md:mt-0 flex justify-center md:justify-end ml-auto">
+              <button
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold shadow-md transition 
+                ${
+                  user?.is_verified
+                    ? "bg-teal-400 text-white hover:bg-teal-600"
+                    : "bg-red-600 text-white hover:bg-red-800"
+                }`}
+              >
+                {user?.is_verified ? (
+                  <>
+                    <FaCheckCircle className="text-sm" />
+                    Verified
+                  </>
+                ) : (
+                  <>
+                    <FaHourglassHalf className="text-sm" />
+                    Verification Pending...
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 px-6 py-4 font-bold">
+        <div className="max-w-full sm:max-w-5xl mx-auto flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 px-4 sm:px-6 py-4 font-bold">
           <Link
             to="/Profile"
-            className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm"
+            className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full sm:w-auto text-center"
           >
             About
           </Link>
-          <Link
-            to={
-              user?.role === "teacher"
-                ? `/myclassrooms/${user?.username}`
-                : `/classrooms/${user?.username}`
-            }
-            className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md text-sm text-center font-bold"
-          >
-            {user?.role === "teacher" ? "My Classrooms" : "Joined Classrooms"}
-          </Link>
+          {user?.is_verified && (
+            <Link
+              to={
+                user?.role === "teacher"
+                  ? `/myclassrooms/${user?.username}`
+                  : `/classrooms/${user?.username}`
+              }
+              className="px-4 py-2 bg-gray-300 text--black rounded-md text-sm w-full sm:w-auto text-center"
+            >
+              {user?.role === "teacher" ? "My Classrooms" : "Joined Classrooms"}
+            </Link>
+          )}
         </div>
 
         {/* Profile Details */}
-        <div className="bg-gray-200 max-w-5xl mx-auto p-6 rounded-lg mt-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-            <div className="flex items-center space-x-2">
-              <strong>Email:</strong>
-              <a href={`mailto:${user.email}`} className="text-teal-500">
+        <div className="bg-gray-200 max-w-full sm:max-w-5xl mx-auto p-4 sm:p-6 rounded-lg mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-black">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <strong className="text-sm sm:text-base">Email:</strong>
+              <a
+                href={`mailto:${user.email}`}
+                className="text-teal-500 text-sm sm:text-base break-all"
+              >
                 {user.email}
               </a>
             </div>
 
             <div className="flex items-center space-x-2 capitalize">
-              <strong>Role:</strong>
-              <span>{user.role || "None"}</span>
+              <strong className="text-sm sm:text-base">Role:</strong>
+              <span className="text-sm sm:text-base">
+                {user.role || "None"}
+              </span>
             </div>
 
-            <div className="flex items-center space-x-1">
-              <strong>Gender:</strong>
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <strong className="text-sm sm:text-base">Gender:</strong>
               {isEditing ? (
                 <select
                   name="gender"
                   value={editedUser.gender || ""}
                   onChange={handleInputChange}
-                  className="border rounded-md px-2 py-1 flex-1"
+                  className="border rounded-md px-2 py-1 w-full sm:flex-1 text-sm sm:text-base"
                 >
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
@@ -226,56 +237,66 @@ const Profile = () => {
                   <option value="Other">Other</option>
                 </select>
               ) : (
-                <span>{user.gender || "None"}</span>
+                <span className="text-sm sm:text-base">
+                  {user.gender || "None"}
+                </span>
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <strong>DOB :</strong>
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <strong className="text-sm sm:text-base">DOB:</strong>
               {isEditing ? (
                 <input
                   type="date"
                   name="dob"
                   value={editedUser.dob || ""}
                   onChange={handleInputChange}
-                  className="border rounded-md px-2 py-1 flex-1"
+                  className="border rounded-md px-2 py-1 w-full sm:flex-1 text-sm sm:text-base"
                 />
               ) : (
-                <span>{user.dob || "None"}</span>
+                <span className="text-sm sm:text-base">
+                  {user.dob || "None"}
+                </span>
               )}
             </div>
-            <div className="flex items-center space-x-2">
-              <strong>Phone :</strong>
+
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <strong className="text-sm sm:text-base">Phone:</strong>
               {isEditing ? (
                 <input
                   type="text"
                   name="phone"
                   value={editedUser.phone || ""}
                   onChange={handleInputChange}
-                  className="border rounded-md px-2 py-1 flex-1"
+                  className="border rounded-md px-2 py-1 w-full sm:flex-1 text-sm sm:text-base"
                 />
               ) : (
-                <span>{user.phone || "None"}</span>
+                <span className="text-sm sm:text-base">
+                  {user.phone || "None"}
+                </span>
               )}
             </div>
-            <div className="flex items-center space-x-2">
-              <strong>Place:</strong>
+
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <strong className="text-sm sm:text-base">Place:</strong>
               {isEditing ? (
                 <input
                   type="text"
                   name="place"
                   value={editedUser.place || ""}
                   onChange={handleInputChange}
-                  className="border rounded-md px-2 py-1 flex-1"
+                  className="border rounded-md px-2 py-1 w-full sm:flex-1 text-sm sm:text-base"
                 />
               ) : (
-                <span>{user.place || "None"}</span>
+                <span className="text-sm sm:text-base">
+                  {user.place || "None"}
+                </span>
               )}
             </div>
           </div>
 
           {/* Edit & Reset Buttons */}
-          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 mt-4 items-end justify-end">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4 justify-end">
             {isEditing ? (
               <>
                 <button
@@ -284,13 +305,13 @@ const Profile = () => {
                     setEditedUser(user);
                     setImagePreview(getCloudinaryUrl(user.profile_image));
                   }}
-                  className="px-4 py-2 bg-gray-400 text-white rounded-md text-sm w-full md:w-40 hover:bg-gray-500 transition"
+                  className="px-4 py-2 bg-gray-400 text-white rounded-md text-sm w-full sm:w-32 hover:bg-gray-500 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full md:w-40 hover:bg-teal-500 transition"
+                  className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full sm:w-32 hover:bg-teal-500 transition"
                 >
                   Save Changes
                 </button>
@@ -298,22 +319,15 @@ const Profile = () => {
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full md:w-40 hover:bg-teal-500 transition"
+                className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full sm:w-32 hover:bg-teal-500 transition"
               >
                 Edit Details
               </button>
             )}
-            {/* <button
-              className="px-4 py-2 bg-red-400 text-white rounded-md text-sm w-full md:w-40 hover:bg-red-400 transition"
-              onClick={() => navigate("")}
-            >
-              Reset Password
-            </button> */}
           </div>
         </div>
       </div>
       <ToastContainer />
-
       <Footer />
     </>
   );
