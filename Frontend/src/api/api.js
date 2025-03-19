@@ -1,6 +1,6 @@
 import axios from "axios";
 import store from "../redux/store";
-import { refreshToken } from "../redux/authSlice";
+import { refreshToken,logout } from "../redux/authSlice";
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 

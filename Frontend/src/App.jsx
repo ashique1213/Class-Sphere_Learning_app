@@ -61,24 +61,16 @@ function App() {
         {/* Teacher-specific routes */}
         <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/myclassrooms/:teachername" element={<Createclass />} />
-        </Route>
-
-        <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/classdetails/:slug" element={<ClassDetails />} />
-        </Route>
-
-        <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/meetings/:slug" element={<Meetings />} />
           <Route path="/meetings/details/:meetingId" element={<MeetingDetails />} />
         </Route>
+        
         <Route path="/join/:meetingId" element={<JoinMeeting />} />
 
         {/* Student-specific routes */}
         <Route element={<RoleRoute allowedRoles={["student"]} />}>
           <Route path="/classrooms/:studentname" element={<Classrooms />} />
-        </Route>
-
-        <Route element={<RoleRoute allowedRoles={["student"]} />}>
           <Route path="/classroom/:slug" element={<Classroom />} />
         </Route>
 

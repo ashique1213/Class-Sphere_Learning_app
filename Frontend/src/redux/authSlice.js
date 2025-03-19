@@ -65,8 +65,8 @@ const authSlice = createSlice({
       state.role = action.payload.role;
       state.is_active = action.payload.is_active ?? true;
       
-      // Align with SIMPLE_JWT ACCESS_TOKEN_LIFETIME (15 minutes)
-      const expiryTime = new Date().getTime() + 15 * 60 * 1000;
+      // Align with SIMPLE_JWT ACCESS_TOKEN_LIFETIME (30 minutes)
+      const expiryTime = new Date().getTime() + 30 * 60 * 1000;
       state.tokenExpiry = expiryTime;
     },
     loginFailure: (state, action) => {
@@ -90,7 +90,7 @@ const authSlice = createSlice({
     updateTokens: (state, action) => {
       if (action.payload.authToken) {
         state.authToken = action.payload.authToken;
-        const expiryTime = new Date().getTime() + 15 * 60 * 1000; // 15 minutes
+        const expiryTime = new Date().getTime() + 30 * 60 * 1000; // 30 minutes
         state.tokenExpiry = expiryTime;
       }
       if (action.payload.refreshToken) {
@@ -108,7 +108,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.authToken = action.payload.authToken;
         state.refreshToken = action.payload.refreshToken; // Update refresh token
-        const expiryTime = new Date().getTime() + 15 * 60 * 1000; // 15 minutes
+        const expiryTime = new Date().getTime() + 30 * 60 * 1000; // 30 minutes
         state.tokenExpiry = expiryTime;
       })
       .addCase(refreshToken.rejected, (state, action) => {

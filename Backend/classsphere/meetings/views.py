@@ -15,13 +15,12 @@ class CreateMeetingView(APIView):
         data = request.data.copy()
         data['classroom'] = classroom.pk
         data['host'] = request.user.id
-        print("Data before serialization:", data)  # Debugging
+        print(data)  
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            print("Serialized data after save:", serializer.data)  # Debugging
+            print(serializer.data)  
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print("Serializer errors:", serializer.errors)  # Debugging
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetMeetingView(APIView):
