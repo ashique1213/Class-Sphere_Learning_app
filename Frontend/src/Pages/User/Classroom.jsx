@@ -1,49 +1,71 @@
 import React, { useState, useEffect } from "react";
-import { FaUsers, FaClock, FaBook } from "react-icons/fa";
+import { FaBook } from "react-icons/fa";
 import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchClassroom } from "../../api/classroomapi";
+import { fetchMeetings, joinMeeting } from "../../api/meetingsapi";
 import { toast } from "react-toastify";
+import MeetingCard from "../../Components/MeetingCard";
 
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
   const [classroom, setClassroom] = useState(null);
+  const [meetings, setMeetings] = useState([]);
+  const [hasActiveMeeting, setHasActiveMeeting] = useState(false);
   const { slug } = useParams();
   const authToken = useSelector((state) => state.auth.authToken);
   const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    if (!authToken) return;
+    try {
+      const [classroomData, meetingsData] = await Promise.all([
+        fetchClassroom(slug, authToken),
+        fetchMeetings(slug, authToken),
+      ]);
+      setClassroom(classroomData);
+      setMeetings(meetingsData);
+      setHasActiveMeeting(meetingsData.some((m) => m.is_active));
+    } catch {
+      toast.error("Failed to fetch classroom details.");
+    }
+  };
 
   useEffect(() => {
-    const loadClassroom = async () => {
-      if (!authToken) return;
-      try {
-        const data = await fetchClassroom(slug, authToken);
-        setClassroom(data);
-      } catch {
-        toast.error("Failed to fetch classroom details.");
-      }
-    };
-
-    loadClassroom();
+    fetchData();
   }, [slug, authToken]);
 
-  const tabs = ["About", "Materials", "Assignments", "Exams", "Attendance"];
+  const joinMeetingHandler = async (meetingId) => {
+    try {
+      await joinMeeting(meetingId, authToken);
+      navigate(`/join/${meetingId}`, { state: { slug, role: "student" } });
+    } catch (error) {
+      toast.error(error?.message || "Failed to join meeting");
+    }
+  };
+
+  const handleEndMeeting = (meetingId) => {
+    toast.error("Students cannot end meetings.");
+  };
+
+  const tabs = ["About", "Materials", "Assignments", "Exams", "Attendance", "Meetings"];
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
-        {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | My Account |{" "}
-          <Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
-          <span className="font-bold">
-            {classroom?.name || "Loading..."}
-          </span>
+          <Link to={`/classrooms/${user?.username}`} className="capitalize">
+            {user?.username}
+          </Link>{" "}
+          | <Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
+          <span className="font-bold">{classroom?.name || "Loading..."}</span>
         </div>
 
-        {/* Classroom Header */}
         {classroom ? (
           <div className="bg-white max-w-full sm:max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden mb-6">
             <div className="bg-gradient-to-r from-teal-400 to-teal-600 p-4 sm:p-6 flex flex-col md:flex-row items-center md:items-start text-center md:text-left">
@@ -59,9 +81,21 @@ const Classroom = () => {
                 </p>
               </div>
               <div className="mt-4 md:mt-0 md:ml-4 flex flex-col gap-2 w-full md:w-auto">
-                <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full">
-                  Join Now
-                </button>
+                {hasActiveMeeting && (
+                  <div className="flex flex-col gap-2">
+                    {meetings
+                      .filter((m) => m.is_active)
+                      .map((m) => (
+                        <button
+                          key={m.meeting_id}
+                          onClick={() => joinMeetingHandler(m.meeting_id)}
+                          className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full text-center"
+                        >
+                          Join {m.title}
+                        </button>
+                      ))}
+                  </div>
+                )}
                 <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full">
                   Join Kritsin
                 </button>
@@ -74,7 +108,6 @@ const Classroom = () => {
           </p>
         )}
 
-        {/* Tabs */}
         <div className="max-w-full sm:max-w-5xl mx-auto flex flex-wrap items-center gap-2 sm:gap-4 mb-6 px-4">
           {tabs.map((tab) => (
             <button
@@ -91,7 +124,6 @@ const Classroom = () => {
           ))}
         </div>
 
-        {/* Content Area */}
         <div className="max-w-full sm:max-w-5xl mx-auto mt-6 bg-white p-4 sm:p-6 rounded-lg shadow-md">
           {activeTab === "About" && (
             <>
@@ -103,17 +135,26 @@ const Classroom = () => {
               </p>
             </>
           )}
-          {activeTab === "Materials" && (
-            <p className="text-sm sm:text-base">Materials content goes here.</p>
-          )}
-          {activeTab === "Assignments" && (
-            <p className="text-sm sm:text-base">Assignments content goes here.</p>
-          )}
-          {activeTab === "Exams" && (
-            <p className="text-sm sm:text-base">Exams content goes here.</p>
-          )}
-          {activeTab === "Attendance" && (
-            <p className="text-sm sm:text-base">Attendance content goes here.</p>
+          {activeTab === "Materials" && <p className="text-sm sm:text-base">Materials content goes here.</p>}
+          {activeTab === "Assignments" && <p className="text-sm sm:text-base">Assignments content goes here.</p>}
+          {activeTab === "Exams" && <p className="text-sm sm:text-base">Exams content goes here.</p>}
+          {activeTab === "Attendance" && <p className="text-sm sm:text-base">Attendance content goes here.</p>}
+          {activeTab === "Meetings" && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+              {meetings.length > 0 ? (
+                meetings.map((meet) => (
+                  <MeetingCard
+                    key={meet.meeting_id}
+                    meet={meet}
+                    user={user}
+                    joinMeeting={joinMeetingHandler}
+                    handleEndMeeting={handleEndMeeting}
+                  />
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No meetings available.</p>
+              )}
+            </div>
           )}
         </div>
       </div>

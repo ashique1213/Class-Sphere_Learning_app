@@ -56,7 +56,7 @@ const Classrooms = () => {
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | <Link to="/profile">My Account |</Link>{" "}
-          <span className="font-semibold capitalize">{studentname} </span>
+          <span className="capitalize">{studentname} </span>
           <span className="font-semibold">| Classroom</span>
         </div>
 

@@ -24,7 +24,8 @@ import { useSelector } from "react-redux";
 import Classroom from "./Pages/User/Classroom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import Meetings from "./Pages/User/Meetings";
+import JoinMeeting from "./Components/JoinMeeting";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -32,7 +33,7 @@ function App() {
 
   return (
     <Router>
-            <ToastContainer /> 
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -64,6 +65,11 @@ function App() {
         <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/classdetails/:slug" element={<ClassDetails />} />
         </Route>
+
+        <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
+          <Route path="/meetings/:slug" element={<Meetings />} />
+        </Route>
+        <Route path="/join/:meetingId" element={<JoinMeeting />} />
 
         {/* Student-specific routes */}
         <Route element={<RoleRoute allowedRoles={["student"]} />}>

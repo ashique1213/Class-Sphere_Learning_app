@@ -78,8 +78,9 @@ const ClassDetails = () => {
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | My Account |{" "}
-          <Link to={`/myclassrooms/${user?.username}`}>Classroom</Link> |{" "}
-          <span className="font-bold">{classroom.name}</span>
+          <span className="capitalize"> {user?.username} </span>
+          <Link to={`/myclassrooms/${user?.username}`}>| Class Rooms</Link> |{" "}
+          <span className="font-bold">{classroom?.name}</span>
         </div>
 
         {/* Header */}
@@ -130,16 +131,16 @@ const ClassDetails = () => {
 
           {[
             { icon: <FaClipboardList />, label: "Assignments" },
-            { icon: <FaVideo />, label: "Meetings" },
+            { icon: <FaVideo />, label: "Meetings",path: `/meetings/${classroom.slug}` },
             { icon: <FaCheckCircle />, label: "Attendance" },
             { icon: <FaFileAlt />, label: "Exams" },
           ].map((item, index) => (
-            <button
-              key={index}
+            <Link
+              key={index} to={item.path}
               className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition w-full sm:w-auto"
             >
               {item.icon} <span className="text-sm sm:text-base">{item.label}</span>
-            </button>
+            </Link>
           ))}
         </div>
 

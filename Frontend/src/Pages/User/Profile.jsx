@@ -33,7 +33,7 @@ const Profile = () => {
           setImagePreview(getCloudinaryUrl(userData.profile_image));
         }
       } catch (error) {
-        toast.error("Error loading user details:", error);
+        toast.error("Failed loading user details", error);
       }
     };
 
@@ -155,7 +155,8 @@ const Profile = () => {
               </p>
             </div>
             {/* Verification Button */}
-            <div className="w-full md:w-auto mt-4 md:mt-0 flex justify-center md:justify-end ml-auto">
+            {user?.role == "teacher" && (
+              <div className="w-full md:w-auto mt-4 md:mt-0 flex justify-center md:justify-end ml-auto">
               <button
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold shadow-md transition 
                 ${
@@ -177,18 +178,21 @@ const Profile = () => {
                 )}
               </button>
             </div>
+            ) }
+            
           </div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="max-w-full sm:max-w-5xl mx-auto flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 px-4 sm:px-6 py-4 font-bold">
+        <div className="max-w-full sm:max-w-5xl mx-auto flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 px-4 sm:px-6 py-4 ">
           <Link
             to="/Profile"
             className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full sm:w-auto text-center"
           >
             About
           </Link>
-          {user?.is_verified && (
+          {/* {user?.is_verified && (
+          )} */}
             <Link
               to={
                 user?.role === "teacher"
@@ -197,9 +201,8 @@ const Profile = () => {
               }
               className="px-4 py-2 bg-gray-300 text--black rounded-md text-sm w-full sm:w-auto text-center"
             >
-              {user?.role === "teacher" ? "My Classrooms" : "Joined Classrooms"}
+              {user?.role === "teacher" ? "My Classrooms" : "Your Classrooms"}
             </Link>
-          )}
         </div>
 
         {/* Profile Details */}
