@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const MeetingCard = ({ meet, user, joinMeeting, slug, handleEndMeeting }) => {
   const isTeacher = user.role === "teacher";
-  const email = useSelector((state) => state.auth.email);
 
   const navigate = useNavigate();
 
@@ -62,7 +61,13 @@ const MeetingCard = ({ meet, user, joinMeeting, slug, handleEndMeeting }) => {
               )}
 
               <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <FaUsers /> Participants ({meet.participants.length})
+                <FaUsers /> Participants (
+                {
+                  meet.participants.filter(
+                    (participant) => participant.role !== "teacher"
+                  ).length
+                }
+                )
               </h4>
             </div>
           )}

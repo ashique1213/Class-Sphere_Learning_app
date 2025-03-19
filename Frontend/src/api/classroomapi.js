@@ -46,15 +46,16 @@ export const joinClass = async (classLink, authToken) => {
     }
   };
   
-export const fetchClassroom = async (slug, authToken) => {
+  export const fetchClassroom = async (slug) => {
     try {
       const response = await api.get(`/classrooms/${slug}/`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching classroom details:", error);
+      console.error("Failed to fetch classroom details:", error);
       throw error.response?.data || error;
     }
 };
+
 
 export const createClassroom = async (formData, authToken, userEmail) => {
     try {

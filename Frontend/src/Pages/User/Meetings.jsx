@@ -19,8 +19,6 @@ const Meetings = () => {
   const [classroom, setClassroom] = useState(null);
   const navigate = useNavigate();
 
-  console.log(meetings)
-
   useEffect(() => {
     const loadData = async () => {
       if (!authToken) {

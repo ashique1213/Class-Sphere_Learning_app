@@ -21,15 +21,18 @@ class MeetingParticipantSerializer(serializers.ModelSerializer):
         }
 
 class MeetingSerializer(serializers.ModelSerializer):
-    participants = MeetingParticipantSerializer(many=True, read_only=True)
-    host = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  # Writable field for input
-    host_details = serializers.SerializerMethodField(read_only=True)  # Read-only detailed output
+    participants = serializers.SerializerMethodField()
+    host = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())  
+    host_details = serializers.SerializerMethodField(read_only=True)  
     classroom = serializers.PrimaryKeyRelatedField(queryset=Classroom.objects.all())
 
     class Meta:
         model = Meeting
-        fields = ['meeting_id', 'title', 'description', 'duration', 
-                  'is_one_to_one', 'created_at', 'is_active', 'host', 'host_details', 'classroom', 'participants']
+        fields = [
+            'meeting_id', 'title', 'description', 'duration', 
+            'is_one_to_one', 'created_at', 'is_active', 
+            'host', 'host_details', 'classroom', 'participants'
+        ]
 
     def get_host_details(self, obj):
         return {
@@ -38,3 +41,9 @@ class MeetingSerializer(serializers.ModelSerializer):
             "email": obj.host.email,
             "role": obj.host.role
         }
+
+    def get_participants(self, obj):
+        filtered_participants = obj.participants.exclude(user__role="teacher")
+        return MeetingParticipantSerializer(filtered_participants, many=True).data
+
+        

@@ -7,9 +7,7 @@ import Footer from "../Components/Footer"; // Adjust path
 const MeetingDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
-    const { meet, slug } = location.state || {};
-    
-    console.log(meet)
+  const { meet, slug } = location.state || {};
 
   if (!meet || !slug) {
     return (
@@ -50,15 +48,21 @@ const MeetingDetails = () => {
 
           {/* Meeting Info Card */}
           <div className="bg-white rounded-lg shadow-lg overflow-hidden p-6 space-y-4">
-            <h3 className="text-xl font-semibold text-gray-800">Meeting Information</h3>
+            <h3 className="text-xl font-semibold text-gray-800">
+              Meeting Information
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <p>
                 <strong className="text-gray-700">Description:</strong>{" "}
-                <span className="text-gray-600">{meet.description || "No description provided."}</span>
+                <span className="text-gray-600">
+                  {meet.description || "No description provided."}
+                </span>
               </p>
               <p>
                 <strong className="text-gray-700">Created:</strong>{" "}
-                <span className="text-gray-600">{new Date(meet.created_at).toLocaleString()}</span>
+                <span className="text-gray-600">
+                  {new Date(meet.created_at).toLocaleString()}
+                </span>
               </p>
               <p>
                 <strong className="text-gray-700">Duration:</strong>{" "}
@@ -66,7 +70,11 @@ const MeetingDetails = () => {
               </p>
               <p>
                 <strong className="text-gray-700">Status:</strong>{" "}
-                <span className={`text-${meet.is_active ? "green" : "red"}-500 font-semibold`}>
+                <span
+                  className={`text-${
+                    meet.is_active ? "green" : "red"
+                  }-500 font-semibold`}
+                >
                   {meet.is_active ? "Active" : "Ended"}
                 </span>
               </p>
@@ -77,7 +85,8 @@ const MeetingDetails = () => {
           {meet.participants.length > 0 && (
             <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <FaUsers className="text-teal-500" /> Participants ({meet.participants.length})
+                <FaUsers className="text-teal-500" /> Participants (
+                {meet.participants.length})
               </h3>
               <div className="overflow-hidden border rounded-lg">
                 <table className="w-full text-sm text-gray-600">
@@ -90,10 +99,17 @@ const MeetingDetails = () => {
                   </thead>
                   <tbody className="divide-y">
                     {meet.participants.map((participant) => (
-                      <tr key={participant.user.id} className="hover:bg-gray-50">
-                        <td className="p-3 capitalize">{participant.user.username}</td>
+                      <tr
+                        key={participant.user.id}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="p-3 capitalize">
+                          {participant.user.username}
+                        </td>
                         <td className="p-3">{participant.user.email}</td>
-                        <td className="p-3">{new Date(participant.joined_at).toLocaleString()}</td>
+                        <td className="p-3">
+                          {new Date(participant.joined_at).toLocaleString()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
