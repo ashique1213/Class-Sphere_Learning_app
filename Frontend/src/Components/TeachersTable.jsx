@@ -222,7 +222,7 @@ const TeachersTable = () => {
 
       {/* Verification Modal */}
       {verifyId && !teachers.find((t) => t.id === verifyId)?.is_verified && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center  backdrop-blur-md bg-opacity-50">
           <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg text-center w-11/12 sm:w-100">
             <h3 className="text-base sm:text-lg font-semibold">Confirm Verification</h3>
             <p className="text-gray-600 my-2 sm:my-3 text-sm sm:text-base">
@@ -248,7 +248,7 @@ const TeachersTable = () => {
 
       {/* Block/Unblock Confirmation Modal */}
       {blockUserId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-50">
           <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg text-center w-11/12 sm:w-100">
             <h3 className="text-base sm:text-lg font-semibold">Confirm Action</h3>
             <p className="text-gray-600 my-2 sm:my-3 text-sm sm:text-base">

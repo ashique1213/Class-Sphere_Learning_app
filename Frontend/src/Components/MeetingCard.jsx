@@ -1,8 +1,17 @@
 import React from "react";
 import { FaVideo, FaUsers } from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-const MeetingCard = ({ meet, user, joinMeeting, handleEndMeeting }) => {
+const MeetingCard = ({ meet, user, joinMeeting, slug, handleEndMeeting }) => {
   const isTeacher = user.role === "teacher";
+  const email = useSelector((state) => state.auth.email);
+
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    navigate(`/meetings/details/${meet.meeting_id}`, { state: { meet, slug } });
+  };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border">
@@ -14,18 +23,49 @@ const MeetingCard = ({ meet, user, joinMeeting, handleEndMeeting }) => {
               Topic: {meet.title}
             </span>
             <p className="text-gray-600 text-xs sm:text-sm">
-              Created: {new Date(meet.created_at).toLocaleString()}
-            </p>
-            <p className="text-gray-600 text-xs sm:text-sm">
-              Duration: {meet.duration} minutes
-            </p>
-            <p className="text-gray-600 text-xs sm:text-sm">
-              Type: {meet.is_one_to_one ? "One-to-One" : "One-to-Many"}
-            </p>
-            <p className="text-gray-600 text-xs sm:text-sm">
-              Host: {meet.host_details.username} ({meet.host_details.email})
+              {new Date(meet.created_at).toLocaleDateString()}{" "}
+              {new Date(meet.created_at).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true, // Ensures AM/PM format
+              })}
             </p>
           </div>
+          {meet.participants.length > 0 && (
+            <div className="mt-1">
+              {user?.role === "student" && (
+                <tbody className="divide-y">
+                  {meet.participants
+                    .filter(
+                      (participant) => participant.user.email === user.email
+                    )
+                    .map((participant) => (
+                      <tr
+                        key={participant.user.id}
+                        className="hover:bg-gray-50"
+                      >
+                        <td className="text-sm">
+                          Joined Date:{" "}
+                          {new Date(participant.joined_at).toLocaleDateString()}{" "}
+                          {new Date(participant.joined_at).toLocaleTimeString(
+                            [],
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true, // Ensures AM/PM format
+                            }
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              )}
+
+              <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <FaUsers /> Participants ({meet.participants.length})
+              </h4>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -39,35 +79,26 @@ const MeetingCard = ({ meet, user, joinMeeting, handleEndMeeting }) => {
             {meet.is_active ? "Join Meeting" : "Meeting Ended"}
           </button>
 
-          {isTeacher && meet.is_active && meet.host_details.email === user.email && (
+          {isTeacher &&
+            meet.is_active &&
+            meet.host_details.email === user.email && (
+              <button
+                onClick={() => handleEndMeeting(meet.meeting_id)}
+                className="px-3 sm:px-4 py-1 sm:py-2 rounded-md text-white bg-red-500 text-xs sm:text-sm w-full sm:w-auto"
+              >
+                End Meeting
+              </button>
+            )}
+          {isTeacher && (
             <button
-              onClick={() => handleEndMeeting(meet.meeting_id)}
-              className="px-3 sm:px-4 py-1 sm:py-2 rounded-md text-white bg-red-500 text-xs sm:text-sm w-full sm:w-auto"
+              onClick={handleViewDetails}
+              className="px-3 sm:px-4 py-1 sm:py-2 rounded-md text-white bg-teal-900 text-xs sm:text-sm w-full sm:w-auto"
             >
-              End Meeting
+              View Details
             </button>
           )}
         </div>
       </div>
-
-      {meet.participants.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <FaUsers /> Participants ({meet.participants.length})
-          </h4>
-          <ul className="mt-2 space-y-2">
-            {meet.participants.map((participant) => (
-              <li
-                key={participant.user.id}
-                className="text-xs sm:text-sm text-gray-600"
-              >
-                {participant.user.username} ({participant.user.email}) - Joined:{" "}
-                {new Date(participant.joined_at).toLocaleString()}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 };

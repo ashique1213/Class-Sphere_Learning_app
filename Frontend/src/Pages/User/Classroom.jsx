@@ -4,9 +4,9 @@ import Navbar from "../../Components/Navbar";
 import Footer from "../../Components/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { fetchClassroom } from "../../api/classroomapi";
 import { fetchMeetings, joinMeeting } from "../../api/meetingsapi";
 import { toast } from "react-toastify";
+import { fetchClassroom } from "../../api/classroomapi";
 import MeetingCard from "../../Components/MeetingCard";
 
 const Classroom = () => {
@@ -15,7 +15,7 @@ const Classroom = () => {
   const [meetings, setMeetings] = useState([]);
   const [hasActiveMeeting, setHasActiveMeeting] = useState(false);
   const { slug } = useParams();
-  const authToken = useSelector((state) => state.auth.authToken);
+  const authToken = useSelector((state) => state.auth.authToken); // For initial check
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
@@ -23,8 +23,8 @@ const Classroom = () => {
     if (!authToken) return;
     try {
       const [classroomData, meetingsData] = await Promise.all([
-        fetchClassroom(slug, authToken),
-        fetchMeetings(slug, authToken),
+        fetchClassroom(slug),
+        fetchMeetings(slug),
       ]);
       setClassroom(classroomData);
       setMeetings(meetingsData);
@@ -40,7 +40,7 @@ const Classroom = () => {
 
   const joinMeetingHandler = async (meetingId) => {
     try {
-      await joinMeeting(meetingId, authToken);
+      await joinMeeting(meetingId);
       navigate(`/join/${meetingId}`, { state: { slug, role: "student" } });
     } catch (error) {
       toast.error(error?.message || "Failed to join meeting");
@@ -59,10 +59,10 @@ const Classroom = () => {
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | My Account |{" "}
-          <Link to={`/classrooms/${user?.username}`} className="capitalize">
+          <Link to={`/profile`} className="capitalize">
             {user?.username}
           </Link>{" "}
-          | <Link to={`/classrooms/${user?.username}`}>Classroom</Link> |{" "}
+          | <Link to={`/classrooms/${user?.username}`}>Classrooms</Link> |{" "}
           <span className="font-bold">{classroom?.name || "Loading..."}</span>
         </div>
 
@@ -140,7 +140,7 @@ const Classroom = () => {
           {activeTab === "Exams" && <p className="text-sm sm:text-base">Exams content goes here.</p>}
           {activeTab === "Attendance" && <p className="text-sm sm:text-base">Attendance content goes here.</p>}
           {activeTab === "Meetings" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
               {meetings.length > 0 ? (
                 meetings.map((meet) => (
                   <MeetingCard

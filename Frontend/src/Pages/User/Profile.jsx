@@ -104,9 +104,9 @@ const Profile = () => {
       {/* Main Content with padding-top to avoid overlap */}
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-24">
         {/* Breadcrumbs */}
-        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto">
+        <div className="text-sm text-black max-w-full sm:max-w-5xl  mx-auto">
           Home | My Account |{" "}
-          <span className="text-gray-800 font-bold capitalize">
+          <span className="text-gray-800  font-bold capitalize">
             {user.username}
           </span>
         </div>
@@ -157,29 +157,28 @@ const Profile = () => {
             {/* Verification Button */}
             {user?.role == "teacher" && (
               <div className="w-full md:w-auto mt-4 md:mt-0 flex justify-center md:justify-end ml-auto">
-              <button
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold shadow-md transition 
+                <button
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-semibold shadow-md transition 
                 ${
                   user?.is_verified
                     ? "bg-teal-400 text-white hover:bg-teal-600"
                     : "bg-red-600 text-white hover:bg-red-800"
                 }`}
-              >
-                {user?.is_verified ? (
-                  <>
-                    <FaCheckCircle className="text-sm" />
-                    Verified
-                  </>
-                ) : (
-                  <>
-                    <FaHourglassHalf className="text-sm" />
-                    Verification Pending...
-                  </>
-                )}
-              </button>
-            </div>
-            ) }
-            
+                >
+                  {user?.is_verified ? (
+                    <>
+                      <FaCheckCircle className="text-sm" />
+                      Verified
+                    </>
+                  ) : (
+                    <>
+                      <FaHourglassHalf className="text-sm" />
+                      Verification Pending...
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -191,18 +190,24 @@ const Profile = () => {
           >
             About
           </Link>
-          {/* {user?.is_verified && (
-          )} */}
+
+          {user?.role === "teacher" && user?.is_verified && (
             <Link
-              to={
-                user?.role === "teacher"
-                  ? `/myclassrooms/${user?.username}`
-                  : `/classrooms/${user?.username}`
-              }
-              className="px-4 py-2 bg-gray-300 text--black rounded-md text-sm w-full sm:w-auto text-center"
+              to={`/myclassrooms/${user?.username}`}
+              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
             >
-              {user?.role === "teacher" ? "My Classrooms" : "Your Classrooms"}
+              My Classrooms
             </Link>
+          )}
+
+          {user?.role === "student" && (
+            <Link
+              to={`/classrooms/${user?.username}`}
+              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
+            >
+              Your Classrooms
+            </Link>
+          )}
         </div>
 
         {/* Profile Details */}

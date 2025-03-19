@@ -1,10 +1,8 @@
 import api from "./api";
 
-export const createMeeting = async (slug, meetingData, authToken) => {
+export const createMeeting = async (slug, meetingData) => {
   try {
-    const response = await api.post(`/meetings/create/${slug}/`, meetingData, {
-      headers: { Authorization: `Token ${authToken}` },
-    });
+    const response = await api.post(`/meetings/create/${slug}/`, meetingData);
     return response.data;
   } catch (error) {
     console.error("Error creating meeting:", error);
@@ -12,11 +10,9 @@ export const createMeeting = async (slug, meetingData, authToken) => {
   }
 };
 
-export const fetchMeetings = async (slug, authToken) => {
+export const fetchMeetings = async (slug) => {
   try {
-    const response = await api.get(`/meetings/list/${slug}/`, {
-      headers: { Authorization: `Token ${authToken}` },
-    });
+    const response = await api.get(`/meetings/list/${slug}/`);
     return response.data;
   } catch (error) {
     console.error("Error fetching meetings:", error);
@@ -24,11 +20,9 @@ export const fetchMeetings = async (slug, authToken) => {
   }
 };
 
-export const joinMeeting = async (meetingId, authToken) => {
+export const joinMeeting = async (meetingId) => {
   try {
-    const response = await api.post(`/meetings/join/${meetingId}/`, {}, {
-      headers: { Authorization: `Token ${authToken}` },
-    });
+    const response = await api.post(`/meetings/join/${meetingId}/`, {});
     return response.data;
   } catch (error) {
     console.error("Error joining meeting:", error);
@@ -36,11 +30,9 @@ export const joinMeeting = async (meetingId, authToken) => {
   }
 };
 
-export const endMeeting = async (meetingId, authToken) => {
+export const endMeeting = async (meetingId) => {
   try {
-    const response = await api.post(`/meetings/end/${meetingId}/`, {}, {
-      headers: { Authorization: `Token ${authToken}` },
-    });
+    const response = await api.post(`/meetings/end/${meetingId}/`, {});
     return response.data;
   } catch (error) {
     console.error("Error ending meeting:", error);

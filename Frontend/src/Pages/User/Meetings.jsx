@@ -13,17 +13,13 @@ const Meetings = () => {
   const [showModal, setShowModal] = useState(false);
   const [meetings, setMeetings] = useState([]);
   const authToken = useSelector((state) => state.auth.authToken);
-  const [newMeeting, setNewMeeting] = useState({
-    title: "",
-    description: "",
-    duration: "",
-    is_one_to_one: true,
-  });
   const { user } = useSelector((state) => state.auth);
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [classroom, setClassroom] = useState(null);
   const navigate = useNavigate();
+
+  console.log(meetings)
 
   useEffect(() => {
     const loadData = async () => {
@@ -35,8 +31,8 @@ const Meetings = () => {
 
       try {
         const [classroomData, meetingsData] = await Promise.all([
-          fetchClassroom(slug, authToken),
-          fetchMeetings(slug, authToken),
+          fetchClassroom(slug),
+          fetchMeetings(slug),
         ]);
         setClassroom(classroomData);
         setMeetings(meetingsData);
@@ -58,9 +54,16 @@ const Meetings = () => {
     }));
   };
 
+  const [newMeeting, setNewMeeting] = useState({
+    title: "",
+    description: "",
+    duration: "",
+    is_one_to_one: true,
+  });
+
   const handleCreateMeeting = async () => {
     try {
-      const meeting = await createMeeting(slug, newMeeting, authToken);
+      const meeting = await createMeeting(slug, newMeeting);
       setMeetings((prev) => [meeting, ...prev]);
       setShowModal(false);
       setNewMeeting({
@@ -70,19 +73,19 @@ const Meetings = () => {
         is_one_to_one: true,
       });
       toast.success("Meeting created successfully!");
-      navigate(`/meetings/${slug}`); // Stay on Meetings page
+      navigate(`/meetings/${slug}`);
     } catch (error) {
       toast.error(error?.message || "Failed to create meeting.");
     }
   };
 
-  const joinMeeting = (meetingId) => {
+  const joinMeetingHandler = (meetingId) => {
     navigate(`/join/${meetingId}`, { state: { slug, role: "teacher" } });
   };
 
   const handleEndMeeting = async (meetingId) => {
     try {
-      const updatedMeeting = await endMeeting(meetingId, authToken);
+      const updatedMeeting = await endMeeting(meetingId);
       setMeetings((prev) =>
         prev.map((m) => (m.meeting_id === meetingId ? updatedMeeting : m))
       );
@@ -99,9 +102,9 @@ const Meetings = () => {
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
           Home | My Account |{" "}
-          <Link to={`/myclassrooms/${user?.username}`}>{user?.username}</Link> |{" "}
-          <Link to={`/myclassrooms/${user?.username}`}>Classroom</Link> |{" "}
-          <Link to={`/classdetails/${slug}`}>{classroom?.name}</Link> |{" "}
+          <Link to={`/myclassrooms/${user?.username}`} className="hover:underline">{user?.username}</Link> |{" "}
+          <Link to={`/myclassrooms/${user?.username}`} className="hover:underline" >Classroom</Link> |{" "}
+          <Link to={`/classdetails/${slug}`} className="hover:underline">{classroom?.name}</Link> |{" "}
           <span className="font-bold">Meetings</span>
         </div>
 
@@ -152,8 +155,9 @@ const Meetings = () => {
               <MeetingCard
                 key={meet.meeting_id}
                 meet={meet}
+                slug={slug}
                 user={user}
-                joinMeeting={joinMeeting}
+                joinMeeting={joinMeetingHandler}
                 handleEndMeeting={handleEndMeeting}
               />
             ))

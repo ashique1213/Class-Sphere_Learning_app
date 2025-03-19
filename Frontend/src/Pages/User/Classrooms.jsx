@@ -58,7 +58,7 @@ const Classrooms = () => {
           Home | <Link to="/profile">My Account |</Link>{" "}
           <Link to="/profile">{studentname}</Link>{" "}
           {/* <span className="capitalize"> </span> */}
-          <span className="font-semibold">| Classroom</span>
+          <span className="font-semibold">| Classrooms</span>
         </div>
 
         {/* Classroom Header */}

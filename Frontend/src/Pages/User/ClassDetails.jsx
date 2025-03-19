@@ -79,7 +79,7 @@ const ClassDetails = () => {
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | My Account |{" "}
           <span className="capitalize"> {user?.username} </span>
-          <Link to={`/myclassrooms/${user?.username}`}>| Class Rooms</Link> |{" "}
+          <Link to={`/myclassrooms/${user?.username}`} className="hover:underline">| Class Rooms</Link> |{" "}
           <span className="font-bold">{classroom?.name}</span>
         </div>
 

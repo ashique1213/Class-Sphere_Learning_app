@@ -26,6 +26,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Meetings from "./Pages/User/Meetings";
 import JoinMeeting from "./Components/JoinMeeting";
+import MeetingDetails from "./Components/MeetingDetails";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -68,6 +69,7 @@ function App() {
 
         <Route element={<RoleRoute allowedRoles={["teacher"]} />}>
           <Route path="/meetings/:slug" element={<Meetings />} />
+          <Route path="/meetings/details/:meetingId" element={<MeetingDetails />} />
         </Route>
         <Route path="/join/:meetingId" element={<JoinMeeting />} />
 

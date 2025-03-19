@@ -65,7 +65,7 @@ const Createclass = () => {
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home |{" "}
-          <Link to="/profile" className="text-black">
+          <Link to="/profile" className="text-black hover:underline">
             My Account
           </Link>{" "}
           |<span className="capitalize"> {teachername}</span> |
