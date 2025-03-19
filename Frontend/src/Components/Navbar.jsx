@@ -29,13 +29,15 @@ const Navbar = () => {
       }
 
       dispatch(logout()); // Clear Redux state
-      await persistor.flush(); // Persist cleared state
-      navigate("/"); 
-      // window.location.reload(); 
+      await persistor.purge(); // Purge persisted state
+      localStorage.clear(); // Clear local storage
+      navigate("/");
+      // window.location.reload();
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
-      dispatch(logout());
-      await persistor.flush();
+      dispatch(logout()); // Clear Redux state
+      await persistor.purge(); // Purge persisted state
+      localStorage.clear(); // Clear local storage
       navigate("/");
       // window.location.reload();
     }

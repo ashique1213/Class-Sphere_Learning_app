@@ -54,9 +54,10 @@ const Classrooms = () => {
       <Navbar />
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
-        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
+        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
           Home | <Link to="/profile">My Account |</Link>{" "}
-          <span className="capitalize">{studentname} </span>
+          <Link to="/profile">{studentname}</Link>{" "}
+          {/* <span className="capitalize"> </span> */}
           <span className="font-semibold">| Classroom</span>
         </div>
 
