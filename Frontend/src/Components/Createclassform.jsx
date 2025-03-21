@@ -20,9 +20,18 @@ const CreateClassForm = ({ onClose, existingClass }) => {
 
   useEffect(() => {
     if (existingClass) {
-      setFormData(existingClass);
+      setFormData({
+        ...existingClass,
+        start_datetime: existingClass.start_datetime
+          ? existingClass.start_datetime.slice(0, 16) 
+          : "",
+        end_datetime: existingClass.end_datetime
+          ? existingClass.end_datetime.slice(0, 16)
+          : "",
+      });
     }
   }, [existingClass]);
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

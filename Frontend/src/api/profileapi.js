@@ -1,7 +1,7 @@
 // profileapi.js
 import api from "./api"; //Axios instance
 
-export const fetchUserDetails = async (authToken) => {
+export const fetchUserDetails = async () => {
   try {
     const response = await api.get("/profile/");
     return response.data;

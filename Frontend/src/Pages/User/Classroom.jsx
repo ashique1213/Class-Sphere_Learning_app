@@ -96,9 +96,9 @@ const Classroom = () => {
                       ))}
                   </div>
                 )}
-                <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full">
+                {/* <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full">
                   Join Kritsin
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

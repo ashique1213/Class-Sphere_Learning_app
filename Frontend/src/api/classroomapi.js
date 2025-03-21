@@ -1,7 +1,7 @@
 // classroomapi.js
 import api from "./api"; 
 
-export const fetchClasses = async (teachername, authToken) => {
+export const fetchClasses = async (teachername) => {
   try {
     const response = await api.get(`/classrooms/?teacher=${teachername}`);
     return response.data;
@@ -11,7 +11,7 @@ export const fetchClasses = async (teachername, authToken) => {
   }
 };
 
-export const deleteClassroom = async (id, authToken) => {
+export const deleteClassroom = async (id) => {
   try {
     await api.delete(`/classrooms/${id}/delete/`);
     return true;
@@ -21,7 +21,7 @@ export const deleteClassroom = async (id, authToken) => {
   }
 };
 
-export const fetchJoinedClasses = async (authToken) => {
+export const fetchJoinedClasses = async () => {
     try {
       const response = await api.get("/joined-classes/");
       return response.data;
@@ -31,7 +31,7 @@ export const fetchJoinedClasses = async (authToken) => {
     }
   };
   
-export const joinClass = async (classLink, authToken) => {
+export const joinClass = async (classLink) => {
     try {
       const slug = classLink.split("/").pop();
   
@@ -57,7 +57,7 @@ export const joinClass = async (classLink, authToken) => {
 };
 
 
-export const createClassroom = async (formData, authToken, userEmail) => {
+export const createClassroom = async (formData, userEmail) => {
     try {
       const response = await api.post("/classrooms/", { ...formData, teacher_email: userEmail });
       return response.data;
@@ -67,7 +67,7 @@ export const createClassroom = async (formData, authToken, userEmail) => {
     }
   };
   
-export const updateClassroom = async (classId, formData, authToken) => {
+export const updateClassroom = async (classId, formData) => {
     try {
       const response = await api.put(`/classrooms/${classId}/update/`, formData);
       return response.data;

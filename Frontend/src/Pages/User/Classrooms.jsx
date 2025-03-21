@@ -48,7 +48,7 @@ const Classrooms = () => {
       classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       classroom.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  console.log(filteredClassrooms)
   return (
     <>
       <Navbar />
@@ -132,7 +132,8 @@ const Classrooms = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800">
                   {classroom.name}
                 </h3>
-                <p className="text-sm text-gray-700">{classroom.category}</p>
+                <p className="text-sm text-gray-700 capitalize font-bold">Tutor: {classroom.teacher}</p>
+                <p className="text-sm text-gray-700">Topic :{classroom.category}</p>
                 <p className="text-xs sm:text-sm text-gray-500 pt-1">
                   {classroom.description.length > 200
                     ? classroom.description.slice(0, 200) + "....."
