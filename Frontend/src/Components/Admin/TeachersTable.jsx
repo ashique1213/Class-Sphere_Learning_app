@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/authSlice";
+import { logout } from "../../redux/authSlice";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, XCircle } from "lucide-react";
 import {
@@ -9,7 +9,7 @@ import {
   verifyTeacher,
   blockUser,
   unblockUser,
-} from "../api/adminapi";
+} from "../../api/adminapi";
 
 const TeachersTable = () => {
   const [teachers, setTeachers] = useState([]);

@@ -2,7 +2,7 @@ import React from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import { HiOutlineUsers } from "react-icons/hi";
 import { IoWalletOutline } from "react-icons/io5";
-import { logout } from "../redux/authSlice";
+import { logout } from "../../redux/authSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 

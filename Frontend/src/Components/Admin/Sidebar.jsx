@@ -3,7 +3,7 @@ import { HiOutlineUsers } from "react-icons/hi";
 import { IoWalletOutline } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "../assets/Nav_logo.svg";
+import logo from "../../assets/Nav_logo.svg"
 import { FaBars } from "react-icons/fa"; // For hamburger menu
 
 const Sidebar = () => {

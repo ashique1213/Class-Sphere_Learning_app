@@ -33,31 +33,35 @@ const MeetingCard = ({ meet, user, joinMeeting, slug, handleEndMeeting }) => {
           {meet.participants.length > 0 && (
             <div className="mt-1">
               {user?.role === "student" && (
-                <tbody className="divide-y">
-                  {meet.participants
-                    .filter(
-                      (participant) => participant.user.email === user.email
-                    )
-                    .map((participant) => (
-                      <tr
-                        key={participant.user.id}
-                        className="hover:bg-gray-50"
-                      >
-                        <td className="text-sm">
-                          Joined Date:{" "}
-                          {new Date(participant.joined_at).toLocaleDateString()}{" "}
-                          {new Date(participant.joined_at).toLocaleTimeString(
-                            [],
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true, // Ensures AM/PM format
-                            }
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
+                <table>
+                  <tbody className="divide-y">
+                    {meet.participants
+                      .filter(
+                        (participant) => participant.user.email === user.email
+                      )
+                      .map((participant) => (
+                        <tr
+                          key={participant.user.id}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="text-sm">
+                            Joined Date:{" "}
+                            {new Date(
+                              participant.joined_at
+                            ).toLocaleDateString()}{" "}
+                            {new Date(participant.joined_at).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true, // Ensures AM/PM format
+                              }
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               )}
 
               <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">

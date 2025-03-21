@@ -10,12 +10,12 @@ import {
   FaFileAlt,
   FaSpinner,
 } from "react-icons/fa";
-import Navbar from "../../Components/Navbar";
-import Footer from "../../Components/Footer";
-import CreateClassForm from "../../Components/Createclassform";
-import { toast, ToastContainer } from "react-toastify";
+import Navbar from "../../../Components/Navbar";
+import Footer from "../../../Components/Footer";
+import CreateClassForm from "../../../Components/Teacher/Createclassform";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fetchClassroom } from "../../api/classroomapi";
+import { fetchClassroom } from "../../../api/classroomapi";
 
 const ClassDetails = () => {
   const { slug } = useParams();
@@ -72,8 +72,7 @@ const ClassDetails = () => {
 
   return (
     <>
-      <Navbar />
-      <ToastContainer />
+      <Navbar />         
       <div className="min-h-screen bg-gray-50 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
@@ -131,6 +130,7 @@ const ClassDetails = () => {
 
           {[
             { icon: <FaClipboardList />, label: "Assignments" },
+            { icon: <FaClipboardList />, label: "Materails" },
             { icon: <FaVideo />, label: "Meetings",path: `/meetings/${classroom.slug}` },
             { icon: <FaCheckCircle />, label: "Attendance" },
             { icon: <FaFileAlt />, label: "Exams" },

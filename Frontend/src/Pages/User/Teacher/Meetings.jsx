@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FaVideo, FaSearch, FaTimes, FaUsers } from "react-icons/fa";
-import Navbar from "../../Components/Navbar";
-import Footer from "../../Components/Footer";
+import Navbar from "../../../Components/Navbar";
+import Footer from "../../../Components/Footer";
 import { useSelector } from "react-redux";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { fetchClassroom } from "../../api/classroomapi";
+import { fetchClassroom } from "../../../api/classroomapi";
 import { toast } from "react-toastify";
-import { createMeeting, fetchMeetings, endMeeting } from "../../api/meetingsapi";
-import MeetingCard from "../../Components/MeetingCard";
+import { createMeeting, fetchMeetings, endMeeting } from "../../../api/meetingsapi";
+import MeetingCard from "../../../Components/MeetingCard";
 
 const Meetings = () => {
   const [showModal, setShowModal] = useState(false);

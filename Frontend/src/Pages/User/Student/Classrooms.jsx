@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaUsers, FaClock, FaBook, FaPlus } from "react-icons/fa";
-import Navbar from "../../Components/Navbar";
-import Footer from "../../Components/Footer";
+import Navbar from "../../../Components/Navbar";
+import Footer from "../../../Components/Footer";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { fetchJoinedClasses, joinClass } from "../../api/classroomapi";
+import { fetchJoinedClasses, joinClass } from "../../../api/classroomapi";
 import { toast } from "react-toastify"; // Assuming toast is imported globally or in a provider
 
 const Classrooms = () => {
@@ -48,7 +48,6 @@ const Classrooms = () => {
       classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       classroom.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  console.log(filteredClassrooms)
   return (
     <>
       <Navbar />

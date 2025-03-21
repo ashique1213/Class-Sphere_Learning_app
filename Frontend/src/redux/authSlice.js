@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Assuming SIMPLE_JWT ACCESS_TOKEN_LIFETIME is 15 minutes 
-const ACCESS_TOKEN_LIFETIME = 15 * 60 * 1000; 
+// Assuming SIMPLE_JWT ACCESS_TOKEN_LIFETIME is 10 minutes 
+const ACCESS_TOKEN_LIFETIME = 10 * 60 * 1000; 
 
 const initialState = {
   user: null,

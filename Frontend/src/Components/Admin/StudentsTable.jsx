@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/authSlice";
+import { logout } from "../../redux/authSlice";
 import { useNavigate } from "react-router-dom";
-import { fetchStudents, blockUser, unblockUser } from "../api/adminapi";
+import { fetchStudents, blockUser, unblockUser } from "../../api/adminapi";
 
 const StudentsTable = () => {
   const [students, setStudents] = useState([]);

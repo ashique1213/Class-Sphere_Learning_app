@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash } from "react-icons/fa";
 import { MdOutlineTopic } from "react-icons/md";
-import Navbar from "../../Components/Navbar";
-import Footer from "../../Components/Footer";
-import Createclassform from "../../Components/Createclassform";
+import Navbar from "../../../Components/Navbar";
+import Footer from "../../../Components/Footer";
+import Createclassform from "../../../Components/Teacher/Createclassform"
 import { useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fetchClasses, deleteClassroom } from "../../api/classroomapi";
+import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
+import AssignmentsPage from "./AssignmentsPage";
+import MaterialsPage from "./MaterialsPage";
+import AttendancePage from "./AttendancePage";
+import ExamsPage from "./ExamsPage";
 
 const Createclass = () => {
   const { teachername } = useParams();
@@ -60,7 +64,10 @@ const Createclass = () => {
   return (
     <>
       <Navbar />
-      <ToastContainer />
+      <AssignmentsPage />
+      <MaterialsPage />
+      <AttendancePage />
+      <ExamsPage/>
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
@@ -68,8 +75,11 @@ const Createclass = () => {
           <Link to="/profile" className="text-black hover:underline">
             My Account
           </Link>{" "}
-          |<span className="capitalize"> {teachername}</span> |
-          <span className="font-bold"> Class Rooms</span>
+          |{" "}
+          <Link to="/profile" className="capitalize hover:underline">
+            {teachername}
+          </Link>{" "}
+          |<span className="font-bold"> Class Rooms</span>
         </div>
 
         {/* Header */}
@@ -131,7 +141,7 @@ const Createclass = () => {
                   {/* Delete Icon */}
                   <button
                     onClick={() => confirmDelete(classItem.id)}
-                    className="absolute top-2 right-7 sm:right-9 text-gray-500 hover:text-red-700 transition"
+                    className="absolute top-3 right-7 sm:right-9 text-gray-500 hover:text-red-700 transition"
                     title="Delete Classroom"
                   >
                     <FaTrash className="text-sm sm:text-base" />
@@ -144,7 +154,7 @@ const Createclass = () => {
                         `${window.location.origin}/classroom/${classItem.slug}`
                       )
                     }
-                    className="absolute top-2 right-2 sm:right-3 text-gray-500 hover:text-gray-700 transition"
+                    className="absolute top-3 right-2 sm:right-3 text-gray-500 hover:text-gray-700 transition"
                     title="Copy Classroom Link"
                   >
                     <FaShareAlt className="text-sm sm:text-base" />
@@ -195,7 +205,9 @@ const Createclass = () => {
       {deleteId && (
         <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
           <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg text-center w-11/12 sm:w-100">
-            <h3 className="text-base sm:text-lg font-semibold">Confirm Deletion</h3>
+            <h3 className="text-base sm:text-lg font-semibold">
+              Confirm Deletion
+            </h3>
             <p className="text-gray-600 my-2 sm:my-3 text-sm sm:text-base">
               Are you sure you want to delete this classroom?
             </p>

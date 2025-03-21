@@ -1,6 +1,6 @@
 import React from "react";
-import Sidebar from "../../Components/Sidebar";
-import TeachersTable from "../../Components/TeachersTable";
+import Sidebar from "../../Components/Admin/Sidebar"
+import TeachersTable from "../../Components/Admin/TeachersTable";
 
 const Teachers = () => {
   return (

@@ -1,14 +1,98 @@
 import React, { useState, useEffect } from "react";
 import { FaBook } from "react-icons/fa";
-import Navbar from "../../Components/Navbar";
-import Footer from "../../Components/Footer";
+import Navbar from "../../../Components/Navbar";
+import Footer from "../../../Components/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { fetchMeetings, joinMeeting } from "../../api/meetingsapi";
+import { fetchMeetings, joinMeeting } from "../../../api/meetingsapi";
 import { toast } from "react-toastify";
-import { fetchClassroom } from "../../api/classroomapi";
-import MeetingCard from "../../Components/MeetingCard";
+import { fetchClassroom } from "../../../api/classroomapi";
+import MeetingCard from "../../../Components/MeetingCard";
+import MaterialsTab from "../../../Components/Student/MaterialsTab";
+import AssignmentTab from "../../../Components/Student/AssignmentTab";
+import AttendanceTab from "../../../Components/Student/AttendanceTab";
+import ExamTab from "../../../Components/Student/ExamTab";
 
+const dummyMaterials = [
+  {
+    id: 1,
+    name: "Algebra Notes",
+    type: "pdf",
+    date: "March 20, 2025",
+    description: "Complete guide to algebraic equations and expressions.",
+    url: "https://example.com/algebra.pdf",
+  },
+  {
+    id: 2,
+    name: "Science Lecture",
+    type: "video",
+    date: "March 18, 2025",
+    description: "A detailed video explaining chemical reactions.",
+    url: "https://example.com/science-video",
+  },
+];
+
+const dummyAssignments = [
+  {
+    id: 2,
+    topic: "Science Project - Renewable Energy",
+    description: "Prepare a short report on renewable energy sources.",
+    endDate: "April 5, 2025",
+  },
+  {
+    id: 3,
+    topic: "History Essay - World War II",
+    description: "Write an essay covering the key events of WWII.",
+    endDate: "April 10, 2025",
+  },
+];
+
+const dummyAttendanceRecords = [
+  {
+    topic: "Math Class - Algebra",
+    date: "March 20, 2025",
+    joinedDate: "March 20, 2025",
+  },
+  {
+    topic: "Science Class - Renewable Energy",
+    date: "March 21, 2025",
+    joinedDate: null, // Absent
+  },
+];
+
+const dummyExams = [
+  {
+    id: 1,
+    topic: "Mathematics Quiz",
+    description: "Algebra, Geometry & Trigonometry",
+    timeout: 10, // In minutes
+    endDate: "March 25, 2025",
+    marks: 100,
+    questions: [
+      { question: "What is 2+2?", options: ["3", "4", "5", "6"], answer: "4" },
+      { question: "What is 5*6?", options: ["30", "25", "35", "40"], answer: "30" },
+      // Add more questions up to 10
+    ],
+  },
+  {
+    id: 1,
+    topic: "Mathematics Quiz",
+    description: "Algebra, Geometry & Trigonometry",
+    timeout: 10, // In minutes
+    endDate: "March 25, 2025",
+    marks: 100,
+    questions: [
+      { question: "What is 2+2?", options: ["3", "4", "5", "6"], answer: "4" },
+      { question: "What is 5*6?", options: ["30", "25", "35", "40"], answer: "30" },
+      // Add more questions up to 10
+    ],
+  },
+];
+
+
+
+
+  
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
   const [classroom, setClassroom] = useState(null);
@@ -56,7 +140,8 @@ const Classroom = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
+      <MaterialsTab/>
+      <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-16">
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
           Home | My Account |{" "}
           <Link to={`/profile`} className="capitalize">
@@ -135,10 +220,10 @@ const Classroom = () => {
               </p>
             </>
           )}
-          {activeTab === "Materials" && <p className="text-sm sm:text-base">Materials content goes here.</p>}
-          {activeTab === "Assignments" && <p className="text-sm sm:text-base">Assignments content goes here.</p>}
-          {activeTab === "Exams" && <p className="text-sm sm:text-base">Exams content goes here.</p>}
-          {activeTab === "Attendance" && <p className="text-sm sm:text-base">Attendance content goes here.</p>}
+          {activeTab === "Materials" && <MaterialsTab materials={dummyMaterials} />}
+          {activeTab === "Assignments" && <AssignmentTab assignments={dummyAssignments} />}
+          {activeTab === "Exams" && <ExamTab exams={dummyExams} />}
+          {activeTab === "Attendance" && <AttendanceTab attendanceRecords={dummyAttendanceRecords} />}
           {activeTab === "Meetings" && (
             <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
               {meetings.length > 0 ? (

@@ -16,17 +16,17 @@ import AdminLogin from "./Pages/Admin/AdminLogin";
 import AdminDashboard from "./Pages/Admin/AdminDashboard";
 import Students from "./Pages/Admin/Students";
 import Teachers from "./Pages/Admin/Teachers";
-import Createclass from "./Pages/User/Createclass";
-import Classrooms from "./Pages/User/Classrooms";
-import ClassDetails from "./Pages/User/ClassDetails";
+import Createclass from "./Pages/User/Teacher/Createclass";
+import Classrooms from "./Pages/User/Student/Classrooms";
+import ClassDetails from "./Pages/User/Teacher/ClassDetails";
 import Notfound from "./Pages/Notfound";
 import { useSelector } from "react-redux";
-import Classroom from "./Pages/User/Classroom";
+import Classroom from "./Pages/User/Student/Classroom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Meetings from "./Pages/User/Meetings";
+import Meetings from "./Pages/User/Teacher/Meetings"
 import JoinMeeting from "./Components/JoinMeeting";
-import MeetingDetails from "./Components/MeetingDetails";
+import MeetingDetails from "./Components/Teacher/MeetingDetails";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
