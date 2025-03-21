@@ -9,10 +9,6 @@ import { useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
-import AssignmentsPage from "./AssignmentsPage";
-import MaterialsPage from "./MaterialsPage";
-import AttendancePage from "./AttendancePage";
-import ExamsPage from "./ExamsPage";
 
 const Createclass = () => {
   const { teachername } = useParams();
@@ -64,10 +60,6 @@ const Createclass = () => {
   return (
     <>
       <Navbar />
-      <AssignmentsPage />
-      <MaterialsPage />
-      <AttendancePage />
-      <ExamsPage/>
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
