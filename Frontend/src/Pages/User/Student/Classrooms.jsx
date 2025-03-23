@@ -19,7 +19,7 @@ const Classrooms = () => {
     const loadJoinedClasses = async () => {
       if (!authToken) return;
       try {
-        const data = await fetchJoinedClasses(authToken);
+        const data = await fetchJoinedClasses();
         setJoinedClasses(data);
       } catch {
         toast.error("Failed to fetch joined classrooms.");
@@ -54,8 +54,8 @@ const Classrooms = () => {
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
-          Home | <Link to="/profile">My Account |</Link>{" "}
-          <Link to="/profile">{studentname}</Link>{" "}
+          Home | <Link to="/profile" className="hover:underline">My Account |</Link>{" "}
+          <Link to="/profile" className="hover:underline">{studentname}</Link>{" "}
           {/* <span className="capitalize"> </span> */}
           <span className="font-semibold">| Classrooms</span>
         </div>

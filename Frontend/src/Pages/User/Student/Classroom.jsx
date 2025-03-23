@@ -5,6 +5,7 @@ import Footer from "../../../Components/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchMeetings, joinMeeting } from "../../../api/meetingsapi";
+import { fetchExams } from "../../../api/examsapi"; // Import fetchExams
 import { toast } from "react-toastify";
 import { fetchClassroom } from "../../../api/classroomapi";
 import MeetingCard from "../../../Components/MeetingCard";
@@ -13,107 +14,29 @@ import AssignmentTab from "../../../Components/Student/AssignmentTab";
 import AttendanceTab from "../../../Components/Student/AttendanceTab";
 import ExamTab from "../../../Components/Student/ExamTab";
 
-const dummyMaterials = [
-  {
-    id: 1,
-    name: "Algebra Notes",
-    type: "pdf",
-    date: "March 20, 2025",
-    description: "Complete guide to algebraic equations and expressions.",
-    url: "https://example.com/algebra.pdf",
-  },
-  {
-    id: 2,
-    name: "Science Lecture",
-    type: "video",
-    date: "March 18, 2025",
-    description: "A detailed video explaining chemical reactions.",
-    url: "https://example.com/science-video",
-  },
-];
-
-const dummyAssignments = [
-  {
-    id: 2,
-    topic: "Science Project - Renewable Energy",
-    description: "Prepare a short report on renewable energy sources.",
-    endDate: "April 5, 2025",
-  },
-  {
-    id: 3,
-    topic: "History Essay - World War II",
-    description: "Write an essay covering the key events of WWII.",
-    endDate: "April 10, 2025",
-  },
-];
-
-const dummyAttendanceRecords = [
-  {
-    topic: "Math Class - Algebra",
-    date: "March 20, 2025",
-    joinedDate: "March 20, 2025",
-  },
-  {
-    topic: "Science Class - Renewable Energy",
-    date: "March 21, 2025",
-    joinedDate: null, // Absent
-  },
-];
-
-const dummyExams = [
-  {
-    id: 1,
-    topic: "Mathematics Quiz",
-    description: "Algebra, Geometry & Trigonometry",
-    timeout: 10, // In minutes
-    endDate: "March 25, 2025",
-    marks: 100,
-    questions: [
-      { question: "What is 2+2?", options: ["3", "4", "5", "6"], answer: "4" },
-      { question: "What is 5*6?", options: ["30", "25", "35", "40"], answer: "30" },
-      // Add more questions up to 10
-    ],
-  },
-  {
-    id: 1,
-    topic: "Mathematics Quiz",
-    description: "Algebra, Geometry & Trigonometry",
-    timeout: 10, // In minutes
-    endDate: "March 25, 2025",
-    marks: 100,
-    questions: [
-      { question: "What is 2+2?", options: ["3", "4", "5", "6"], answer: "4" },
-      { question: "What is 5*6?", options: ["30", "25", "35", "40"], answer: "30" },
-      // Add more questions up to 10
-    ],
-  },
-];
-
-
-
-
-  
 const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
   const [classroom, setClassroom] = useState(null);
   const [meetings, setMeetings] = useState([]);
+  const [exams, setExams] = useState([]); // State for exams
   const [hasActiveMeeting, setHasActiveMeeting] = useState(false);
   const { slug } = useParams();
-  const authToken = useSelector((state) => state.auth.authToken); // For initial check
-  const { user } = useSelector((state) => state.auth);
+  const { authToken, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   const fetchData = async () => {
     if (!authToken) return;
     try {
-      const [classroomData, meetingsData] = await Promise.all([
+      const [classroomData, meetingsData, examsData] = await Promise.all([
         fetchClassroom(slug),
         fetchMeetings(slug),
+        fetchExams(slug), // Fetch exams for the classroom
       ]);
       setClassroom(classroomData);
       setMeetings(meetingsData);
+      setExams(Array.isArray(examsData) ? examsData : []);
       setHasActiveMeeting(meetingsData.some((m) => m.is_active));
-    } catch {
+    } catch (error) {
       toast.error("Failed to fetch classroom details.");
     }
   };
@@ -140,15 +63,21 @@ const Classroom = () => {
   return (
     <>
       <Navbar />
-      <MaterialsTab/>
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-16">
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
-          Home | My Account |{" "}
-          <Link to={`/profile`} className="capitalize">
+          Home |{" "}
+          <Link to={`/profile`} className="capitalize hover:underline">
+            My Account
+          </Link>{" "}
+          |{" "}
+          <Link to={`/profile`} className="capitalize hover:underline">
             {user?.username}
           </Link>{" "}
-          | <Link to={`/classrooms/${user?.username}`}>Classrooms</Link> |{" "}
-          <span className="font-bold">{classroom?.name || "Loading..."}</span>
+          |{" "}
+          <Link to={`/classrooms/${user?.username}`} className="hover:underline">
+            Classrooms
+          </Link>{" "}
+          | <span className="font-bold">{classroom?.name || "Loading..."}</span>
         </div>
 
         {classroom ? (
@@ -181,9 +110,6 @@ const Classroom = () => {
                       ))}
                   </div>
                 )}
-                {/* <button className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full">
-                  Join Kritsin
-                </button> */}
               </div>
             </div>
           </div>
@@ -222,8 +148,10 @@ const Classroom = () => {
           )}
           {activeTab === "Materials" && <MaterialsTab materials={dummyMaterials} />}
           {activeTab === "Assignments" && <AssignmentTab assignments={dummyAssignments} />}
-          {activeTab === "Exams" && <ExamTab exams={dummyExams} />}
-          {activeTab === "Attendance" && <AttendanceTab attendanceRecords={dummyAttendanceRecords} />}
+          {activeTab === "Exams" && <ExamTab exams={exams} />}
+          {activeTab === "Attendance" && (
+            <AttendanceTab attendanceRecords={dummyAttendanceRecords} />
+          )}
           {activeTab === "Meetings" && (
             <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">
               {meetings.length > 0 ? (

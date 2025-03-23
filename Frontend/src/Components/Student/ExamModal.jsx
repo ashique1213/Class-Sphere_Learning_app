@@ -1,25 +1,79 @@
-import React, { useState, useEffect } from "react";
-import { FaTimes, FaChevronLeft, FaChevronRight, FaClock } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaChevronLeft, FaChevronRight, FaClock, FaTimes } from "react-icons/fa";
+import { toast } from "react-toastify";
 
-const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
+const ExamModal = ({
+  isOpen,
+  onClose,
+  exam,
+  onSubmit,
+  viewMode = false,
+  submittedAnswers = {},
+}) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(exam.timeout * 60); // Convert minutes to seconds
+  const [timeLeft, setTimeLeft] = useState(0);
+  const timerRef = useRef(null);
+  const shouldAutoSubmit = useRef(false); // Flag for auto-submit
 
+  // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setCurrentQuestion(0);
+    if (!isOpen) return;
+
+    setCurrentQuestion(0);
+    if (viewMode) {
+      const mappedAnswers = {};
+      exam.questions.forEach((q, index) => {
+        mappedAnswers[index] = submittedAnswers[q.id] || null;
+      });
+      setSelectedAnswers(mappedAnswers);
+      setTimeLeft(0);
+    } else {
       setSelectedAnswers({});
-      setTimeLeft(exam.timeout * 60);
+      const initialTime = exam.timeout ? parseInt(exam.timeout, 10) * 60 : 600;
+      setTimeLeft(initialTime);
     }
-  }, [isOpen, exam]);
+  }, [isOpen, viewMode]);
 
-  // Timer Countdown
+  // Timer Setup and Cleanup
   useEffect(() => {
-    if (!isOpen || timeLeft <= 0) return;
-    const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [isOpen, timeLeft]);
+    if (!isOpen || viewMode) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+          shouldAutoSubmit.current = true; // Set flag instead of calling directly
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isOpen, viewMode]);
+
+  // Handle Auto-Submit after timer expires
+  useEffect(() => {
+    if (shouldAutoSubmit.current && !viewMode) {
+      toast.info("Time’s up! Exam auto-submitted with current answers.");
+      onSubmit(selectedAnswers);
+      onClose();
+      shouldAutoSubmit.current = false; // Reset flag
+    }
+  }, [timeLeft, viewMode, selectedAnswers, onSubmit, onClose]);
 
   // Format Timer
   const formatTime = (seconds) => {
@@ -30,10 +84,12 @@ const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
 
   // Handle Answer Selection
   const handleAnswerSelect = (option) => {
-    setSelectedAnswers({
-      ...selectedAnswers,
-      [currentQuestion]: option,
-    });
+    if (!viewMode) {
+      setSelectedAnswers((prev) => {
+        const updated = { ...prev, [currentQuestion]: option };
+        return updated;
+      });
+    }
   };
 
   // Handle Next & Previous
@@ -49,9 +105,15 @@ const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
     }
   };
 
-  // Handle Submit
+  // Handle Manual Submit
   const handleSubmit = () => {
-    onSubmit(selectedAnswers);
+    if (!viewMode) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      onSubmit(selectedAnswers);
+    }
     onClose();
   };
 
@@ -60,24 +122,33 @@ const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-50 p-4 z-50">
       <div className="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg relative">
-        {/* Close Button */}
-        <button className="absolute top-3 right-3 text-gray-500 hover:text-red-500" onClick={onClose}>
-          <FaTimes size={18} />
-        </button>
+        {/* Close Button - Only in viewMode */}
+        {viewMode && (
+          <button
+            className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            onClick={onClose}
+          >
+            <FaTimes size={18} />
+          </button>
+        )}
 
         {/* Timer */}
         <div className="flex justify-between items-center mb-4 text-gray-700">
-          <h2 className="text-lg font-semibold">{exam.topic} - {exam.marks} Marks</h2>
-          <div className="flex items-center gap-2 bg-gray-200 px-3 py-1 rounded-full">
-            <FaClock className="text-red-500" />
-            <span className="text-sm font-semibold">{formatTime(timeLeft)}</span>
-          </div>
+          <h2 className="text-lg font-semibold">
+            {exam.topic} - {exam.marks} Marks
+          </h2>
+          {!viewMode && (
+            <div className="flex items-center gap-2 bg-gray-200 px-3 py-1 rounded-full">
+              <FaClock className="text-red-500" />
+              <span className="text-sm font-semibold">{formatTime(timeLeft)}</span>
+            </div>
+          )}
         </div>
 
         {/* Question */}
         <div>
           <h3 className="text-lg font-semibold mb-3">
-            Q{currentQuestion + 1}. {exam.questions[currentQuestion].question}
+            Q{currentQuestion + 1}. {exam.questions[currentQuestion].question_text}
           </h3>
 
           {/* Options */}
@@ -85,15 +156,19 @@ const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
             {exam.questions[currentQuestion].options.map((option, index) => (
               <button
                 key={index}
-                className={`w-full px-4 py-2 rounded-md border transition-all duration-300 text-left
-                  ${
-                    selectedAnswers[currentQuestion] === option
-                      ? "bg-indigo-500 text-white"
-                      : "bg-gray-100 hover:bg-gray-200"
-                  }`}
+                className={`w-full px-4 py-2 rounded-md border transition-all duration-300 text-left ${
+                  selectedAnswers[currentQuestion] === option
+                    ? "bg-teal-500 text-white"
+                    : viewMode && selectedAnswers[currentQuestion] === null
+                    ? "bg-gray-300 text-gray-700"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
                 onClick={() => handleAnswerSelect(option)}
+                disabled={viewMode || timeLeft <= 0}
               >
-                {option}
+                {viewMode && selectedAnswers[currentQuestion] === null
+                  ? "Not Answered"
+                  : option}
               </button>
             ))}
           </div>
@@ -112,14 +187,20 @@ const ExamModal = ({ isOpen, onClose, exam, onSubmit }) => {
           {currentQuestion === exam.questions.length - 1 ? (
             <button
               onClick={handleSubmit}
-              className="bg-teal-500 text-white px-5 py-2 rounded-md hover:bg-teal-600 text-sm"
+              className={`px-5 py-2 rounded-md text-sm ${
+                viewMode
+                  ? "bg-gray-500 text-white hover:bg-gray-600"
+                  : "bg-teal-500 text-white hover:bg-teal-600"
+              }`}
+              disabled={!viewMode && timeLeft <= 0}
             >
-              Submit Exam
+              {viewMode ? "Close" : "Submit Exam"}
             </button>
           ) : (
             <button
               onClick={handleNext}
               className="flex items-center gap-2 bg-teal-500 text-white px-3 py-2 rounded-md hover:bg-teal-600 text-sm"
+              disabled={!viewMode && timeLeft <= 0}
             >
               Next <FaChevronRight size={14} />
             </button>

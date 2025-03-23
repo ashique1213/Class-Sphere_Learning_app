@@ -72,14 +72,26 @@ const ClassDetails = () => {
 
   return (
     <>
-      <Navbar />         
+      <Navbar />
       <div className="min-h-screen bg-gray-50 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
-          Home | My Account |{" "}
-          <span className="capitalize"> {user?.username} </span>
-          <Link to={`/myclassrooms/${user?.username}`} className="hover:underline">| Class Rooms</Link> |{" "}
-          <span className="font-bold">{classroom?.name}</span>
+          Home |{" "}
+          <Link to="/profile" className="capitalize hover:underline">
+            My Account
+          </Link>{" "}
+          |{" "}
+          <Link to="/profile" className="capitalize hover:underline">
+            {user?.username}
+          </Link>{" "}
+          |{" "}
+          <Link
+            to={`/myclassrooms/${user?.username}`}
+            className="hover:underline"
+          >
+            Class Rooms
+          </Link>{" "}
+          | <span className="font-bold">{classroom?.name}</span>
         </div>
 
         {/* Header */}
@@ -131,15 +143,25 @@ const ClassDetails = () => {
           {[
             { icon: <FaClipboardList />, label: "Assignments" },
             { icon: <FaClipboardList />, label: "Materails" },
-            { icon: <FaVideo />, label: "Meetings",path: `/meetings/${classroom.slug}` },
+            {
+              icon: <FaVideo />,
+              label: "Meetings",
+              path: `/meetings/${classroom.slug}`,
+            },
             { icon: <FaCheckCircle />, label: "Attendance" },
-            { icon: <FaFileAlt />, label: "Exams" },
+            {
+              icon: <FaFileAlt />,
+              label: "Exams",
+              path: `/exams/${classroom.slug}`,
+            },
           ].map((item, index) => (
             <Link
-              key={index} to={item.path}
+              key={index}
+              to={item.path}
               className="bg-teal-500 hover:bg-teal-600 text-white px-3 sm:px-4 py-2 rounded-lg shadow-md flex items-center gap-2 transition w-full sm:w-auto"
             >
-              {item.icon} <span className="text-sm sm:text-base">{item.label}</span>
+              {item.icon}{" "}
+              <span className="text-sm sm:text-base">{item.label}</span>
             </Link>
           ))}
         </div>
@@ -193,7 +215,9 @@ const ClassDetails = () => {
                 </div>
               ))
             ) : (
-              <p className="text-gray-600 text-sm sm:text-base">No students enrolled yet.</p>
+              <p className="text-gray-600 text-sm sm:text-base">
+                No students enrolled yet.
+              </p>
             )}
           </div>
         </div>

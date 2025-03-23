@@ -27,6 +27,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Meetings from "./Pages/User/Teacher/Meetings"
 import JoinMeeting from "./Components/JoinMeeting";
 import MeetingDetails from "./Components/Teacher/MeetingDetails";
+import ExamsPage from "./Pages/User/Teacher/ExamsPage";
+import ExamDetail from "./Components/Teacher/ExamDetail";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -64,6 +66,8 @@ function App() {
           <Route path="/classdetails/:slug" element={<ClassDetails />} />
           <Route path="/meetings/:slug" element={<Meetings />} />
           <Route path="/meetings/details/:meetingId" element={<MeetingDetails />} />
+          <Route path="/exams/:slug" element={<ExamsPage />} />
+          <Route path="/exam/:examId" element={<ExamDetail />} />
         </Route>
         
         <Route path="/join/:meetingId" element={<JoinMeeting />} />

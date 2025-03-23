@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
+import DeleteModal from "../../../Components/DeleteModal";
 
 const Createclass = () => {
   const { teachername } = useParams();
@@ -16,6 +17,15 @@ const Createclass = () => {
   const [classrooms, setClassrooms] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
   const authToken = useSelector((state) => state.auth.authToken);
+  const message = localStorage.getItem("toastMessage");
+
+
+  useEffect(() => {
+      if (message) {
+        toast.success(message);
+        localStorage.removeItem("toastMessage");
+      }
+    }, []);
 
   useEffect(() => {
     const loadClasses = async () => {
@@ -194,32 +204,13 @@ const Createclass = () => {
       </div>
 
       {/* Modal */}
-      {deleteId && (
-        <div className="fixed inset-0 flex items-center justify-center bg-opacity-50">
-          <div className="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg text-center w-11/12 sm:w-100">
-            <h3 className="text-base sm:text-lg font-semibold">
-              Confirm Deletion
-            </h3>
-            <p className="text-gray-600 my-2 sm:my-3 text-sm sm:text-base">
-              Are you sure you want to delete this classroom?
-            </p>
-            <div className="flex justify-center gap-2 sm:gap-4 mt-3 sm:mt-4">
-              <button
-                onClick={handleDelete}
-                className="bg-red-500 text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-red-600 text-sm sm:text-base"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setDeleteId(null)}
-                className="bg-gray-300 px-3 sm:px-4 py-1 sm:py-2 rounded-md hover:bg-gray-400 text-sm sm:text-base"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+       {/* Delete Modal */}
+       <DeleteModal
+        isOpen={!!deleteId}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+        message="Are you sure you want to delete this classroom?"
+      />
 
       <Footer />
     </>
