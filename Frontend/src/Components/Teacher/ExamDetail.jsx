@@ -113,11 +113,14 @@ const ExamDetail = () => {
                         key={submission.id || index}
                         className="p-2 bg-white rounded-md shadow-sm flex justify-between items-center"
                       >
-                        <span className="text-gray-700">
-                          {studentName} (Submitted on{" "}
-                          {new Date(submission.submitted_at).toLocaleString()})
+                        <span className="text-gray-700 ml-5 capitalize font-bold">
+                          {studentName} 
                         </span>
-                        <span className="text-teal-600 font-medium">
+                        <span>
+                        Submitted on{" "}
+                          {new Date(submission.submitted_at).toLocaleString()}
+                        </span>
+                        <span className="text-teal-600 pr-5 font-medium">
                           Score: {submission.score || "N/A"}
                         </span>
                       </li>
@@ -125,12 +128,14 @@ const ExamDetail = () => {
                   })}
                 </ul>
               )}
-              <button
-                onClick={() => setShowSubmissions(false)}
-                className="mt-4 bg-gray-300 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-400 transition"
-              >
-                Close
-              </button>
+               <div className="flex justify-end">
+                <button
+                  onClick={() => setShowSubmissions(false)}
+                  className="mt-4 bg-gray-300 text-gray-800 px-5 py-1 rounded-lg hover:bg-gray-400 transition"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           )}
 

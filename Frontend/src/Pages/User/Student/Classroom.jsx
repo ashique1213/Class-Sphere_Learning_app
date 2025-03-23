@@ -5,7 +5,7 @@ import Footer from "../../../Components/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchMeetings, joinMeeting } from "../../../api/meetingsapi";
-import { fetchExams } from "../../../api/examsapi"; // Import fetchExams
+import { fetchExams, fetchSubmissions } from "../../../api/examsapi"; // Add fetchSubmissions
 import { toast } from "react-toastify";
 import { fetchClassroom } from "../../../api/classroomapi";
 import MeetingCard from "../../../Components/MeetingCard";
@@ -18,7 +18,8 @@ const Classroom = () => {
   const [activeTab, setActiveTab] = useState("About");
   const [classroom, setClassroom] = useState(null);
   const [meetings, setMeetings] = useState([]);
-  const [exams, setExams] = useState([]); // State for exams
+  const [exams, setExams] = useState([]);
+  const [submissions, setSubmissions] = useState([]); // Add submissions state
   const [hasActiveMeeting, setHasActiveMeeting] = useState(false);
   const { slug } = useParams();
   const { authToken, user } = useSelector((state) => state.auth);
@@ -27,14 +28,16 @@ const Classroom = () => {
   const fetchData = async () => {
     if (!authToken) return;
     try {
-      const [classroomData, meetingsData, examsData] = await Promise.all([
+      const [classroomData, meetingsData, examsData, submissionsData] = await Promise.all([
         fetchClassroom(slug),
         fetchMeetings(slug),
-        fetchExams(slug), // Fetch exams for the classroom
+        fetchExams(slug),
+        fetchSubmissions(slug), // Fetch student submissions
       ]);
       setClassroom(classroomData);
       setMeetings(meetingsData);
       setExams(Array.isArray(examsData) ? examsData : []);
+      setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
       setHasActiveMeeting(meetingsData.some((m) => m.is_active));
     } catch (error) {
       toast.error("Failed to fetch classroom details.");
@@ -58,7 +61,7 @@ const Classroom = () => {
     toast.error("Students cannot end meetings.");
   };
 
-  const tabs = ["About", "Materials", "Assignments", "Exams", "Attendance", "Meetings"];
+  const tabs = ["About", "Materials", "Assignments", "Exams", "Submissions", "Attendance", "Meetings"];
 
   return (
     <>
@@ -151,6 +154,38 @@ const Classroom = () => {
           {activeTab === "Exams" && <ExamTab exams={exams} />}
           {activeTab === "Attendance" && (
             <AttendanceTab attendanceRecords={dummyAttendanceRecords} />
+          )}
+          {activeTab === "Submissions" && (
+            <div>
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                My Submissions
+              </h3>
+              {submissions.length === 0 ? (
+                <p className="text-gray-500">No submissions yet.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {submissions.map((submission) => {
+                    const studentName = `${submission.student.first_name || ""} ${
+                      submission.student.last_name || ""
+                    }`.trim() || submission.student.username;
+                    return (
+                      <li
+                        key={submission.id}
+                        className="p-2 bg-gray-100 rounded-md flex justify-between items-center"
+                      >
+                        <span className="text-gray-700">
+                          {studentName} (Submitted on{" "}
+                          {new Date(submission.submitted_at).toLocaleString()})
+                        </span>
+                        <span className="text-teal-600 font-medium">
+                          Score: {submission.score || "N/A"}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
           )}
           {activeTab === "Meetings" && (
             <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 gap-4">

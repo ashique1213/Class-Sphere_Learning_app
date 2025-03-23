@@ -60,17 +60,16 @@ const submitExam = async (examId, answers) => {
   }
 };
 
-const fetchSubmissions = async (slug, examId) => {
-  try {
-    const response = await api.get(`/classrooms/${slug}/submissions/?exam_id=${examId}`);
-    console.log("Fetch Submissions Response:", response.data); // Debug log
-    return response.data;
-  } catch (error) {
-    console.error("Error fetching submissions:", error.response?.data || error.message);
-    throw error;
-  }
+const fetchSubmissions = async (slug) => {
+    try {
+      const response = await api.get(`/classrooms/${slug}/submissions/`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching submissions:", error.response?.data || error.message);
+      throw error;
+    }
 };
-
+  
 const fetchExamSubmissionsForTeacher = async (examId) => {
   try {
     const response = await api.get(`/exams/${examId}/submissions/`);

@@ -42,7 +42,7 @@ const ClassDetails = () => {
       }
 
       try {
-        const data = await fetchClassroom(slug, authToken);
+        const data = await fetchClassroom(slug);
         setClassroom(data);
       } catch {
         toast.error("Failed to fetch classroom details.");

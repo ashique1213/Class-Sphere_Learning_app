@@ -167,7 +167,7 @@ const ExamsPage = () => {
             Classroom
           </Link>{" "}
           |{" "}
-          <Link to={`/exams/${slug}`} className="hover:underline">
+          <Link to={`/classdetails/${slug}`} className="hover:underline">
             {classroom?.name || "Classroom"}
           </Link>{" "}
           | <span className="font-bold">Exams</span>

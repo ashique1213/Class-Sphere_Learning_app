@@ -84,38 +84,36 @@ class ExamSubmissionView(APIView):
     def post(self, request, exam_id):
         try:
             exam = Exam.objects.get(id=exam_id)
+            if ExamSubmission.objects.filter(student=request.user, exam=exam).exists():
+                return Response(
+                    {"error": "You have already submitted this exam"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            data = request.data.copy()
+            data['student'] = request.user.id
+            data['exam'] = exam.id
+
+            # Calculate score
+            answers = data.get('answers', {})
+            questions = {q.id: q.correct_answer for q in exam.questions.all()}
+            score = 0
+            total_questions = len(questions)
+            marks_per_question = exam.marks / total_questions if total_questions > 0 else 0
+
+            for q_index, student_answer in answers.items():
+                if int(q_index) in questions and student_answer == questions[int(q_index)]:
+                    score += marks_per_question
+
+            data['score'] = round(score)
+
+            serializer = ExamSubmissionSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(student=request.user)  # Explicitly pass student
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exam.DoesNotExist:
             return Response({"error": "Exam not found"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Check if student already submitted
-        if ExamSubmission.objects.filter(student=request.user, exam=exam).exists():
-            return Response(
-                {"error": "You have already submitted this exam"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        data = request.data.copy()
-        data['student'] = request.user.id
-        data['exam'] = exam.id
-
-        # Calculate score
-        answers = data.get('answers', {})
-        questions = {q.id: q.correct_answer for q in exam.questions.all()}
-        score = 0
-        total_questions = len(questions)
-        marks_per_question = exam.marks / total_questions if total_questions > 0 else 0
-
-        for q_index, student_answer in answers.items():
-            if int(q_index) in questions and student_answer == questions[int(q_index)]:
-                score += marks_per_question
-
-        data['score'] = round(score)
-
-        serializer = ExamSubmissionSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class StudentExamSubmissionsView(APIView):
     permission_classes = [permissions.IsAuthenticated]

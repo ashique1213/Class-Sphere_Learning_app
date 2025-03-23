@@ -90,7 +90,7 @@ const ExamTab = ({ exams = [] }) => {
               <button
                 className={`w-full py-2 rounded-full flex items-center justify-center gap-2 font-medium transition-all duration-300 ${
                   isSubmitted
-                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    ? "bg-teal-600 text-white cursor-not-allowed"
                     : "bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:shadow-lg hover:scale-105 active:scale-95"
                 }`}
                 onClick={() => handleStartExam(exam)}
@@ -98,7 +98,7 @@ const ExamTab = ({ exams = [] }) => {
               >
                 {isSubmitted ? (
                   <>
-                    Done <FaCheck />
+                    Exam Submitted <FaCheck />
                   </>
                 ) : (
                   <>

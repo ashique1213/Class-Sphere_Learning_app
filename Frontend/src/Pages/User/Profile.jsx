@@ -211,7 +211,7 @@ const Profile = () => {
         </div>
 
         {/* Profile Details */}
-        <div className="bg-gray-200 max-w-full sm:max-w-5xl mx-auto p-4 sm:p-6 rounded-lg mt-4">
+        <div className="bg-white max-w-full sm:max-w-5xl mx-auto p-4 sm:p-6  rounded-lg mt-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-black">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
               <strong className="text-sm sm:text-base">Email:</strong>
