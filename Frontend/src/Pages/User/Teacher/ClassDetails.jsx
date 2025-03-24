@@ -135,14 +135,14 @@ const ClassDetails = () => {
               placeholder="Search students..."
               className="px-4 py-2 w-full border-none outline-none bg-transparent text-sm sm:text-base"
             />
-            <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2">
+            <button className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-3">
               <FaSearch className="text-sm sm:text-base" />
             </button>
           </div>
 
           {[
             { icon: <FaClipboardList />, label: "Assignments" },
-            { icon: <FaClipboardList />, label: "Materails" },
+            { icon: <FaClipboardList />, label: "Materials" ,path:`/materials/${classroom.slug}`},
             {
               icon: <FaVideo />,
               label: "Meetings",
