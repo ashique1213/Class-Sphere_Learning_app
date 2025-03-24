@@ -1,39 +1,184 @@
-import React, { useState } from "react";
-import { FaClipboardList, FaSearch, FaPlus, FaTimes, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import {
+  FaClipboardList,
+  FaSearch,
+  FaPlus,
+  FaTimes,
+  FaEye,
+  FaEdit,
+  FaTrash,
+} from "react-icons/fa";
 import Navbar from "../../../Components/Navbar";
 import Footer from "../../../Components/Footer";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
+import { useParams, Link } from "react-router-dom";
+import { fetchClassroom } from "../../../api/classroomapi";
+import {
+  fetchAssignments,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+} from "../../../api/assignmentsapi";
 
 const AssignmentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [assignments, setAssignments] = useState([]);
-  const [newAssignment, setNewAssignment] = useState({ topic: "", description: "", lastDate: "", totalMarks: "" });
+  const [newAssignment, setNewAssignment] = useState({
+    topic: "",
+    description: "",
+    last_date: "",
+    total_marks: "",
+  });
+  const [editAssignment, setEditAssignment] = useState({
+    id: null,
+    topic: "",
+    description: "",
+    last_date: "",
+    total_marks: "",
+  });
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { user } = useSelector((state) => state.auth);
+  const authToken = useSelector((state) => state.auth.authToken);
+  const { slug } = useParams();
+  const [classroom, setClassroom] = useState(null);
 
-  const handleAddAssignment = () => {
-    if (!newAssignment.topic || !newAssignment.description || !newAssignment.lastDate || !newAssignment.totalMarks) {
+  useEffect(() => {
+    const loadData = async () => {
+      if (!authToken) {
+        console.error("No Auth Token Found!");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const [classroomData, assignmentsData] = await Promise.all([
+          fetchClassroom(slug),
+          fetchAssignments(slug),
+        ]);
+        setClassroom(classroomData);
+        setAssignments(assignmentsData);
+      } catch {
+        toast.error("Failed to fetch data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [slug, authToken]);
+
+  const handleAddAssignment = async () => {
+    if (
+      !newAssignment.topic ||
+      !newAssignment.description ||
+      !newAssignment.last_date ||
+      !newAssignment.total_marks
+    ) {
       toast.error("Please fill in all fields.");
       return;
     }
-    setAssignments([...assignments, newAssignment]);
-    setNewAssignment({ topic: "", description: "", lastDate: "", totalMarks: "" });
-    setIsModalOpen(false);
-    toast.success("Assignment added successfully!");
+    try {
+      const newAssign = await createAssignment(slug, newAssignment);
+      setAssignments([...assignments, newAssign]);
+      setNewAssignment({
+        topic: "",
+        description: "",
+        last_date: "",
+        total_marks: "",
+      });
+      setIsModalOpen(false);
+      toast.success("Assignment added successfully!");
+    } catch (error) {
+      toast.error("Failed to add assignment.");
+    }
   };
 
-  const handleDeleteAssignment = (index) => {
-    const updatedAssignments = assignments.filter((_, i) => i !== index);
-    setAssignments(updatedAssignments);
-    toast.success("Assignment deleted successfully!");
+  const handleEditAssignment = (assignment) => {
+    setEditAssignment({
+      id: assignment.id,
+      topic: assignment.topic,
+      description: assignment.description,
+      last_date: assignment.last_date.split("T")[0], // Format for input[type=date]
+      total_marks: assignment.total_marks,
+    });
+    setIsEditModalOpen(true);
   };
+
+  const handleUpdateAssignment = async () => {
+    if (
+      !editAssignment.topic ||
+      !editAssignment.description ||
+      !editAssignment.last_date ||
+      !editAssignment.total_marks
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    try {
+      const updatedAssign = await updateAssignment(
+        slug,
+        editAssignment.id,
+        editAssignment
+      );
+      setAssignments(
+        assignments.map((a) => (a.id === updatedAssign.id ? updatedAssign : a))
+      );
+      setEditAssignment({
+        id: null,
+        topic: "",
+        description: "",
+        last_date: "",
+        total_marks: "",
+      });
+      setIsEditModalOpen(false);
+      toast.success("Assignment updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update assignment.");
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId) => {
+    try {
+      await deleteAssignment(slug, assignmentId);
+      setAssignments(assignments.filter((a) => a.id !== assignmentId));
+      toast.success("Assignment deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete assignment.");
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 px-4 pt-16 sm:pt-20 md:pt-20">
-        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4">
-          Home | My Account | <span className="font-bold">Assignments</span>
+        <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
+          Home | My Account |{" "}
+          <Link
+            to={`/myclassrooms/${user?.username}`}
+            className="hover:underline"
+          >
+            {user?.username}
+          </Link>{" "}
+          |{" "}
+          <Link
+            to={`/myclassrooms/${user?.username}`}
+            className="hover:underline"
+          >
+            Classroom
+          </Link>{" "}
+          |{" "}
+          <Link to={`/classdetails/${slug}`} className="hover:underline">
+            {classroom?.name}
+          </Link>{" "}
+          | <span className="font-bold">Assignments</span>
         </div>
 
         <div className="bg-white max-w-full sm:max-w-5xl mx-auto rounded-lg shadow-lg overflow-hidden mb-6">
@@ -42,11 +187,18 @@ const AssignmentsPage = () => {
               <FaClipboardList className="text-3xl sm:text-4xl md:text-5xl" />
             </div>
             <div className="flex-1 mt-4 md:mt-0 md:ml-4">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">Assignments</h2>
-              <p className="text-white text-sm sm:text-base opacity-90">Manage and track your assignments.</p>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-white">
+                Assignments
+              </h2>
+              <p className="text-white text-sm sm:text-base opacity-90">
+                Manage and track your assignments.
+              </p>
             </div>
             <div className="mt-4 md:mt-0 md:ml-4 text-center w-full md:w-auto">
-              <button onClick={() => setIsModalOpen(true)} className="bg-white text-teal-600 px-4 py-2 rounded-md border border-teal-500 shadow-md hover:bg-gray-100 w-full md:w-auto flex items-center gap-2 justify-center">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="bg-white text-teal-600 px-4 py-2 rounded-md border border-teal-500 shadow-md hover:bg-gray-100 w-full md:w-auto flex items-center gap-2 justify-center"
+              >
                 <FaPlus /> Add Assignment
               </button>
             </div>
@@ -54,34 +206,76 @@ const AssignmentsPage = () => {
         </div>
 
         <div className="max-w-full sm:max-w-5xl mx-auto flex items-center bg-gray-200 rounded-lg overflow-hidden shadow-sm mb-6">
-          <input type="text" placeholder="Search assignments..." className="px-4 py-2 w-full border-none outline-none bg-transparent text-sm sm:text-base" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <input
+            type="text"
+            placeholder="Search assignments..."
+            className="px-4 py-2 w-full border-none outline-none bg-transparent text-sm sm:text-base"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
           <button className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-3">
             <FaSearch className="text-sm sm:text-base" />
           </button>
         </div>
 
-        <div className="max-w-full sm:max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden p-4 sm:p-6">
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Assignments</h3>
+        <div className="max-w-full sm:max-w-5xl mx-auto bg-white shadow-md rounded-lg overflow-hidden p-4 sm:p-6 capitalize">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+            Assignments
+          </h3>
           <div className="space-y-4">
             {assignments.length > 0 ? (
               assignments
-                .filter((assignment) => assignment.topic.toLowerCase().includes(searchQuery.toLowerCase()))
-                .map((assignment, index) => (
-                  <div key={index} className="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-sm border">
-                    <div>
-                      <p className="text-gray-800 font-medium">{assignment.topic}</p>
-                      <p className="text-gray-600 text-sm">{assignment.description}</p>
-                      <p className="text-gray-500 text-xs">Due: {assignment.lastDate} | Marks: {assignment.totalMarks}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEye /></button>
-                      <button className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEdit /></button>
-                      <button onClick={() => handleDeleteAssignment(index)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaTrash /></button>
+                .filter((assignment) =>
+                  assignment.topic
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())
+                )
+                .map((assignment) => (
+                  <div
+                    key={assignment.id}
+                    className="bg-gray-100 p-4 rounded-lg shadow-sm border"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-gray-800 font-medium">
+                          {assignment.topic}
+                        </p>
+                        <p className="text-gray-600 text-sm">
+                          {assignment.description}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          Due: {new Date(assignment.last_date).toLocaleString()}{" "}
+                          | Marks: {assignment.total_marks}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link
+                          to={`/assignments/${slug}/${assignment.id}`}
+                          state={{ slug }}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
+                        >
+                          <FaEye /> View
+                        </Link>{" "}
+                        <button
+                          onClick={() => handleEditAssignment(assignment)}
+                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAssignment(assignment.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))
             ) : (
-              <p className="text-gray-600 text-sm sm:text-base">No assignments added yet.</p>
+              <p className="text-gray-600 text-sm sm:text-base">
+                No assignments added yet.
+              </p>
             )}
           </div>
         </div>
@@ -90,13 +284,130 @@ const AssignmentsPage = () => {
           <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-130">
               <h3 className="text-lg font-semibold mb-4">Add Assignment</h3>
-              <input type="text" placeholder="Topic" className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4" value={newAssignment.topic} onChange={(e) => setNewAssignment({ ...newAssignment, topic: e.target.value })} />
-              <textarea placeholder="Description" className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4" value={newAssignment.description} onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })} />
-              <input type="date" className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4" value={newAssignment.lastDate} onChange={(e) => setNewAssignment({ ...newAssignment, lastDate: e.target.value })} />
-              <input type="number" placeholder="Total Marks" className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4" value={newAssignment.totalMarks} onChange={(e) => setNewAssignment({ ...newAssignment, totalMarks: e.target.value })} />
+              <input
+                type="text"
+                placeholder="Topic"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={newAssignment.topic}
+                onChange={(e) =>
+                  setNewAssignment({ ...newAssignment, topic: e.target.value })
+                }
+              />
+              <textarea
+                placeholder="Description"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={newAssignment.description}
+                onChange={(e) =>
+                  setNewAssignment({
+                    ...newAssignment,
+                    description: e.target.value,
+                  })
+                }
+              />
+              <input
+                type="datetime-local"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={newAssignment.last_date}
+                onChange={(e) =>
+                  setNewAssignment({
+                    ...newAssignment,
+                    last_date: e.target.value,
+                  })
+                }
+              />
+              <input
+                type="number"
+                placeholder="Total Marks"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={newAssignment.total_marks}
+                onChange={(e) =>
+                  setNewAssignment({
+                    ...newAssignment,
+                    total_marks: e.target.value,
+                  })
+                }
+              />
               <div className="flex justify-end gap-3">
-                <button onClick={() => setIsModalOpen(false)} className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md">Cancel</button>
-                <button onClick={handleAddAssignment} className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md">Add</button>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddAssignment}
+                  className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isEditModalOpen && (
+          <div className="fixed inset-0 flex items-center justify-center backdrop-blur-md bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-130">
+              <h3 className="text-lg font-semibold mb-4">Edit Assignment</h3>
+              <input
+                type="text"
+                placeholder="Topic"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={editAssignment.topic}
+                onChange={(e) =>
+                  setEditAssignment({
+                    ...editAssignment,
+                    topic: e.target.value,
+                  })
+                }
+              />
+              <textarea
+                placeholder="Description"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={editAssignment.description}
+                onChange={(e) =>
+                  setEditAssignment({
+                    ...editAssignment,
+                    description: e.target.value,
+                  })
+                }
+              />
+              <input
+                type="datetime-local"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={editAssignment.last_date}
+                onChange={(e) =>
+                  setEditAssignment({
+                    ...editAssignment,
+                    last_date: e.target.value,
+                  })
+                }
+              />
+              <input
+                type="number"
+                placeholder="Total Marks"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
+                value={editAssignment.total_marks}
+                onChange={(e) =>
+                  setEditAssignment({
+                    ...editAssignment,
+                    total_marks: e.target.value,
+                  })
+                }
+              />
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateAssignment}
+                  className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md"
+                >
+                  Update
+                </button>
               </div>
             </div>
           </div>

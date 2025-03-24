@@ -5,7 +5,7 @@ import Footer from "../../Components/Footer";
 import { FaUserCircle, FaCamera } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
 
@@ -335,7 +335,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <ToastContainer />
       <Footer />
     </>
   );

@@ -6,7 +6,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchMeetings, joinMeeting } from "../../../api/meetingsapi";
 import { fetchExams, fetchSubmissions } from "../../../api/examsapi";
-import { fetchMaterials } from "../../../api/materialsapi"; // Updated import
+import { fetchMaterials } from "../../../api/materialsapi";
+import { fetchAssignments } from "../../../api/assignmentsapi"; // New import
 import { toast } from "react-toastify";
 import { fetchClassroom } from "../../../api/classroomapi";
 import MeetingCard from "../../../Components/MeetingCard";
@@ -22,6 +23,7 @@ const Classroom = () => {
     const [exams, setExams] = useState([]);
     const [submissions, setSubmissions] = useState([]);
     const [materials, setMaterials] = useState([]);
+    const [assignments, setAssignments] = useState([]); // New state
     const [hasActiveMeeting, setHasActiveMeeting] = useState(false);
     const { slug } = useParams();
     const { authToken, user } = useSelector((state) => state.auth);
@@ -30,18 +32,20 @@ const Classroom = () => {
     const fetchData = async () => {
         if (!authToken) return;
         try {
-            const [classroomData, meetingsData, examsData, submissionsData, materialsData] = await Promise.all([
+            const [classroomData, meetingsData, examsData, submissionsData, materialsData, assignmentsData] = await Promise.all([
                 fetchClassroom(slug),
                 fetchMeetings(slug),
                 fetchExams(slug),
                 fetchSubmissions(slug),
-                fetchMaterials(slug),  // Updated to use separate materials endpoint
+                fetchMaterials(slug),
+                fetchAssignments(slug), // Fetch assignments
             ]);
             setClassroom(classroomData);
             setMeetings(meetingsData);
             setExams(Array.isArray(examsData) ? examsData : []);
             setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
             setMaterials(Array.isArray(materialsData) ? materialsData : []);
+            setAssignments(Array.isArray(assignmentsData) ? assignmentsData : []);
             setHasActiveMeeting(meetingsData.some((m) => m.is_active));
         } catch (error) {
             toast.error("Failed to fetch classroom details.");
@@ -161,7 +165,7 @@ const Classroom = () => {
                         date: new Date(m.created_at).toLocaleDateString(),
                         description: ""
                     }))} />}
-                    {activeTab === "Assignments" && <AssignmentTab assignments={dummyAssignments} />}
+                    {activeTab === "Assignments" && <AssignmentTab assignments={assignments} />}
                     {activeTab === "Exams" && <ExamTab exams={exams} />}
                     {activeTab === "Attendance" && (
                         <AttendanceTab attendanceRecords={dummyAttendanceRecords} />

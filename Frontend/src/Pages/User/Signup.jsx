@@ -7,7 +7,7 @@ import Login_image from "../../assets/Images/Login_image.png";
 import Otp from "../../Components/Otp";
 import { signup, signin } from "../../api/authapi";
 import ResetPassword from "../../Components/Resetpassword";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GoogleSignIn from "../../Components/GoogleSignIn";
 
@@ -399,7 +399,6 @@ const Signup = () => {
           )}
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 };

@@ -47,10 +47,19 @@ const MeetingDetails = () => {
           </div>
 
           {/* Meeting Info Card */}
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden p-6 space-y-4">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden p-6 space-y-4 relative">
+            {/* Back Button - Positioned Top Right */}
+            <button
+              onClick={() => navigate(`/meetings/${slug}`)}
+              className="absolute top-4 right-4 bg-teal-500 text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition flex items-center gap-2"
+            >
+              <FaArrowLeft /> Back to Meetings
+            </button>
+
             <h3 className="text-xl font-semibold text-gray-800">
               Meeting Information
             </h3>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <p>
                 <strong className="text-gray-700">Description:</strong>{" "}
@@ -117,16 +126,6 @@ const MeetingDetails = () => {
               </div>
             </div>
           )}
-
-          {/* Back Button */}
-          <div className="mt-6 flex justify-start">
-            <button
-              onClick={() => navigate(`/meetings/${slug}`)}
-              className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-md hover:bg-teal-600 transition"
-            >
-              <FaArrowLeft /> Back to Meetings
-            </button>
-          </div>
         </div>
       </div>
       <Footer />

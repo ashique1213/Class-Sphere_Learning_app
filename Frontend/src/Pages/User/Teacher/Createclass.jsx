@@ -6,7 +6,7 @@ import Footer from "../../../Components/Footer";
 import Createclassform from "../../../Components/Teacher/Createclassform"
 import { useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
 import DeleteModal from "../../../Components/DeleteModal";

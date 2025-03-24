@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/', include('meetings.urls')),
     path('api/', include('exams.urls')),
     path('api/', include('materials.urls')),
+    path('api/', include('assignments.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -141,8 +141,16 @@ const ClassDetails = () => {
           </div>
 
           {[
-            { icon: <FaClipboardList />, label: "Assignments" },
-            { icon: <FaClipboardList />, label: "Materials" ,path:`/materials/${classroom.slug}`},
+            {
+              icon: <FaClipboardList />,
+              label: "Assignments",
+              path: `/assignments/${classroom.slug}`,
+            },
+            {
+              icon: <FaClipboardList />,
+              label: "Materials",
+              path: `/materials/${classroom.slug}`,
+            },
             {
               icon: <FaVideo />,
               label: "Meetings",

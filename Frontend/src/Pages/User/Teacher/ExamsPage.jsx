@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaFileAlt, FaSearch, FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import Navbar from "../../../Components/Navbar";
 import Footer from "../../../Components/Footer";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -405,7 +405,6 @@ const ExamsPage = () => {
         />
       </div>
       <Footer />
-      <ToastContainer />
     </>
   );
 };

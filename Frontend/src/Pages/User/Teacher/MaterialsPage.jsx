@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaFileAlt, FaSearch, FaPlus, FaTimes, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import Navbar from "../../../Components/Navbar";
 import Footer from "../../../Components/Footer";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { fetchClassroom } from "../../../api/classroomapi";
@@ -235,7 +235,6 @@ const MaterialsPage = () => {
                 )}
             </div>
             <Footer />
-            <ToastContainer />
         </>
     );
 };

@@ -30,6 +30,8 @@ import MeetingDetails from "./Components/Teacher/MeetingDetails";
 import ExamsPage from "./Pages/User/Teacher/ExamsPage";
 import ExamDetail from "./Components/Teacher/ExamDetail";
 import MaterialsPage from "./Pages/User/Teacher/MaterialsPage";
+import AssignmentsPage from "./Pages/User/Teacher/AssignmentsPage";
+import AssignmentDetail from "./Components/Teacher/AssignmentDetail";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -70,6 +72,8 @@ function App() {
           <Route path="/exams/:slug" element={<ExamsPage />} />
           <Route path="/exam/:examId" element={<ExamDetail />} />
           <Route path="/materials/:slug" element={<MaterialsPage />} />
+          <Route path="/assignments/:slug" element={<AssignmentsPage />} />
+          <Route path="/assignments/:slug/:assignmentId" element={<AssignmentDetail />} />
         </Route>
         
         <Route path="/join/:meetingId" element={<JoinMeeting />} />
