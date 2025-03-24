@@ -31,6 +31,7 @@ const ExamsPage = () => {
   const [classroom, setClassroom] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [examToDelete, setExamToDelete] = useState(null); 
+  const today = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
     const loadData = async () => {
@@ -66,6 +67,20 @@ const ExamsPage = () => {
       !newExam.marks
     ) {
       toast.error("Please provide all exam details.");
+      return;
+    }
+    if (newExam.timeout < 10 || newExam.timeout > 25) {
+      toast.error("Timeout must be between 10 and 25.");
+      return;
+    }
+    
+    if (newExam.end_date <= today) {
+      toast.error("End date must be in the future.");
+      return;
+    }
+    
+    if (newExam.marks <= 10) {
+      toast.error("Marks must be greater than 10.");
       return;
     }
 
@@ -285,7 +300,7 @@ const ExamsPage = () => {
 
               <input
                 type="text"
-                placeholder="Timeout (e.g., 1 hour)"
+                placeholder="Timeout (e.g., 10 minitues)"
                 className="w-full border border-gray-300 px-3 py-2 rounded-md mb-2"
                 value={newExam.timeout}
                 onChange={(e) => setNewExam({ ...newExam, timeout: e.target.value })}
