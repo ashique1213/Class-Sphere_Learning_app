@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash } from "react-icons/fa";
 import { MdOutlineTopic } from "react-icons/md";
-import Navbar from "../../../Components/Navbar";
-import Footer from "../../../Components/Footer";
+import Navbar from "../../../Components/Layouts/Navbar";
+import Footer from "../../../Components/Layouts/Footer";
 import Createclassform from "../../../Components/Teacher/Createclassform"
 import { useParams, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
-import DeleteModal from "../../../Components/DeleteModal";
+import DeleteModal from "../../../Components/Layouts/DeleteModal";
 
 const Createclass = () => {
   const { teachername } = useParams();

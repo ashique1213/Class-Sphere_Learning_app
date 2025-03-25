@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { joinMeeting } from "../api/meetingsapi";
+import { joinMeeting } from "../../api/meetingsapi";
 import { toast } from "react-toastify";
 
 export default function JoinMeeting() {

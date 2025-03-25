@@ -10,8 +10,8 @@ import {
   FaFileAlt,
   FaSpinner,
 } from "react-icons/fa";
-import Navbar from "../../../Components/Navbar";
-import Footer from "../../../Components/Footer";
+import Navbar from "../../../Components/Layouts/Navbar";
+import Footer from "../../../Components/Layouts/Footer";
 import CreateClassForm from "../../../Components/Teacher/Createclassform";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

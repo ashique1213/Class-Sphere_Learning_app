@@ -1,11 +1,11 @@
 import React from "react";
-import Feature1 from "../assets/Images/Feature1.png";
-import Feature2 from "../assets/Images/Feature2.png";
-import Feature3 from "../assets/Images/Feature3.png";
-import Feature4 from "../assets/Images/Feature4.png";
-import Feature5 from "../assets/Images/Feature5.png";
-import Teacher from "../assets/Images/Teacher.png";
-import Student from "../assets/Images/Student.png";
+import Feature1 from "../../assets/Images/Feature1.png";
+import Feature2 from "../../assets/Images/Feature2.png";
+import Feature3 from "../../assets/Images/Feature3.png";
+import Feature4 from "../../assets/Images/Feature4.png";
+import Feature5 from "../../assets/Images/Feature5.png";
+import Teacher from "../../assets/Images/Teacher.png";
+import Student from "../../assets/Images/Student.png";
 
 const features = [
   {

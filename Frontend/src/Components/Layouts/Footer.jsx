@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../assets/Nav_logo.svg";
+import logo from "../../assets/Nav_logo.svg";
 
 const Footer = () => {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaBook } from "react-icons/fa";
-import Navbar from "../../../Components/Navbar";
-import Footer from "../../../Components/Footer";
+import Navbar from "../../../Components/Layouts/Navbar";
+import Footer from "../../../Components/Layouts/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { fetchMeetings, joinMeeting } from "../../../api/meetingsapi";
@@ -10,7 +10,7 @@ import { fetchMaterials } from "../../../api/materialsapi";
 import { fetchAssignments, submitAssignment } from "../../../api/assignmentsapi";
 import { toast } from "react-toastify";
 import { fetchClassroom } from "../../../api/classroomapi";
-import MeetingCard from "../../../Components/MeetingCard";
+import MeetingCard from "../../../Components/Layouts/MeetingCard";
 import MaterialsTab from "../../../Components/Student/MaterialsTab";
 import AssignmentTab from "../../../Components/Student/AssignmentTab";
 import AttendanceTab from "../../../Components/Student/AttendanceTab";

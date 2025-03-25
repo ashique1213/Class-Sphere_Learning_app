@@ -2,8 +2,8 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "../redux/authSlice";
-import { fetchGoogleUserInfo, authenticateWithGoogle } from "../api/authapi";
+import { loginSuccess } from "../../redux/authSlice";
+import { fetchGoogleUserInfo, authenticateWithGoogle } from "../../api/authapi";
 
 const GoogleSignIn = ({ isSignUp, userType }) => {
   const dispatch = useDispatch();

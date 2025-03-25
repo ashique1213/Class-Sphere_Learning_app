@@ -9,8 +9,8 @@ import {
   FaTrash,
   FaSpinner,
 } from "react-icons/fa";
-import Navbar from "../../../Components/Navbar";
-import Footer from "../../../Components/Footer";
+import Navbar from "../../../Components/Layouts/Navbar";
+import Footer from "../../../Components/Layouts/Footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
@@ -22,7 +22,7 @@ import {
   updateAssignment,
   deleteAssignment,
 } from "../../../api/assignmentsapi";
-import DeleteModal from "../../../Components/DeleteModal";
+import DeleteModal from "../../../Components/Layouts/DeleteModal";
 
 const AssignmentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,8 +1,8 @@
 import React from "react";
 import { FaVideo, FaUsers, FaArrowLeft } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../Navbar"; // Adjust path
-import Footer from "../Footer"; // Adjust path
+import Navbar from "../Layouts/Navbar"; // Adjust path
+import Footer from "../Layouts/Footer"; // Adjust path
 
 const MeetingDetails = () => {
   const location = useLocation();

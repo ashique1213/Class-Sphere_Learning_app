@@ -4,8 +4,8 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEye } from "react-icons/fa";
 import { fetchExam, fetchExamSubmissionsForTeacher } from "../../api/examsapi";
-import Navbar from "../Navbar";
-import Footer from "../Footer";
+import Navbar from "../Layouts/Navbar";
+import Footer from "../Layouts/Footer";
 
 const ExamDetail = () => {
   const { examId } = useParams();

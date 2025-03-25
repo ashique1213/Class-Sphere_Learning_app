@@ -25,7 +25,7 @@ import Classroom from "./Pages/User/Student/Classroom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Meetings from "./Pages/User/Teacher/Meetings"
-import JoinMeeting from "./Components/JoinMeeting";
+import JoinMeeting from "./Components/Layouts/JoinMeeting";
 import MeetingDetails from "./Components/Teacher/MeetingDetails";
 import ExamsPage from "./Pages/User/Teacher/ExamsPage";
 import ExamDetail from "./Components/Teacher/ExamDetail";
@@ -33,6 +33,7 @@ import MaterialsPage from "./Pages/User/Teacher/MaterialsPage";
 import AssignmentsPage from "./Pages/User/Teacher/AssignmentsPage";
 import AssignmentDetail from "./Components/Teacher/AssignmentDetail";
 import AttendancePage from "./Pages/User/Teacher/AttendancePage";
+import Notifications from "./Pages/User/Notifications";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -79,6 +80,7 @@ function App() {
         </Route>
         
         <Route path="/join/:meetingId" element={<JoinMeeting />} />
+        <Route path="/notifications" element={<Notifications />} />
 
         {/* Student-specific routes */}
         <Route element={<RoleRoute allowedRoles={["student"]} />}>

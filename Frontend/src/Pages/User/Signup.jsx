@@ -4,12 +4,12 @@ import { FaHome } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { loginStart, loginSuccess, loginFailure } from "../../redux/authSlice";
 import Login_image from "../../assets/Images/Login_image.png";
-import Otp from "../../Components/Otp";
+import Otp from "../../Components/Layouts/Otp";
 import { signup, signin } from "../../api/authapi";
-import ResetPassword from "../../Components/Resetpassword";
+import ResetPassword from "../../Components/Layouts/Resetpassword";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import GoogleSignIn from "../../Components/GoogleSignIn";
+import GoogleSignIn from "../../Components/Layouts/GoogleSignIn";
 
 const Signup = () => {
   const [userType, setUserType] = useState(null);

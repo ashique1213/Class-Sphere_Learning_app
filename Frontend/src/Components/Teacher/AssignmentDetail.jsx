@@ -3,8 +3,8 @@ import { FaClipboardList, FaEye, FaDownload, FaSave } from "react-icons/fa";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Navbar from "../Navbar";
-import Footer from "../Footer";
+import Navbar from "../Layouts/Navbar";
+import Footer from "../Layouts/Footer";
 import { fetchAssignments, updateSubmissionScore } from "../../api/assignmentsapi";
 
 const AssignmentDetail = () => {

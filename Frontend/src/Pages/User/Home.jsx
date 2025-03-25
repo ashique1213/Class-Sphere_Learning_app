@@ -1,8 +1,8 @@
 import React from 'react'
-import Navbar from '../../Components/Navbar'
-import Footer from '../../Components/Footer'
-import Header from '../../Components/Header'
-import FeatureDetails from '../../Components/FeatureDetails'
+import Navbar from '../../Components/Layouts/Navbar'
+import Footer from '../../Components/Layouts/Footer'
+import Header from '../../Components/Layouts/Header'
+import FeatureDetails from '../../Components/Layouts/FeatureDetails'
 
 const Home = () => {
   return (

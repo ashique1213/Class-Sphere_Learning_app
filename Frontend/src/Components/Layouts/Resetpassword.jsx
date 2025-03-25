@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { sendOtp, verifyotp, resetPassword } from "../api/authapi";
+import { sendOtp, verifyotp, resetPassword } from "../../api/authapi";
 
 const ResetPassword = ({ onClose }) => {
   const [email, setEmail] = useState("");

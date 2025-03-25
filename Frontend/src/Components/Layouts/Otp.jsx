@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginSuccess } from "../redux/authSlice";
-import { verifyOtp,resendOtp } from "../api/authapi";
+import { loginSuccess } from "../../redux/authSlice";
+import { verifyOtp,resendOtp } from "../../api/authapi";
 
 const Otp = ({ email, onSuccess }) => {
   const [otp, setOtp] = useState("");

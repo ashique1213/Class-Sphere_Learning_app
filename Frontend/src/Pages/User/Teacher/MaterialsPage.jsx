@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FaFileAlt, FaSearch, FaPlus, FaTimes, FaEye, FaEdit, FaTrash, FaSpinner } from "react-icons/fa";
-import Navbar from "../../../Components/Navbar";
-import Footer from "../../../Components/Footer";
+import Navbar from "../../../Components/Layouts/Navbar";
+import Footer from "../../../Components/Layouts/Footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { fetchClassroom } from "../../../api/classroomapi";
 import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial } from "../../../api/materialsapi";
 import { useParams, Link } from "react-router-dom";
-import DeleteModal from "../../../Components/DeleteModal";
+import DeleteModal from "../../../Components/Layouts/DeleteModal";
 
 const MaterialsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
