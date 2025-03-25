@@ -237,8 +237,8 @@ const ExamsPage = () => {
                   key={exam.id}
                   className="bg-white p-5 rounded-xl shadow-md transition-all hover:shadow-lg"
                 >
-                  <h3 className="text-xl font-semibold text-gray-800">{exam.topic}</h3>
-                  <p className="text-gray-600">{exam.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-800 capitalize">{exam.topic}</h3>
+                  <p className="text-gray-600 capitalize">{exam.description}</p>
                   <div className="mt-2 text-sm text-gray-500 space-y-1">
                     <p>
                       ⏳ Timeout: <span className="font-medium">{exam.timeout}</span>

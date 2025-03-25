@@ -7,6 +7,7 @@ import {
   FaEye,
   FaEdit,
   FaTrash,
+  FaSpinner,
 } from "react-icons/fa";
 import Navbar from "../../../Components/Navbar";
 import Footer from "../../../Components/Footer";
@@ -21,10 +22,16 @@ import {
   updateAssignment,
   deleteAssignment,
 } from "../../../api/assignmentsapi";
+import DeleteModal from "../../../Components/DeleteModal";
 
 const AssignmentsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); 
+  const [assignmentToDelete, setAssignmentToDelete] = useState(null); 
+  const [isAdding, setIsAdding] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false); 
   const [assignments, setAssignments] = useState([]);
   const [newAssignment, setNewAssignment] = useState({
     topic: "",
@@ -81,6 +88,8 @@ const AssignmentsPage = () => {
       toast.error("Please fill in all fields.");
       return;
     }
+
+    setIsAdding(true);
     try {
       const newAssign = await createAssignment(slug, newAssignment);
       setAssignments([...assignments, newAssign]);
@@ -94,15 +103,20 @@ const AssignmentsPage = () => {
       toast.success("Assignment added successfully!");
     } catch (error) {
       toast.error("Failed to add assignment.");
+    } finally {
+      setIsAdding(false);
     }
   };
 
   const handleEditAssignment = (assignment) => {
+    const date = new Date(assignment.last_date);
+    const formattedDate = date.toISOString().slice(0, 16);
+  
     setEditAssignment({
       id: assignment.id,
       topic: assignment.topic,
       description: assignment.description,
-      last_date: assignment.last_date.split("T")[0], // Format for input[type=date]
+      last_date: formattedDate, 
       total_marks: assignment.total_marks,
     });
     setIsEditModalOpen(true);
@@ -118,6 +132,8 @@ const AssignmentsPage = () => {
       toast.error("Please fill in all fields.");
       return;
     }
+
+    setIsEditing(true);
     try {
       const updatedAssign = await updateAssignment(
         slug,
@@ -138,16 +154,30 @@ const AssignmentsPage = () => {
       toast.success("Assignment updated successfully!");
     } catch (error) {
       toast.error("Failed to update assignment.");
+    } finally {
+      setIsEditing(false);
     }
   };
 
-  const handleDeleteAssignment = async (assignmentId) => {
+  const openDeleteModal = (assignmentId) => {
+    setAssignmentToDelete(assignmentId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteAssignment = async () => {
+    if (!assignmentToDelete) return;
+
+    setIsDeleting(true);
     try {
-      await deleteAssignment(slug, assignmentId);
-      setAssignments(assignments.filter((a) => a.id !== assignmentId));
+      await deleteAssignment(slug, assignmentToDelete);
+      setAssignments(assignments.filter((a) => a.id !== assignmentToDelete));
       toast.success("Assignment deleted successfully!");
     } catch (error) {
       toast.error("Failed to delete assignment.");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+      setAssignmentToDelete(null);
     }
   };
 
@@ -255,7 +285,7 @@ const AssignmentsPage = () => {
                           className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
                         >
                           <FaEye /> View
-                        </Link>{" "}
+                        </Link>
                         <button
                           onClick={() => handleEditAssignment(assignment)}
                           className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
@@ -263,7 +293,7 @@ const AssignmentsPage = () => {
                           <FaEdit />
                         </button>
                         <button
-                          onClick={() => handleDeleteAssignment(assignment.id)}
+                          onClick={() => openDeleteModal(assignment.id)}
                           className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
                         >
                           <FaTrash />
@@ -292,6 +322,7 @@ const AssignmentsPage = () => {
                 onChange={(e) =>
                   setNewAssignment({ ...newAssignment, topic: e.target.value })
                 }
+                disabled={isAdding}
               />
               <textarea
                 placeholder="Description"
@@ -303,6 +334,7 @@ const AssignmentsPage = () => {
                     description: e.target.value,
                   })
                 }
+                disabled={isAdding}
               />
               <input
                 type="datetime-local"
@@ -314,6 +346,7 @@ const AssignmentsPage = () => {
                     last_date: e.target.value,
                   })
                 }
+                disabled={isAdding}
               />
               <input
                 type="number"
@@ -326,19 +359,28 @@ const AssignmentsPage = () => {
                     total_marks: e.target.value,
                   })
                 }
+                disabled={isAdding}
               />
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md"
+                  disabled={isAdding}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddAssignment}
-                  className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md"
+                  className="bg-teal-500 text-white px-5 py-1 rounded-md flex items-center gap-2 disabled:bg-teal-300 disabled:cursor-not-allowed"
+                  disabled={isAdding}
                 >
-                  Add
+                  {isAdding ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Adding...
+                    </>
+                  ) : (
+                    "Add"
+                  )}
                 </button>
               </div>
             </div>
@@ -360,6 +402,7 @@ const AssignmentsPage = () => {
                     topic: e.target.value,
                   })
                 }
+                disabled={isEditing}
               />
               <textarea
                 placeholder="Description"
@@ -371,6 +414,7 @@ const AssignmentsPage = () => {
                     description: e.target.value,
                   })
                 }
+                disabled={isEditing}
               />
               <input
                 type="datetime-local"
@@ -382,6 +426,7 @@ const AssignmentsPage = () => {
                     last_date: e.target.value,
                   })
                 }
+                disabled={isEditing}
               />
               <input
                 type="number"
@@ -394,24 +439,44 @@ const AssignmentsPage = () => {
                     total_marks: e.target.value,
                   })
                 }
+                disabled={isEditing}
               />
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setIsEditModalOpen(false)}
                   className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md"
+                  disabled={isEditing}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdateAssignment}
-                  className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md"
+                  className="bg-teal-500 text-white px-5 py-1 rounded-md flex items-center gap-2 disabled:bg-teal-300 disabled:cursor-not-allowed"
+                  disabled={isEditing}
                 >
-                  Update
+                  {isEditing ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Updating...
+                    </>
+                  ) : (
+                    "Update"
+                  )}
                 </button>
               </div>
             </div>
           </div>
         )}
+
+        <DeleteModal
+          isOpen={isDeleteModalOpen}
+          onConfirm={handleDeleteAssignment}
+          onCancel={() => {
+            setIsDeleteModalOpen(false);
+            setAssignmentToDelete(null);
+          }}
+          message="Are you sure you want to delete this assignment? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
       </div>
       <Footer />
     </>

@@ -24,23 +24,31 @@ class MaterialListCreateView(APIView):
             classroom = Classroom.objects.get(slug=classroom_slug)
             if request.user != classroom.teacher:
                 return Response({"error": "Only the teacher can add materials"}, status=status.HTTP_403_FORBIDDEN)
-            
+
+            # Get the file from request.FILES
             file = request.FILES.get('file')
             material_type = 'video' if file and 'video' in file.content_type else 'pdf'
-            data = request.data.copy()
-            data['material_type'] = material_type
-            
-            serializer = MaterialSerializer(data=data, context={'request': request})
+
+            # Create a new dictionary for the form data (excluding the file)
+            data = {
+                'topic': request.data.get('topic'),
+                'material_type': material_type,
+            }
+
+            # Pass the file in the context
+            serializer = MaterialSerializer(data=data, context={'request': request, 'file': file})
             print("Serializer initial data:", serializer.initial_data)
-            
+
             if serializer.is_valid():
+                # Save the serializer with the teacher and classroom
                 serializer.save(teacher=request.user, classroom=classroom)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
             print("Serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Classroom.DoesNotExist:
             return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)
-
+    
 class MaterialDetailView(APIView):
     permission_classes = [IsAuthenticated]
 

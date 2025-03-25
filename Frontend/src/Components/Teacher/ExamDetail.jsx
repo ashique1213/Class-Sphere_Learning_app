@@ -87,7 +87,7 @@ const ExamDetail = () => {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50 px-4 pt-16 sm:pt-20 md:pt-20">
-        <div className="max-w-5xl mx-auto text-sm text-black py-4">
+        <div className="max-w-5xl mx-auto text-sm text-black py-4 capitalize">
           <Link to="/" className="hover:underline text-gray-600">
             Home
           </Link>{" "}

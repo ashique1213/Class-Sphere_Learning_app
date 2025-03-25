@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaFileAlt, FaSearch, FaPlus, FaTimes, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaFileAlt, FaSearch, FaPlus, FaTimes, FaEye, FaEdit, FaTrash, FaSpinner } from "react-icons/fa";
 import Navbar from "../../../Components/Navbar";
 import Footer from "../../../Components/Footer";
 import { toast } from "react-toastify";
@@ -8,10 +8,15 @@ import { useSelector } from "react-redux";
 import { fetchClassroom } from "../../../api/classroomapi";
 import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial } from "../../../api/materialsapi";
 import { useParams, Link } from "react-router-dom";
+import DeleteModal from "../../../Components/DeleteModal";
 
 const MaterialsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); 
+    const [materialToDelete, setMaterialToDelete] = useState(null); 
+    const [isDeleting, setIsDeleting] = useState(false); 
+    const [isAdding, setIsAdding] = useState(false);
     const [materials, setMaterials] = useState([]);
     const [newMaterial, setNewMaterial] = useState({ topic: "", file: null });
     const [editMaterial, setEditMaterial] = useState({ id: null, topic: "", file: null, material_type: "" });
@@ -53,6 +58,7 @@ const MaterialsPage = () => {
             return;
         }
 
+        setIsAdding(true);
         const formData = new FormData();
         formData.append('topic', newMaterial.topic);
         formData.append('file', newMaterial.file);
@@ -65,6 +71,8 @@ const MaterialsPage = () => {
             toast.success("Material added successfully!");
         } catch (error) {
             toast.error("Failed to add material.");
+        } finally {
+            setIsAdding(false);
         }
     };
 
@@ -72,8 +80,8 @@ const MaterialsPage = () => {
         setEditMaterial({
             id: material.id,
             topic: material.topic,
-            file: null, // File isn’t pre-filled; user must re-upload if changing
-            material_type: material.material_type, // Retain current type for display
+            file: null,
+            material_type: material.material_type,
         });
         setIsEditModalOpen(true);
     };
@@ -88,7 +96,6 @@ const MaterialsPage = () => {
         formData.append('topic', editMaterial.topic);
         if (editMaterial.file) {
             formData.append('file', editMaterial.file);
-            // material_type will be set by backend based on new file
         }
 
         try {
@@ -102,13 +109,25 @@ const MaterialsPage = () => {
         }
     };
 
-    const handleDeleteMaterial = async (materialId) => {
+    const openDeleteModal = (materialId) => {
+        setMaterialToDelete(materialId);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteMaterial = async () => {
+        if (!materialToDelete) return;
+
+        setIsDeleting(true);
         try {
-            await deleteMaterial(slug, materialId);
-            setMaterials(materials.filter((m) => m.id !== materialId));
+            await deleteMaterial(slug, materialToDelete);
+            setMaterials(materials.filter((m) => m.id !== materialToDelete));
             toast.success("Material deleted successfully!");
         } catch (error) {
             toast.error("Failed to delete material.");
+        } finally {
+            setIsDeleting(false);
+            setIsDeleteModalOpen(false);
+            setMaterialToDelete(null);
         }
     };
 
@@ -175,7 +194,12 @@ const MaterialsPage = () => {
                                         <div className="flex gap-2">
                                             <a href={material.file_url} target="_blank" rel="noopener noreferrer" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEye /></a>
                                             <button onClick={() => handleEditMaterial(material)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEdit /></button>
-                                            <button onClick={() => handleDeleteMaterial(material.id)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaTrash /></button>
+                                            <button
+                                                onClick={() => openDeleteModal(material.id)}
+                                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                                            >
+                                                <FaTrash />
+                                            </button>
                                         </div>
                                     </div>
                                 ))
@@ -195,15 +219,35 @@ const MaterialsPage = () => {
                                 className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
                                 value={newMaterial.topic}
                                 onChange={(e) => setNewMaterial({ ...newMaterial, topic: e.target.value })}
+                                disabled={isAdding}
                             />
                             <input
                                 type="file"
                                 className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4"
                                 onChange={(e) => setNewMaterial({ ...newMaterial, file: e.target.files[0] })}
+                                disabled={isAdding}
                             />
                             <div className="flex justify-end gap-3">
-                                <button onClick={() => setIsModalOpen(false)} className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md">Cancel</button>
-                                <button onClick={handleAddMaterial} className="bg-teal-500 hover:bg-teal-600 text-white px-5 py-1 rounded-md">Add</button>
+                                <button
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-1 rounded-md"
+                                    disabled={isAdding}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleAddMaterial}
+                                    className="bg-teal-500 text-white px-5 py-1 rounded-md flex items-center gap-2 disabled:bg-teal-300 disabled:cursor-not-allowed"
+                                    disabled={isAdding}
+                                >
+                                    {isAdding ? (
+                                        <>
+                                            <FaSpinner className="animate-spin" /> Adding...
+                                        </>
+                                    ) : (
+                                        "Add"
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -233,6 +277,17 @@ const MaterialsPage = () => {
                         </div>
                     </div>
                 )}
+
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onConfirm={handleDeleteMaterial}
+                    onCancel={() => {
+                        setIsDeleteModalOpen(false);
+                        setMaterialToDelete(null);
+                    }}
+                    message="Are you sure you want to delete this material? This action cannot be undone."
+                    isDeleting={isDeleting} 
+                />
             </div>
             <Footer />
         </>

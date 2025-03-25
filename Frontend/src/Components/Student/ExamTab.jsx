@@ -81,10 +81,10 @@ const ExamTab = ({ exams = [] }) => {
 
             <div className="flex items-center gap-3 text-teal-700">
               <FaBookOpen className="text-3xl" />
-              <h3 className="text-lg font-semibold">{exam.topic}</h3>
+              <h3 className="text-lg font-semibold capitalize">{exam.topic}</h3>
             </div>
 
-            <p className="text-gray-600 text-sm mt-2">{exam.description}</p>
+            <p className="text-gray-600 text-sm mt-2 capitalize">{exam.description}</p>
 
             <div className="mt-5 flex gap-2">
               <button
