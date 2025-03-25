@@ -1,3 +1,4 @@
+// meetingsapi.js
 import api from "./api";
 
 export const createMeeting = async (slug, meetingData) => {

@@ -164,7 +164,7 @@ const Meetings = () => {
 
         {showModal && user.role === "teacher" && (
           <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative">
               <button
                 className="absolute top-3 right-3 text-gray-600 hover:text-gray-900"
                 onClick={() => setShowModal(false)}

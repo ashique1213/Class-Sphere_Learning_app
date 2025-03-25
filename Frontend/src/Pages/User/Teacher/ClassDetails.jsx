@@ -156,7 +156,11 @@ const ClassDetails = () => {
               label: "Meetings",
               path: `/meetings/${classroom.slug}`,
             },
-            { icon: <FaCheckCircle />, label: "Attendance" },
+            {
+              icon: <FaCheckCircle />,
+              label: "Attendance",
+              path: `/attendance/${classroom.slug}`,
+            },
             {
               icon: <FaFileAlt />,
               label: "Exams",

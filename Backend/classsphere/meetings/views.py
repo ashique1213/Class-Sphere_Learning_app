@@ -35,7 +35,7 @@ class GetMeetingView(APIView):
 class MeetingListView(APIView):
     def get(self, request, slug):
         classroom = get_object_or_404(Classroom, slug=slug)
-        meetings = Meeting.objects.filter(classroom=classroom)
+        meetings = Meeting.objects.filter(classroom=classroom).order_by('-created_at') 
         serializer = MeetingSerializer(meetings, many=True)
         return Response(serializer.data)
 

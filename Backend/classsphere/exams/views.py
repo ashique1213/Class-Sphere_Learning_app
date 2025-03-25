@@ -10,7 +10,7 @@ class ExamListCreateView(APIView):
 
     def get(self, request, slug):
         try:
-            exams = Exam.objects.filter(classroom__slug=slug)
+            exams = Exam.objects.filter(classroom__slug=slug).order_by('-created_at') 
             serializer = ExamSerializer(exams, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
