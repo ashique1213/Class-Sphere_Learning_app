@@ -3,14 +3,21 @@ from .models import Assignment, Submission
 
 class SubmissionSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()  # Add file URL
 
     class Meta:
         model = Submission
-        fields = ['id', 'student', 'student_name', 'file', 'submitted_at', 'score']
+        fields = ['id', 'student', 'student_name', 'file', 'file_url', 'submitted_at', 'score']
         read_only_fields = ['student', 'submitted_at']
 
     def get_student_name(self, obj):
         return obj.student.username
+
+    def get_file_url(self, obj):
+        if obj.file:
+            return obj.file.url  # Ensure direct Cloudinary file URL
+        return None
+
 
 class AssignmentSerializer(serializers.ModelSerializer):
     submissions = SubmissionSerializer(many=True, read_only=True)
@@ -23,13 +30,12 @@ class AssignmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['teacher', 'created_at', 'submissions']
 
     def get_file_url(self, obj):
-        request = self.context.get('request')
-        latest_submission = obj.submissions.filter(student=self.context['request'].user).order_by('-submitted_at').first()
-        if latest_submission and latest_submission.file and request:
-            return request.build_absolute_uri(latest_submission.file.url)
+        if obj.submissions.exists():
+            latest_submission = obj.submissions.filter(student=self.context['request'].user).order_by('-submitted_at').first()
+            if latest_submission and latest_submission.file:
+                return latest_submission.file.url
         return None
 
     def get_submission_score(self, obj):
-        request = self.context.get('request')
         latest_submission = obj.submissions.filter(student=self.context['request'].user).order_by('-submitted_at').first()
         return latest_submission.score if latest_submission else None

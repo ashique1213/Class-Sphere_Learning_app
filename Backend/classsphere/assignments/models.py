@@ -1,6 +1,8 @@
 from django.db import models
 from classroom.models import Classroom
 from django.contrib.auth import get_user_model
+from cloudinary.models import CloudinaryField # type: ignore
+
 
 User = get_user_model()
 
@@ -20,7 +22,7 @@ class Assignment(models.Model):
 class Submission(models.Model):
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
-    file = models.FileField(upload_to='submissions/%Y/%m/%d/')
+    file = CloudinaryField('submissions', resource_type='raw', folder="submissions")
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.PositiveIntegerField(null=True, blank=True)
 

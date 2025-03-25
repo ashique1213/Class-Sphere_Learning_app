@@ -129,9 +129,9 @@ const AssignmentDetail = () => {
                       <p className="text-gray-600 text-sm">
                         Submitted on {new Date(submission.submitted_at).toLocaleString()}
                       </p>
-                      {submission.file && (
+                      {submission.file_url && (
                         <a
-                          href={submission.file}
+                          href={submission.file_url}  // Updated to use file_url
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-teal-600 text-sm hover:underline flex items-center gap-1"
@@ -139,6 +139,7 @@ const AssignmentDetail = () => {
                           <FaDownload /> Download Submission
                         </a>
                       )}
+
                     </div>
                     <div className="flex items-center gap-3">
                       <input

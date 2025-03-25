@@ -11,9 +11,8 @@ class MaterialSerializer(serializers.ModelSerializer):
         read_only_fields = ['teacher', 'created_at', 'classroom']
 
     def get_file_url(self, obj):
-        request = self.context.get('request')
-        if obj.file and request:
-            return request.build_absolute_uri(obj.file.url)
+        if obj.file:
+            return obj.file.url 
         return None
 
     def validate(self, data):

@@ -88,9 +88,9 @@ const AssignmentTab = ({ assignments = [] }) => {
               {assignment.file_url ? (
                 <div className="text-sm text-gray-500 mb-2">
                   <p>
-                    Submitted:{" "}
+                  Submitted:{" "}
                     <a
-                      href={assignment.file_url}
+                      href={assignment.file_url} // Updated to use file_url
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-teal-600 hover:underline"
