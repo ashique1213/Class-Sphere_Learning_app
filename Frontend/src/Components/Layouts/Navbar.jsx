@@ -1,23 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../../assets/Nav_logo.svg";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { persistor } from "../../redux/store";
-import api from "../../api/api";
+import notificationApi from "../../api/notificationapi"; 
 import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]); 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { authToken, refreshToken } = useSelector((state) => state.auth); // Get refreshToken
+  const { authToken, refreshToken } = useSelector((state) => state.auth);
   const isAuthenticated = !!authToken;
+
+  useEffect(() => {
+    if (isAuthenticated && authToken) {
+      fetchNotifications();
+    }
+  }, [isAuthenticated, authToken]);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await notificationApi.getNotifications(authToken);
+      setNotifications(response.data);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
       if (refreshToken) {
-        await api.post(
+        const response = await notificationApi.post(
           "/logout/",
           { refresh: refreshToken },
           {
@@ -28,18 +44,18 @@ const Navbar = () => {
         toast.success(response.data.message || "Logged out successfully");
       }
 
-      dispatch(logout()); // Clear Redux state
-      await persistor.purge(); // Purge persisted state
-      localStorage.clear(); // Clear local storage
+      dispatch(logout());
+      await persistor.purge();
+      localStorage.clear();
+      setNotifications([]); // Clear notifications on logout
       navigate("/");
-      // window.location.reload();
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
-      dispatch(logout()); // Clear Redux state
-      await persistor.purge(); // Purge persisted state
-      localStorage.clear(); // Clear local storage
+      dispatch(logout());
+      await persistor.purge();
+      localStorage.clear();
+      setNotifications([]);
       navigate("/");
-      // window.location.reload();
     }
   };
 
@@ -99,10 +115,7 @@ const Navbar = () => {
                   Sign Out
                 </button>
               </Link>
-              <Link
-                to="/notifications"
-                className="block md:inline-block p-2 md:p-0"
-              >
+              <Link to="/notifications" className="relative block md:inline-block p-2 md:p-0">
                 <svg
                   className="w-6 h-6 text-white hover:text-teal-900 transition duration-200"
                   fill="none"
@@ -117,6 +130,11 @@ const Navbar = () => {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
+                {notifications.length > 0 && notifications.filter((n) => !n.is_read).length > 0 && (
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    {notifications.filter((n) => !n.is_read).length}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/Profile"

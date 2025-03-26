@@ -4,7 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Material
 from .serializers import MaterialSerializer
-from classroom.models import Classroom
+from classroom.models import Classroom,Student
+from notifications.utils import create_notification
+
 
 class MaterialListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -19,7 +21,6 @@ class MaterialListCreateView(APIView):
             return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, classroom_slug):
-        print("Entered POST method")
         try:
             classroom = Classroom.objects.get(slug=classroom_slug)
             if request.user != classroom.teacher:
@@ -35,19 +36,32 @@ class MaterialListCreateView(APIView):
                 'material_type': material_type,
             }
 
-            # Pass the file in the context
             serializer = MaterialSerializer(data=data, context={'request': request, 'file': file})
-            print("Serializer initial data:", serializer.initial_data)
 
             if serializer.is_valid():
-                # Save the serializer with the teacher and classroom
-                serializer.save(teacher=request.user, classroom=classroom)
+                material = serializer.save(teacher=request.user, classroom=classroom)
+
+                teacher_message = f"Material '{material.topic}' successfully added to {classroom.name}"
+                create_notification(
+                    user=request.user,
+                    message=teacher_message,
+                    notification_type='SUCCESS'
+                )
+                students = Student.objects.filter(joined_classes=classroom)
+                student_message = f"New {material_type} material '{material.topic}' added to {classroom.name}"
+                for student in students:
+                    create_notification(
+                        user=student.user,
+                        message=student_message,
+                        notification_type='INFO'
+                    )
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
-            print("Serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Classroom.DoesNotExist:
             return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)
+    
     
 class MaterialDetailView(APIView):
     permission_classes = [IsAuthenticated]
@@ -86,7 +100,6 @@ class MaterialDetailView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        print("Serializer errors:", serializer.errors)  # Debug if needed
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, classroom_slug, pk):

@@ -282,19 +282,19 @@ const AssignmentsPage = () => {
                         <Link
                           to={`/assignments/${slug}/${assignment.id}`}
                           state={{ slug }}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
+                          className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm flex items-center gap-1"
                         >
                           <FaEye /> View
                         </Link>
                         <button
                           onClick={() => handleEditAssignment(assignment)}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
                         >
                           <FaEdit />
                         </button>
                         <button
                           onClick={() => openDeleteModal(assignment.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                          className="bg-red-700 hover:bg-red-900 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
                         >
                           <FaTrash />
                         </button>

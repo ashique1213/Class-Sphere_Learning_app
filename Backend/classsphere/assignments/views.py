@@ -4,8 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Assignment, Submission
 from .serializers import AssignmentSerializer, SubmissionSerializer
-from classroom.models import Classroom
+from classroom.models import Classroom,Student
 from django.utils import timezone
+from notifications.utils import create_notification
 
 class AssignmentListCreateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -31,9 +32,26 @@ class AssignmentListCreateView(APIView):
             
             serializer = AssignmentSerializer(data=data, context={'request': request})
             if serializer.is_valid():
-                serializer.save(teacher=request.user, classroom=classroom)  # classroom already set, teacher added
+                assignment = serializer.save(teacher=request.user, classroom=classroom)
+
+                # Notify
+                teacher_message = f"Assignment '{assignment.topic}' successfully added to {classroom.name}"
+                create_notification(
+                    user=request.user,
+                    message=teacher_message,
+                    notification_type='SUCCESS'
+                )
+
+                students = Student.objects.filter(joined_classes=classroom)
+                student_message = f"New assignment '{assignment.topic}' added to {classroom.name}"
+                for student in students:
+                    create_notification(
+                        user=student.user,
+                        message=student_message,
+                        notification_type='INFO'
+                    )
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            print("Serializer errors:", serializer.errors)  # Log errors for debugging
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Classroom.DoesNotExist:
             return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)

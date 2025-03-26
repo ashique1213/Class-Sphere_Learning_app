@@ -233,6 +233,7 @@ class GoogleLoginView(SocialLoginView):
             except Exception as e:
                 # Log the error but continue with social auth
                 print(f"Error validating user role: {str(e)}")
+                return None
         
         # Proceed with social auth
         response = super().post(request, *args, **kwargs)
@@ -505,7 +506,6 @@ class VerifyTeacherView(APIView):
     permission_classes = [IsAdminUser]  # Only admins can verify teachers
 
     def post(self, request, user_id):
-        print("h")
         """Toggle verification status for a teacher."""
         teacher = get_object_or_404(User, id=user_id)
 

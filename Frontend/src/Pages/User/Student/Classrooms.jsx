@@ -5,13 +5,15 @@ import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { fetchJoinedClasses, joinClass } from "../../../api/classroomapi";
-import { toast } from "react-toastify"; // Assuming toast is imported globally or in a provider
+import { toast } from "react-toastify";
+import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
 const Classrooms = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [joinedClasses, setJoinedClasses] = useState([]);
   const [classInput, setClassInput] = useState("");
   const [showInput, setShowInput] = useState(false);
+  const [showModal, setShowModal] = useState(false); // State for modal visibility
   const authToken = useSelector((state) => state.auth.authToken);
   const { studentname } = useParams();
 
@@ -29,16 +31,37 @@ const Classrooms = () => {
     loadJoinedClasses();
   }, [authToken]);
 
-  // Handle joining a class
+  // Handle initiating the join process (show modal)
+  const initiateJoinClass = () => {
+    if (!classInput.trim()) {
+      toast.error("Please enter a class link.");
+      return;
+    }
+    setShowModal(true); // Show confirmation modal
+  };
+
+  // Handle confirmed join class action
   const handleJoinClass = async () => {
     try {
       const newClass = await joinClass(classInput, authToken);
-      setJoinedClasses((prev) => [newClass, ...prev]);
+      
+      const isAlreadyJoined = joinedClasses.some(
+        (cls) => cls.id === newClass.id
+      );
+
+      if (isAlreadyJoined) {
+        toast.info("You have already joined this class.");
+      } else {
+        setJoinedClasses((prev) => [newClass, ...prev]);
+        toast.success("Class joined successfully!");
+      }
+      
       setClassInput("");
       setShowInput(false);
-      toast.success("Class joined successfully!");
+      setShowModal(false); // Close modal after joining
     } catch (error) {
       toast.error(error.message || "Failed to join class.");
+      setShowModal(false); // Close modal on error
     }
   };
 
@@ -48,15 +71,20 @@ const Classrooms = () => {
       classroom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       classroom.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-100 px-4 pt-16 sm:pt-20 md:pt-20">
         {/* Breadcrumbs */}
         <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
-          Home | <Link to="/profile" className="hover:underline">My Account |</Link>{" "}
-          <Link to="/profile" className="hover:underline">{studentname}</Link>{" "}
-          {/* <span className="capitalize"> </span> */}
+          Home |{" "}
+          <Link to="/profile" className="hover:underline">
+            My Account |
+          </Link>{" "}
+          <Link to="/profile" className="hover:underline">
+            {studentname}
+          </Link>{" "}
           <span className="font-semibold">| Classrooms</span>
         </div>
 
@@ -98,13 +126,29 @@ const Classrooms = () => {
               />
               <button
                 className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md sm:rounded-l-none sm:rounded-r-md w-full sm:w-auto"
-                onClick={handleJoinClass}
+                onClick={initiateJoinClass} // Trigger modal instead of direct join
               >
                 Join
               </button>
             </div>
           </div>
         )}
+
+        {/* Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          onConfirm={handleJoinClass}
+          title="Confirm Join Class"
+          message={
+            <>
+              Are you sure you want to join the class with the link:{" "}
+              <span className="font-medium break-all">{classInput}</span>?
+            </>
+          }
+          confirmText="Join"
+          cancelText="Cancel"
+        />
 
         {/* Search Bar */}
         <div className="max-w-full sm:max-w-5xl mx-auto mb-6 px-4">
@@ -131,8 +175,12 @@ const Classrooms = () => {
                 <h3 className="text-base sm:text-lg font-semibold text-gray-800">
                   {classroom.name}
                 </h3>
-                <p className="text-sm text-gray-700 capitalize font-bold">Tutor: {classroom.teacher}</p>
-                <p className="text-sm text-gray-700">Topic :{classroom.category}</p>
+                <p className="text-sm text-gray-700 capitalize font-bold">
+                  Tutor: {classroom.teacher}
+                </p>
+                <p className="text-sm text-gray-700">
+                  Topic: {classroom.category}
+                </p>
                 <p className="text-xs sm:text-sm text-gray-500 pt-1">
                   {classroom.description.length > 200
                     ? classroom.description.slice(0, 200) + "....."

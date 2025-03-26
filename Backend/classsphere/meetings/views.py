@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404
 from .models import Meeting, MeetingParticipant
 from .serializers import MeetingSerializer
 from rest_framework.permissions import IsAuthenticated
-from classroom.models import Classroom
+from classroom.models import Classroom,Student
+from notifications.utils import create_notification
 
 class CreateMeetingView(APIView):
     permission_classes = [IsAuthenticated]
@@ -15,12 +16,28 @@ class CreateMeetingView(APIView):
         data = request.data.copy()
         data['classroom'] = classroom.pk
         data['host'] = request.user.id
-        print(data)  
         serializer = MeetingSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            print(serializer.data)  
+            meeting = serializer.save()
+
+            teacher_message = f"Meeting '{meeting.title}' successfully scheduled for {classroom.name}"
+            create_notification(
+                user=request.user,
+                message=teacher_message,
+                notification_type='SUCCESS'
+            )
+
+            students = Student.objects.filter(joined_classes=classroom)
+            student_message = f"New meeting '{meeting.title}' scheduled for {classroom.name}"
+            for student in students:
+                create_notification(
+                    user=student.user,
+                    message=student_message,
+                    notification_type='INFO'
+                )
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetMeetingView(APIView):

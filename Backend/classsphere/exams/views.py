@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status, permissions
 from .models import Exam, Question, ExamSubmission
 from .serializers import ExamSerializer, ExamSubmissionSerializer
-from classroom.models import Classroom
+from classroom.models import Classroom,Student
+from notifications.utils import create_notification
+
 
 class ExamListCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -28,8 +30,24 @@ class ExamListCreateView(APIView):
             data['classroom'] = classroom.id
             data['created_by'] = request.user.id
             serializer = ExamSerializer(data=data)
+
             if serializer.is_valid():
-                serializer.save()
+                exam = serializer.save()
+                
+                teacher_message = f"New Exam '{exam.topic}' successfully added to {classroom.name}"
+                create_notification(
+                    user= request.user,
+                    message=teacher_message,
+                    notification_type='SUCCESS'
+                )
+                students = Student.objects.filter(joined_classes=classroom)
+                student_message = f"New Exam '{exam.topic}' added to {classroom.name}"
+                for student in students:
+                    create_notification(
+                        user=student.user,
+                        message=student_message,
+                        notification_type='INFO'
+                    )
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Classroom.DoesNotExist:

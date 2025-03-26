@@ -192,11 +192,11 @@ const MaterialsPage = () => {
                                             <span className="text-gray-500">PDF</span>
                                         )}
                                         <div className="flex gap-2">
-                                            <a href={material.file_url} target="_blank" rel="noopener noreferrer" className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEye /></a>
-                                            <button onClick={() => handleEditMaterial(material)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEdit /></button>
+                                            <a href={material.file_url} target="_blank" rel="noopener noreferrer" className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEye /></a>
+                                            <button onClick={() => handleEditMaterial(material)} className="bg-yellow-600 hover:bg-yellow-900 text-white px-3 py-1 rounded-md text-xs sm:text-sm"><FaEdit /></button>
                                             <button
                                                 onClick={() => openDeleteModal(material.id)}
-                                                className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
+                                                className="bg-red-700 hover:bg-red-900 text-white px-3 py-1 rounded-md text-xs sm:text-sm"
                                             >
                                                 <FaTrash />
                                             </button>
