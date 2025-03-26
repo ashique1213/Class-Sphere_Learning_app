@@ -101,4 +101,41 @@ class JoinedClassesView(APIView):
         student, created = Student.objects.get_or_create(user=request.user)
         serializer = StudentSerializer(student)
         return Response(serializer.data["joined_classes"])
-    
+
+
+class RemoveStudentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self,request,slug):
+        try:
+            classroom = Classroom.objects.get(slug=slug)
+
+            if request.user!=classroom.teacher:
+
+                return Response(
+                    {"error": "Only the teacher can remove students"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            student_id = request.data.get("student_id")
+            if not student_id:
+                return Response(
+                    {"error": "Student ID is required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            student = Student.objects.get(user_id=student_id)
+            if classroom not in student.joined_classes.all():
+                return Response(
+                    {"error": "Student is not enrolled in this classroom"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            student.joined_classes.remove(classroom)
+            return Response(
+                {"message": f"Student {student.user.username} removed from {classroom.name}"},
+                status=status.HTTP_200_OK
+            )
+        except Classroom.DoesNotExist:
+            return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Student.DoesNotExist:
+            return Response({"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND)

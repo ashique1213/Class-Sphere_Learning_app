@@ -24,6 +24,7 @@ import requests # type: ignore
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.shortcuts import get_object_or_404
+from notifications.utils import create_notification
 
 
 class SignInView(APIView):
@@ -514,6 +515,19 @@ class VerifyTeacherView(APIView):
 
         teacher.is_verified = not teacher.is_verified
         teacher.save()
+
+        # Prepare notification message
+        status_message = "Teacher verified" if teacher.is_verified else "Teacher unverified"
+        notification_message = (
+            f"Your teacher verification status has been updated. You are now "
+            f"{'verified' if teacher.is_verified else 'unverified'}."
+        )
+
+        create_notification(
+            user=teacher,
+            message=notification_message,
+            notification_type='INFO' if teacher.is_verified else 'WARNING'
+        )
 
         status_message = "Teacher verified" if teacher.is_verified else "Teacher unverified"
         return Response({"message": status_message, "is_verified": teacher.is_verified})

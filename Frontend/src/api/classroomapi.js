@@ -75,4 +75,14 @@ export const updateClassroom = async (classId, formData) => {
       console.error("Error updating classroom:", error);
       throw error.response?.data || error;
     }
-  };
+};
+  
+export const removeStudent = async (slug, studentId) => {
+  try {
+    const response = await api.post(`/classrooms/${slug}/remove-student/`, { student_id: studentId });
+    return response.data;
+  } catch (error) {
+    console.error("Error removing student:", error);
+    throw error.response?.data || error;
+  }
+};

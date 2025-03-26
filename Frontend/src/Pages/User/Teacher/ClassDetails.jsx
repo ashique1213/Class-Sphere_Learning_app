@@ -15,7 +15,8 @@ import Footer from "../../../Components/Layouts/Footer";
 import CreateClassForm from "../../../Components/Teacher/Createclassform";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fetchClassroom } from "../../../api/classroomapi";
+import { fetchClassroom, removeStudent } from "../../../api/classroomapi";
+import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
 const ClassDetails = () => {
   const { slug } = useParams();
@@ -25,6 +26,8 @@ const ClassDetails = () => {
   const { user } = useSelector((state) => state.auth);
   const [isEditing, setIsEditing] = useState(false);
   const message = localStorage.getItem("toastMessage");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [studentToRemove, setStudentToRemove] = useState(null);
 
   useEffect(() => {
     if (message) {
@@ -53,6 +56,28 @@ const ClassDetails = () => {
 
     loadClassroom();
   }, [slug, authToken]);
+
+  const initiateRemoveStudent = (student) => {
+    setStudentToRemove(student)
+    setShowRemoveModal(true)
+  }
+
+
+  const handleRemoveStudent = async () => {
+    try {
+      await removeStudent(slug, studentToRemove.id);
+      setClassroom((prev) => ({
+        ...prev,
+        students: prev.students.filter((s) => s.id !== studentToRemove.id),
+      }));
+      toast.success(`Student ${studentToRemove.username} removed successfully!`);
+    } catch (error) {
+      toast.error(error.message || "Failed to remove student.");
+    } finally {
+      setShowRemoveModal(false);
+      setStudentToRemove(null);
+    }
+  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -220,7 +245,7 @@ const ClassDetails = () => {
                     <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
                       Video Chat
                     </button>
-                    <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
+                    <button onClick={()=> initiateRemoveStudent(student)} className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
                       Remove
                     </button>
                   </div>
@@ -233,6 +258,23 @@ const ClassDetails = () => {
             )}
           </div>
         </div>
+
+        <ConfirmationModal
+          isOpen={showRemoveModal}
+          onClose={() => {
+            setShowRemoveModal(false)
+            setStudentToRemove(null)
+          }}
+          onConfirm={handleRemoveStudent}
+          title="Confirm Remove Student"
+          message={
+            studentToRemove
+              ? `Are you sure you want to remove ${studentToRemove.username} from ${classroom.name}?`
+              : "Are you sure you want to remove this student?"
+          }
+          confirmText="Remove"
+          cancelText="Cancel"
+        />
       </div>
       <Footer />
     </>
