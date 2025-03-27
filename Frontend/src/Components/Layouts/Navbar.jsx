@@ -4,20 +4,67 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { persistor } from "../../redux/store";
-import notificationApi from "../../api/notificationapi"; 
+import notificationApi from "../../api/notificationapi";
 import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]); 
+  const [notifications, setNotifications] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { authToken, refreshToken } = useSelector((state) => state.auth);
   const isAuthenticated = !!authToken;
 
+  // WebSocket state
+  const [ws, setWs] = useState(null);
+
+  // Fetch initial notifications and set up WebSocket
   useEffect(() => {
     if (isAuthenticated && authToken) {
       fetchNotifications();
+
+      // Establish WebSocket connection
+      const websocket = new WebSocket(
+        `ws://localhost:8000/ws/notifications/?token=${authToken}`
+      ); 
+
+      websocket.onopen = () => {
+        console.log("WebSocket connected");
+      };
+
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("Received WebSocket message:", data);
+
+        // Add new notification to state
+        setNotifications((prev) => [
+          {
+            id: data.id,
+            message: data.message,
+            notification_type: data.notification_type,
+            time_ago: data.time_ago,
+            is_read: data.is_read,
+          },
+          ...prev,
+        ]);
+      };
+
+      websocket.onclose = () => {
+        console.log("WebSocket disconnected");
+      };
+
+      websocket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+
+      setWs(websocket);
+
+      // Cleanup WebSocket on unmount
+      return () => {
+        if (websocket) {
+          websocket.close();
+        }
+      };
     }
   }, [isAuthenticated, authToken]);
 
@@ -47,7 +94,8 @@ const Navbar = () => {
       dispatch(logout());
       await persistor.purge();
       localStorage.clear();
-      setNotifications([]); // Clear notifications on logout
+      setNotifications([]);
+      if (ws) ws.close(); // WebSocket on logout
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
@@ -55,6 +103,7 @@ const Navbar = () => {
       await persistor.purge();
       localStorage.clear();
       setNotifications([]);
+      if (ws) ws.close();
       navigate("/");
     }
   };
