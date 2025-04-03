@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { HiOutlineUsers } from "react-icons/hi";
 import { IoWalletOutline } from "react-icons/io5";
 import { MdDashboard } from "react-icons/md";
+import { FaBars } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
-import logo from "../../assets/Nav_logo.svg"
-import { FaBars } from "react-icons/fa"; // For hamburger menu
+import logo from "../../assets/Nav_logo.svg";
+import { FaComment } from "react-icons/fa"; 
 
 const Sidebar = () => {
   const [active, setActive] = useState("");
-  const [isOpen, setIsOpen] = useState(false); // For mobile toggle
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,6 +17,7 @@ const Sidebar = () => {
     { name: "Dashboard", icon: <MdDashboard className="text-lg" />, path: "/admindashboard" },
     { name: "Students", icon: <HiOutlineUsers className="text-lg" />, path: "/students" },
     { name: "Teachers", icon: <HiOutlineUsers className="text-lg" />, path: "/teachers" },
+    { name: "Reviews", icon: <FaComment className="text-lg" />, path: "/reviews" }, 
     { name: "Finance", icon: <IoWalletOutline className="text-lg" /> },
   ];
 
@@ -47,8 +49,8 @@ const Sidebar = () => {
             <li
               key={item.name}
               onClick={() => {
-                navigate(item.path || "#"); // Default to "#" if no path
-                setIsOpen(false); // Close sidebar on mobile click
+                navigate(item.path || "#");
+                setIsOpen(false);
               }}
               className={`flex items-center space-x-2 cursor-pointer px-3 py-2 rounded-md transition ${
                 active === item.path ? "bg-teal-500" : "hover:bg-gray-800"

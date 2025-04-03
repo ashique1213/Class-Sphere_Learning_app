@@ -35,6 +35,7 @@ import AssignmentDetail from "./Components/Teacher/AssignmentDetail";
 import AttendancePage from "./Pages/User/Teacher/AttendancePage";
 import Notifications from "./Pages/User/Notifications";
 import About from "./Pages/User/About";
+import Reviews from "./Pages/Admin/Reviews";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -97,6 +98,7 @@ function App() {
           <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/students" element={<Students />} />
           <Route path="/teachers" element={<Teachers />} />
+          <Route path="/reviews" element={<Reviews />} />
         </Route>
 
         {/* Catch-all route (redirect invalid URLs) */}
