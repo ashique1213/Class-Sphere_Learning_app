@@ -12,6 +12,7 @@ class Exam(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_exams')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    published = models.BooleanField(default=False) 
 
     def __str__(self):
         return f"{self.topic} - {self.classroom.name}"

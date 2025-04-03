@@ -78,6 +78,11 @@ class ExamDetailView(APIView):
                 {"error": "Only the exam creator can edit it"},
                 status=status.HTTP_403_FORBIDDEN
             )
+        if exam.published:
+            return Response(
+                {"error": "Published exams cannot be edited"},
+                status=status.HTTP_403_FORBIDDEN
+            )
         serializer = ExamSerializer(exam, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -95,6 +100,55 @@ class ExamDetailView(APIView):
             )
         exam.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PublishExamView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, exam_id):
+        try:
+            exam = Exam.objects.get(id=exam_id)
+            if request.user != exam.created_by:
+                return Response(
+                    {"error": "Only the exam creator can publish it"},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            if exam.published:
+                return Response(
+                    {"message": "Exam is already published"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            exam.published = True
+            exam.save()
+
+            teacher_message = f"Exam '{exam.topic}' has been successfully published."
+            create_notification(
+                user=request.user,
+                message=teacher_message,
+                notification_type='SUCCESS'
+            )
+
+            students = Student.objects.filter(joined_classes=exam.classroom)
+            student_message = f"New Exam '{exam.topic}' is now published in {exam.classroom.name}."
+            for student in students:
+                create_notification(
+                    user=student.user,
+                    message=student_message,
+                    notification_type='INFO'
+                )
+
+            return Response(
+                {"message": "Exam published successfully"},
+                status=status.HTTP_200_OK
+            )
+        except Exam.DoesNotExist:
+            return Response(
+                {"error": "Exam not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
 
 class ExamSubmissionView(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -41,6 +41,16 @@ const updateExam = async (examId, examData) => {
   }
 };
 
+const publishExam = async (examId) => {
+  try {
+    const response = await api.post(`/exams/${examId}/publish/`);
+    return response.data;
+  } catch (error) {
+    console.error("Error publishing exam:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 const deleteExam = async (examId) => {
   try {
     await api.delete(`/exams/${examId}/`);
@@ -80,4 +90,4 @@ const fetchExamSubmissionsForTeacher = async (examId) => {
     throw error;
   }
 };
-export { fetchExams, fetchExam,fetchExamSubmissionsForTeacher, fetchSubmissions, createExam, updateExam, deleteExam, submitExam };
+export { fetchExams, fetchExam, publishExam,fetchExamSubmissionsForTeacher, fetchSubmissions, createExam, updateExam, deleteExam, submitExam };

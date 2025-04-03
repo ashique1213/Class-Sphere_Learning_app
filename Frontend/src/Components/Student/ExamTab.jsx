@@ -68,7 +68,7 @@ const ExamTab = ({ exams = [] }) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 p-4">
-      {exams.map((exam) => {
+      {exams.filter((exam)=>exam.published).map((exam) => {
         const isSubmitted = submittedExams.has(exam.id);
         return (
           <div

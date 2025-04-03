@@ -152,26 +152,38 @@ const ExamModal = ({
           </h3>
 
           {/* Options */}
-          <div className="grid grid-cols-1 gap-2">
-            {exam.questions[currentQuestion].options.map((option, index) => (
-              <button
-                key={index}
-                className={`w-full px-4 py-2 rounded-md border transition-all duration-300 text-left ${
-                  selectedAnswers[currentQuestion] === option
-                    ? "bg-teal-500 text-white"
-                    : viewMode && selectedAnswers[currentQuestion] === null
-                    ? "bg-gray-300 text-gray-700"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-                onClick={() => handleAnswerSelect(option)}
-                disabled={viewMode || timeLeft <= 0}
-              >
-                {viewMode && selectedAnswers[currentQuestion] === null
-                  ? "Not Answered"
-                  : option}
-              </button>
-            ))}
-          </div>
+            <div className="grid grid-cols-1 gap-2">
+              {exam.questions[currentQuestion].options.map((option, index) => {
+                const isCorrect = option === exam.questions[currentQuestion].correct_answer;
+                const isSelected = selectedAnswers[currentQuestion] === option;
+                const notAnswered = selectedAnswers[currentQuestion] === null;
+
+                let buttonClass = "w-full px-4 py-2 rounded-md border transition-all duration-300 text-left ";
+                
+                if (viewMode) {
+                  if (isCorrect) {
+                    buttonClass += "bg-emerald-400 text-white"; // Show correct answer in green
+                  } else if (isSelected) {
+                    buttonClass += "bg-red-700 text-white"; // Show wrong selected answer in red
+                  } else {
+                    buttonClass += "bg-gray-100"; // Default color
+                  }
+                } else {
+                  buttonClass += isSelected ? "bg-teal-500 text-white" : "bg-gray-100 hover:bg-gray-200";
+                }
+
+                return (
+                  <button
+                    key={index}
+                    className={buttonClass}
+                    onClick={() => handleAnswerSelect(option)}
+                    disabled={viewMode || timeLeft <= 0}
+                  >
+                    {viewMode && notAnswered ? "Not Answered" : option}
+                  </button>
+                );
+              })}
+            </div>
         </div>
 
         {/* Navigation Buttons */}

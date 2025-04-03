@@ -140,7 +140,7 @@ const Notifications = () => {
                             {notif.message}
                           </p>
                           <p className="text-sm text-gray-500 mt-1">
-                            {notif.time_ago}
+                            {notif.time_ago} ago
                           </p>
                         </div>
                       </div>

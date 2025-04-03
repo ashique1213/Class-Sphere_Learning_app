@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { FaFileAlt, FaSearch, FaPlus, FaEdit, FaTrash, FaEye } from "react-icons/fa";
+import { FaFileAlt, FaSearch, FaPlus, FaEdit, FaTrash, FaEye,FaCheckCircle } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { fetchExams, createExam, updateExam, deleteExam } from "../../../api/examsapi";
+import { fetchExams, createExam, updateExam, deleteExam,publishExam } from "../../../api/examsapi";
 import DeleteModal from "../../../Components/Layouts/DeleteModal"; // Import the DeleteModal
 import { fetchClassroom } from "../../../api/classroomapi";
+import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
 const ExamsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,6 +33,10 @@ const ExamsPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [examToDelete, setExamToDelete] = useState(null); 
   const today = new Date().toISOString().split("T")[0];
+  const [processing, setProcessing] = useState(false)
+  const [selectedExamId, setSelectedExamId] = useState(null);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -84,6 +89,25 @@ const ExamsPage = () => {
       return;
     }
 
+     // Check for duplicate questions
+    const questionTexts = newExam.questions.map((q) => q.question_text.trim().toLowerCase());
+    const uniqueQuestionTexts = new Set(questionTexts);
+    if (questionTexts.length !== uniqueQuestionTexts.size) {
+      toast.error("Same questions are not allowed.");
+      return;
+    }
+
+    // Check for duplicate options within a question
+    for (let i = 0; i < newExam.questions.length; i++) {
+      const options = newExam.questions[i].options.map((opt) => opt.trim().toLowerCase());
+      const uniqueOptions = new Set(options);
+
+      if (options.length !== uniqueOptions.size) {
+        toast.error(`Question ${i + 1} has same options.`);
+        return;
+      }
+    }
+
     try {
       if (isEditing) {
         const updatedExam = await updateExam(editExamId, newExam);
@@ -99,6 +123,15 @@ const ExamsPage = () => {
       toast.error(
         error.response?.data?.error || `Failed to ${isEditing ? "update" : "create"} exam.`
       );
+    }
+  };
+
+  const handleClick = async () => {
+    setProcessing(true); 
+    try {
+      await handleAddExam();
+    } finally {
+      setProcessing(false); 
     }
   };
 
@@ -168,6 +201,27 @@ const ExamsPage = () => {
     setIsModalOpen(false);
   };
 
+  const openPublishModal = (examId) => {
+    setSelectedExamId(examId);
+    setIsPublishModalOpen(true);
+  };
+  
+
+  const handleConfirmPublish = async () => {
+    if (!selectedExamId) return;
+    try {
+      await publishExam(selectedExamId);
+      const updatedExams = await fetchExams(slug);
+      setExams(updatedExams);
+      toast.success("Exam published successfully!");
+    } catch (error) {
+      toast.error("Failed to publish exam.");
+    } finally {
+      setIsPublishModalOpen(false);
+      setSelectedExamId(null);
+    }
+  };
+  
   return (
     <>
       <Navbar />
@@ -226,7 +280,7 @@ const ExamsPage = () => {
         </div>
 
         <div className="max-w-5xl mx-auto">
-          {loading ? (
+          `{loading ? (
             <p className="text-center text-gray-600">Loading exams...</p>
           ) : !Array.isArray(exams) || exams.length === 0 ? (
             <p className="text-center text-gray-500">No exams available.</p>
@@ -257,12 +311,28 @@ const ExamsPage = () => {
                     >
                       <FaEye />
                     </button>
-                    <button
-                      onClick={() => handleEditExam(exam)}
-                      className="p-2 text-yellow-500 hover:text-yellow-700 transition-all"
-                    >
-                      <FaEdit size={18} />
-                    </button>
+
+                    {!exam.published ? (
+                      <>
+                        <button
+                          onClick={() => handleEditExam(exam)}
+                          className="p-2 text-yellow-500 hover:text-yellow-700 transition-all"
+                        >
+                          <FaEdit size={18} />
+                        </button>
+                        <button
+                          onClick={() => openPublishModal(exam.id)}
+                          className="p-2 text-green-500 hover:text-green-700 transition-all"
+                        >
+                          <FaCheckCircle size={18} />
+                        </button>
+
+                      </>
+                    ) : (
+                      <span className="text-green-600 font-semibold">Published</span>
+                    )}
+
+
                     <button
                       onClick={() => handleDeleteExam(exam.id)}
                       className="p-2 text-red-500 hover:text-red-700 transition-all"
@@ -274,7 +344,7 @@ const ExamsPage = () => {
               ))}
             </div>
           )}
-        </div>
+        </div>`
 
         {isModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 backdrop-blur-md p-4 z-[1000]">
@@ -385,10 +455,13 @@ const ExamsPage = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={handleAddExam}
-                    className="bg-teal-500 text-white px-4 py-2 rounded-md mt-2 mr-1"
+                    onClick={handleClick}
+                    disabled={processing}
+                    className={`px-4 py-2 rounded-md mt-2 mr-1 ${
+                      processing ? "bg-gray-400 cursor-not-allowed" : "bg-teal-500 text-white"
+                    }`}
                   >
-                    {isEditing ? "Update" : "Add"}
+                    {processing ? "Processing..." : isEditing ? "Update" : "Add"}
                   </button>
                 </div>
               </div>
@@ -404,7 +477,20 @@ const ExamsPage = () => {
           message="Are you sure you want to delete this exam?"
         />
       </div>
+
+      <ConfirmationModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        onConfirm={handleConfirmPublish}
+        title="Confirm Publish"
+        message="Are you sure you want to publish this exam? Once published, it cannot be edited."
+        confirmText="Publish"
+        cancelText="Cancel"
+      />
+
       <Footer />
+
+      
     </>
   );
 };

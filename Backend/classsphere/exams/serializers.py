@@ -7,12 +7,24 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'question_text', 'options', 'correct_answer']
 
+    def validate(self, data):
+        options = data.get("options", [])
+        if len(options) != len(set(options)):
+            raise serializers.ValidationError("Each question must have unique options.")
+        return data
+
 class ExamSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
 
     class Meta:
         model = Exam
-        fields = ['id', 'classroom', 'topic', 'description', 'timeout', 'end_date', 'marks', 'created_by', 'created_at', 'questions']
+        fields = ['id', 'classroom', 'topic', 'description', 'timeout', 'end_date', 'marks', 'created_by', 'created_at','published', 'questions']
+
+    def validate(self, data):
+        question_texts = [q['question_text'].strip().lower() for q in data.get('questions', [])]
+        if len(question_texts) != len(set(question_texts)):
+            raise serializers.ValidationError("Duplicate questions are not allowed in the exam.")
+        return data
 
     def create(self, validated_data):
         questions_data = validated_data.pop('questions')

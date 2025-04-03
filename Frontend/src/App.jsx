@@ -34,6 +34,7 @@ import AssignmentsPage from "./Pages/User/Teacher/AssignmentsPage";
 import AssignmentDetail from "./Components/Teacher/AssignmentDetail";
 import AttendancePage from "./Pages/User/Teacher/AttendancePage";
 import Notifications from "./Pages/User/Notifications";
+import About from "./Pages/User/About";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -79,8 +80,11 @@ function App() {
           <Route path="/attendance/:slug" element={<AttendancePage/>} />
         </Route>
         
-        <Route path="/join/:meetingId" element={<JoinMeeting />} />
-        <Route path="/notifications" element={<Notifications />} />
+        <Route element={<RoleRoute allowedRoles={["student", "teacher"]} />}>
+          <Route path="/join/:meetingId" element={<JoinMeeting />} />
+          <Route path="/notifications" element={<Notifications />} />
+        </Route>
+          <Route path="/about" element={<About />} />
 
         {/* Student-specific routes */}
         <Route element={<RoleRoute allowedRoles={["student"]} />}>

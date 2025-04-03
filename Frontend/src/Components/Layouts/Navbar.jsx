@@ -146,7 +146,7 @@ const Navbar = () => {
             Home
           </Link>
           <Link
-            to="/"
+            to="/about"
             className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0 border-b border-transparent hover:border-teal-200 md:hover:border-b"
           >
             About Us
