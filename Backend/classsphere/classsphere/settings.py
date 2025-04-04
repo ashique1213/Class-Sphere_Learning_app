@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "notifications",
     "channels",
     "review",
+    "subscription",
 ]
 
 MIDDLEWARE = [
@@ -191,6 +192,8 @@ TEMPLATES = [
         },
     },
 ]
+
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
 
 WSGI_APPLICATION = "classsphere.wsgi.application"
 

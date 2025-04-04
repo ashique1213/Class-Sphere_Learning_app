@@ -36,6 +36,10 @@ import AttendancePage from "./Pages/User/Teacher/AttendancePage";
 import Notifications from "./Pages/User/Notifications";
 import About from "./Pages/User/About";
 import Reviews from "./Pages/Admin/Reviews";
+import Subscription from "./Pages/Admin/subscription";
+import Plans from "./Pages/User/Plans";
+import Payment from "./Pages/User/Payment";
+
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -84,6 +88,8 @@ function App() {
         <Route element={<RoleRoute allowedRoles={["student", "teacher"]} />}>
           <Route path="/join/:meetingId" element={<JoinMeeting />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/plans" element={<Plans />} />
+          <Route path="/payment" element={<Payment />} />
         </Route>
           <Route path="/about" element={<About />} />
 
@@ -99,6 +105,8 @@ function App() {
           <Route path="/students" element={<Students />} />
           <Route path="/teachers" element={<Teachers />} />
           <Route path="/reviews" element={<Reviews />} />
+          <Route path="/subscription" element={<Subscription />} />
+
         </Route>
 
         {/* Catch-all route (redirect invalid URLs) */}

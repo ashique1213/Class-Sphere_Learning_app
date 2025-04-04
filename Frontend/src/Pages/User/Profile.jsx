@@ -8,6 +8,7 @@ import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaCheckCircle, FaHourglassHalf } from "react-icons/fa";
+import { checkUserSubscription } from "../../api/subscriptionapi";
 
 const Profile = () => {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -95,6 +96,22 @@ const Profile = () => {
       toast.error("Failed to update profile. Please try again.");
     }
   };
+
+
+  const handleClassroomLink = async (path) => {
+    try {
+      const subscriptionStatus = await checkUserSubscription(authToken);
+      if (!subscriptionStatus.subscribed) {
+        toast.warn("You need an active subscription to access classrooms.");
+        navigate("/plans");
+      } else {
+        navigate(path);
+      }
+    } catch (error) {
+      toast.error("Failed to check subscription status.");
+    }
+  };
+
 
   if (!user) return <div className="text-center mt-10">Loading...</div>;
 
@@ -192,22 +209,22 @@ const Profile = () => {
           </Link>
 
           {user?.role === "teacher" && user?.is_verified && (
-            <Link
-              to={`/myclassrooms/${user?.username}`}
+            <button
+              onClick={() => handleClassroomLink(`/myclassrooms/${user?.username}`)}
               className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
             >
               My Classrooms
-            </Link>
+            </button>
           )}
-
           {user?.role === "student" && (
-            <Link
-              to={`/classrooms/${user?.username}`}
+            <button
+              onClick={() => handleClassroomLink(`/classrooms/${user?.username}`)}
               className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
             >
               Your Classrooms
-            </Link>
+            </button>
           )}
+          
         </div>
 
         {/* Profile Details */}
