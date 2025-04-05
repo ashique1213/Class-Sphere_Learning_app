@@ -60,3 +60,16 @@ export const unblockUser = async (userId) => {
     throw new Error(error.response?.data?.message || "Failed to unblock user");
   }
 };
+
+
+export const fetchFinanceOverview = async (startDate = null, endDate = null) => {
+  try {
+    const params = {};
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
+    const response = await api.get("/subscription/finance-overview/" );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};

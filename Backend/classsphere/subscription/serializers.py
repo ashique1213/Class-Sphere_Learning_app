@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import SubscriptionPlan,UserSubscription,Transaction
+from authentication.models import User
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,6 +20,7 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
         return value
     
 class UserSubscriptionSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
     plan = SubscriptionPlanSerializer(read_only=True)
 
     class Meta:
@@ -27,8 +29,9 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
     subscription_plan = SubscriptionPlanSerializer()
 
     class Meta:
         model = Transaction
-        fields = ['id', 'subscription_plan', 'transaction_id', 'amount', 'currency', 'status', 'created_at']
+        fields = ['id', 'user', 'subscription_plan', 'transaction_id', 'amount', 'currency', 'status', 'created_at']

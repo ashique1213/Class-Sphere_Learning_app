@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../../Components/Layouts/Navbar";
 import Footer from "../../Components/Layouts/Footer";
-import { FaUserCircle, FaCamera,FaSpinner } from "react-icons/fa";
+import { FaUserCircle, FaCamera, FaSpinner } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
 import { toast } from "react-toastify";
@@ -97,7 +97,6 @@ const Profile = () => {
     }
   };
 
-
   const handleClassroomLink = async (path) => {
     try {
       const subscriptionStatus = await checkUserSubscription(authToken);
@@ -111,7 +110,6 @@ const Profile = () => {
       toast.error("Failed to check subscription status.");
     }
   };
-
 
   if (!user) {
     return (
@@ -209,26 +207,31 @@ const Profile = () => {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="max-w-full sm:max-w-5xl mx-auto flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 px-4 sm:px-6 py-4 ">
+        <div className="max-w-full sm:max-w-5xl mx-auto flex flex-col sm:flex-row flex-wrap gap-2 px-4 sm:px-6 py-4">
           <Link
             to="/Profile"
-            className="px-4 py-2 bg-teal-400 text-white rounded-md text-sm w-full sm:w-auto text-center"
+            className="px-5 py-2 bg-teal-500 text-white rounded-lg text-sm w-full sm:w-auto text-center shadow hover:bg-teal-600 transition"
           >
             About
           </Link>
 
           {user?.role === "teacher" && user?.is_verified && (
             <button
-              onClick={() => handleClassroomLink(`/myclassrooms/${user?.username}`)}
-              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
+              onClick={() =>
+                handleClassroomLink(`/myclassrooms/${user?.username}`)
+              }
+              className="px-5 py-2 bg-gray-200 text-black rounded-lg text-sm w-full sm:w-auto text-center hover:bg-gray-300 transition shadow"
             >
               My Classrooms
             </button>
           )}
+
           {user?.role === "student" && (
             <button
-              onClick={() => handleClassroomLink(`/classrooms/${user?.username}`)}
-              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center  hover:bg-gray-400 transition"
+              onClick={() =>
+                handleClassroomLink(`/classrooms/${user?.username}`)
+              }
+              className="px-5 py-2 bg-gray-200 text-black rounded-lg text-sm w-full sm:w-auto text-center hover:bg-gray-300 transition shadow"
             >
               Your Classrooms
             </button>
@@ -236,23 +239,21 @@ const Profile = () => {
 
           <Link
             to="/plans"
-            className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center"
+            className="px-5 py-2 bg-gray-200 text-black rounded-lg text-sm w-full sm:w-auto text-center hover:bg-gray-300 transition shadow"
           >
             Subscription Plans
           </Link>
+
           <Link
             to="/subscription-history"
-            className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center"
+            className="px-5 py-2 bg-gray-200 text-black rounded-lg text-sm w-full sm:w-auto text-center hover:bg-gray-300 transition shadow"
           >
-            Subscription history
+            Subscription History
           </Link>
-
-          
-          
         </div>
 
         {/* Profile Details */}
-        <div className="bg-white max-w-full sm:max-w-5xl mx-auto p-4 sm:p-6  rounded-lg mt-4">
+        <div className="bg-white max-w-full sm:max-w-5xl mx-auto p-4 sm:p-6  rounded-lg mt-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-black">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
               <strong className="text-sm sm:text-base">Email:</strong>

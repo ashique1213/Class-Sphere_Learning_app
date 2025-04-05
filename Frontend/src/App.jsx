@@ -40,7 +40,8 @@ import Subscription from "./Pages/Admin/subscription";
 import Plans from "./Pages/User/Plans";
 import Payment from "./Pages/User/Payment";
 import SubscriptionHistory from "./Pages/User/SubscriptionHistory";
-
+import Finance from "./Pages/Admin/Finance";
+import ChatWindow from "./Pages/User/ChatWindow";
 
 function App() {
   const authToken = useSelector((state) => state.auth.authToken);
@@ -92,8 +93,9 @@ function App() {
           <Route path="/plans" element={<Plans />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/subscription-history" element={<SubscriptionHistory />} />
+          <Route path="/chat" element={<ChatWindow />} />
         </Route>
-        
+
           <Route path="/about" element={<About />} />
 
         {/* Student-specific routes */}
@@ -109,6 +111,7 @@ function App() {
           <Route path="/teachers" element={<Teachers />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/subscription" element={<Subscription />} />
+          <Route path="/finance" element={<Finance />} />
 
         </Route>
 

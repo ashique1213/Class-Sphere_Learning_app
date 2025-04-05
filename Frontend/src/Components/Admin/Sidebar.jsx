@@ -18,8 +18,8 @@ const Sidebar = () => {
     { name: "Students", icon: <HiOutlineUsers className="text-lg" />, path: "/students" },
     { name: "Teachers", icon: <HiOutlineUsers className="text-lg" />, path: "/teachers" },
     { name: "Reviews", icon: <FaComment className="text-lg" />, path: "/reviews" },
-    { name: "Subscription", icon: <IoWalletOutline className="text-lg" />, path: "/subscription" }, // Added
-    { name: "Finance", icon: <IoWalletOutline className="text-lg" /> },
+    { name: "Subscription", icon: <IoWalletOutline className="text-lg" />, path: "/subscription" },
+    { name: "Finance", icon: <IoWalletOutline className="text-lg" />,path: "/finance" },
   ];
 
   useEffect(() => {

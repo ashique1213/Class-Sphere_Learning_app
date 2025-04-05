@@ -105,9 +105,9 @@ const SubscriptionHistory = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-100 px-4 pt-20 pb-10">
+      <div className="min-h-screen bg-gray-100 px-4 pt-20 pb-10 capitalize">
         <div className="max-w-5xl mx-auto">
-          <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 capitalize">
+          <div className="text-sm text-black max-w-full sm:max-w-5xl mx-auto py-4 ">
             Home |{" "}
             <Link to="/profile" className="hover:underline">
               My Account
@@ -125,12 +125,12 @@ const SubscriptionHistory = () => {
 
           {/* Subscriptions */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Subscriptions
             </h2>
             {subscriptions.length ? (
               <>
-                <div className="overflow-x-auto bg-white rounded-2xl shadow-sm">
+                <div className="overflow-x-auto bg-white rounded-2xl shadow-sm capitalize">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-teal-600 text-white">
                       <tr>
@@ -196,7 +196,7 @@ const SubscriptionHistory = () => {
 
           {/* Transactions */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Transactions
             </h2>
             {transactions.length ? (

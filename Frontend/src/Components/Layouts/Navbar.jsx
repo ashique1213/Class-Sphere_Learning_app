@@ -5,11 +5,13 @@ import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import { persistor } from "../../redux/store";
 import notificationApi from "../../api/notificationapi";
+import { checkUserSubscription } from "../../api/subscriptionapi";
 import { toast } from "react-toastify";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [currentSubscription, setCurrentSubscription] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { authToken, refreshToken } = useSelector((state) => state.auth);
@@ -18,15 +20,15 @@ const Navbar = () => {
   // WebSocket state
   const [ws, setWs] = useState(null);
 
-  // Fetch initial notifications and set up WebSocket
+  // Fetch initial notifications, subscription, and set up WebSocket
   useEffect(() => {
     if (isAuthenticated && authToken) {
       fetchNotifications();
+      fetchSubscriptionStatus();
 
-      // Establish WebSocket connection
       const websocket = new WebSocket(
         `ws://localhost:8000/ws/notifications/?token=${authToken}`
-      ); 
+      );
 
       websocket.onopen = () => {
         console.log("WebSocket connected");
@@ -36,7 +38,6 @@ const Navbar = () => {
         const data = JSON.parse(event.data);
         console.log("Received WebSocket message:", data);
 
-        // Add new notification to state
         setNotifications((prev) => [
           {
             id: data.id,
@@ -59,7 +60,6 @@ const Navbar = () => {
 
       setWs(websocket);
 
-      // Cleanup WebSocket on unmount
       return () => {
         if (websocket) {
           websocket.close();
@@ -74,6 +74,15 @@ const Navbar = () => {
       setNotifications(response.data);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  const fetchSubscriptionStatus = async () => {
+    try {
+      const subscriptionData = await checkUserSubscription(authToken);
+      setCurrentSubscription(subscriptionData);
+    } catch (error) {
+      console.error("Failed to fetch subscription status:", error);
     }
   };
 
@@ -95,7 +104,8 @@ const Navbar = () => {
       await persistor.purge();
       localStorage.clear();
       setNotifications([]);
-      if (ws) ws.close(); // WebSocket on logout
+      setCurrentSubscription(null);
+      if (ws) ws.close();
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
@@ -103,8 +113,20 @@ const Navbar = () => {
       await persistor.purge();
       localStorage.clear();
       setNotifications([]);
+      setCurrentSubscription(null);
       if (ws) ws.close();
       navigate("/");
+    }
+  };
+
+  // Handle Chat button click
+  const handleChatClick = () => {
+    const hasPaidPlan = currentSubscription?.subscribed && currentSubscription.subscription.plan.name !== "free";
+    if (hasPaidPlan) {
+      navigate("/chat");
+    } else {
+      toast.info("Chat is available only with a paid plan. Please upgrade.");
+      navigate("/plans");
     }
   };
 
@@ -153,12 +175,12 @@ const Navbar = () => {
           </Link>
           {isAuthenticated && (
             <>
-              <Link
-                to="/"
-                className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0 border-b border-transparent hover:border-teal-200 md:hover:border-b"
+              <button
+                onClick={handleChatClick}
+                className="block md:inline-block text-white text-md font-bold hover:text-teal-900 transition py-2 md:py-0 border-b border-transparent hover:border-teal-200 md:hover:border-b w-full md:w-auto text-left"
               >
                 Chat
-              </Link>
+              </button>
               <Link to="/" onClick={handleLogout}>
                 <button className="block md:inline-block bg-teal-200 text-teal-800 px-4 py-1 rounded-full hover:bg-teal-300 transition duration-200 w-full md:w-auto mt-2 md:mt-0 font-medium">
                   Sign Out

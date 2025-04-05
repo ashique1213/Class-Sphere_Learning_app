@@ -8,6 +8,7 @@ from django.utils import timezone
 from datetime import timedelta
 import stripe # type: ignore
 from django.conf import settings
+from django.db.models import Count, Sum
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -198,4 +199,39 @@ class UserTransactionHistoryView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
-    
+class FinanceOverviewView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        transactions = Transaction.objects.all()
+        if start_date:
+            transactions = transactions.filter(created_at__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(created_at__lte=end_date)
+
+        transaction_serializer = TransactionSerializer(transactions, many=True)
+
+        current_subscriptions = UserSubscription.objects.filter(
+            is_active=True,
+            end_date__gte=timezone.now()
+        ).select_related('user', 'plan')
+        subscription_serializer = UserSubscriptionSerializer(current_subscriptions, many=True)
+
+        total_balance = transactions.filter(status='succeeded').aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        most_subscribed = UserSubscription.objects.values('plan__name').annotate(
+            count=Count('plan')
+        ).order_by('-count').first()
+        most_subscribed_plan = most_subscribed['plan__name'] if most_subscribed else "None"
+
+        return Response({
+            'transactions': transaction_serializer.data,
+            'current_subscriptions': subscription_serializer.data,
+            'total_balance': total_balance,
+            'most_subscribed_plan': most_subscribed_plan,
+        }, status=status.HTTP_200_OK)

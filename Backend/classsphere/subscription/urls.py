@@ -8,6 +8,7 @@ from .views import (
     ConfirmPaymentView,
     UserSubscriptionHistoryView,
     UserTransactionHistoryView,
+    FinanceOverviewView
 )
 urlpatterns = [
     path('subscription/plans/', SubscriptionPlanListCreateView.as_view(), name='plan-list-create'),
@@ -18,4 +19,5 @@ urlpatterns = [
     path('subscription/confirm-payment/', ConfirmPaymentView.as_view(), name='confirm-payment'),
     path('subscription/subscription-history/', UserSubscriptionHistoryView.as_view(), name='subscription-history'),
     path('subscription/transaction-history/', UserTransactionHistoryView.as_view(), name='transaction-history'),
+    path('subscription/finance-overview/', FinanceOverviewView.as_view(), name='finance-overview'),
 ]
