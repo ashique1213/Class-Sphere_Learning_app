@@ -5,6 +5,8 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from django.utils import timezone
+from subscription.models import UserSubscription
 
 
 class ClassroomListCreateView(APIView):
@@ -21,6 +23,23 @@ class ClassroomListCreateView(APIView):
         return Response(serializer.data)
     
     def post(self, request):
+        # Check subscription and classroom limit
+        active_subscription = UserSubscription.objects.filter(
+            user=request.user,
+            is_active=True,
+            end_date__gte=timezone.now()
+        ).first()
+        existing_classrooms_count = Classroom.objects.filter(teacher=request.user).count()
+
+        if not active_subscription or active_subscription.plan.name == "free":
+            if existing_classrooms_count >= 2:
+                return Response(
+                    {
+                        "error": "Upgrade to a paid plan to create more."
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
         serializer = ClassroomSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(teacher=request.user)
@@ -77,20 +96,38 @@ class ClassroomDeleteView(APIView):
 
 class JoinClassView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         class_slug = request.data.get("class_id")
-        
+
         if not class_slug:
             return Response({"error": "Class slug is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         classroom = get_object_or_404(Classroom, slug=class_slug)
-        
         student, created = Student.objects.get_or_create(user=request.user)
+
+        # Check subscription and joined classes limit
+        active_subscription = UserSubscription.objects.filter(
+            user=request.user,
+            is_active=True,
+            end_date__gte=timezone.now()
+        ).first()
+        joined_count = student.joined_classes.count()
+
+        if not active_subscription or active_subscription.plan.name == "free":
+            if joined_count >= 2:
+                return Response(
+                    {"error": "Upgrade to join more."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        # Check if already joined (optional, aligns with frontend)
+        if classroom in student.joined_classes.all():
+            return Response({"error": "You have already joined this class."}, status=status.HTTP_400_BAD_REQUEST)
+
         student.joined_classes.add(classroom)
-        
         classroom_data = ClassroomSerializer(classroom).data
-        
+
         return Response({"classroom": classroom_data}, status=status.HTTP_200_OK)
 
 
