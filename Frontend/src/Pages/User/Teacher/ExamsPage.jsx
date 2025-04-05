@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaFileAlt, FaSearch, FaPlus, FaEdit, FaTrash, FaEye,FaCheckCircle } from "react-icons/fa";
+import { FaFileAlt, FaSearch, FaPlus, FaEdit, FaTrash, FaEye,FaCheckCircle,FaSpinner } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { toast } from "react-toastify";
@@ -281,7 +281,9 @@ const ExamsPage = () => {
 
         <div className="max-w-5xl mx-auto">
           `{loading ? (
-            <p className="text-center text-gray-600">Loading exams...</p>
+            <div className="flex justify-center items-center py-16">
+              <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+            </div>
           ) : !Array.isArray(exams) || exams.length === 0 ? (
             <p className="text-center text-gray-500">No exams available.</p>
           ) : (

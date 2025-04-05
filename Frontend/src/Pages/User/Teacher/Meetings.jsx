@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaVideo, FaSearch, FaTimes, FaUsers } from "react-icons/fa";
+import { FaVideo, FaSearch, FaTimes, FaSpinner } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
@@ -145,7 +145,9 @@ const Meetings = () => {
 
         <div className="max-w-full sm:max-w-5xl mx-auto space-y-4">
           {loading ? (
-            <p>Loading...</p>
+           <div className="flex justify-center items-center py-16">
+           <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+         </div>
           ) : meetings.length === 0 ? (
             <p>No meetings available.</p>
           ) : (

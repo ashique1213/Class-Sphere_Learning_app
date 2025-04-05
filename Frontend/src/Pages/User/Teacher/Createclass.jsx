@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash } from "react-icons/fa";
+import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash,FaSpinner } from "react-icons/fa";
 import { MdOutlineTopic } from "react-icons/md";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
@@ -21,6 +21,8 @@ const Createclass = () => {
   const [subscriptionPlan, setSubscriptionPlan] = useState(null); // Store subscription status
   const authToken = useSelector((state) => state.auth.authToken);
   const message = localStorage.getItem("toastMessage");
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     if (message) {
@@ -31,6 +33,7 @@ const Createclass = () => {
 
   useEffect(() => {
     const loadClassesAndSubscription = async () => {
+      setLoading(true);
       try {
         // Fetch classrooms
         const classData = await fetchClasses(teachername, authToken);
@@ -41,14 +44,29 @@ const Createclass = () => {
         setSubscriptionPlan(subscriptionData);
       } catch (error) {
         toast.error("Failed to fetch data: " + (error.error || "Unknown error"));
+      } finally {
+        setLoading(false);
       }
     };
-
+  
     if (authToken) {
       loadClassesAndSubscription();
     }
   }, [authToken, teachername]);
+  
 
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
+  
   const confirmDelete = (id) => {
     setDeleteId(id);
   };

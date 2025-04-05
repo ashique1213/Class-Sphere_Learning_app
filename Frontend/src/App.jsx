@@ -39,6 +39,7 @@ import Reviews from "./Pages/Admin/Reviews";
 import Subscription from "./Pages/Admin/subscription";
 import Plans from "./Pages/User/Plans";
 import Payment from "./Pages/User/Payment";
+import SubscriptionHistory from "./Pages/User/SubscriptionHistory";
 
 
 function App() {
@@ -90,7 +91,9 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/plans" element={<Plans />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/subscription-history" element={<SubscriptionHistory />} />
         </Route>
+        
           <Route path="/about" element={<About />} />
 
         {/* Student-specific routes */}

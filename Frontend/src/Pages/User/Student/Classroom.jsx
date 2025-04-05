@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBook } from "react-icons/fa";
+import { FaBook,FaSpinner} from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -32,6 +32,7 @@ const Classroom = () => {
   const { slug } = useParams();
   const { authToken, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     if (!authToken) {
@@ -40,6 +41,7 @@ const Classroom = () => {
       return;
     }
     try {
+      setIsLoading(true);
       const classroomData = await fetchClassroom(slug);
       setClassroom(classroomData);
 
@@ -68,8 +70,11 @@ const Classroom = () => {
     } catch (error) {
       toast.error("Failed to fetch classroom details.");
       console.error("Fetch Error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchData();
@@ -162,12 +167,12 @@ const Classroom = () => {
   const baseUrl = window.location.origin;
   const fullUrl = `${baseUrl}/classroom/${slug}`;
 
-  if (isJoined === null) {
+  if (isLoading) {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-          <p className="text-gray-500">Loading...</p>
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
         </div>
         <Footer />
       </>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaEye, FaClipboardList, FaUser } from "react-icons/fa";
+import { FaEye, FaClipboardList, FaUser,FaSpinner } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
@@ -94,7 +94,9 @@ const AttendancePage = () => {
             Attendance Records
           </h3>
           {loading ? (
-            <p>Loading...</p>
+             <div className="flex justify-center items-center py-16">
+              <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+            </div>
           ) : (
             <div className="space-y-4">
               {sessions.map((session) => (

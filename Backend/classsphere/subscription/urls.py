@@ -1,6 +1,14 @@
 from django.urls import path
-from .views import SubscriptionPlanListCreateView, SubscriptionPlanDetailView, SubscriptionPlanToggleActiveView,CheckUserSubscriptionView,CreatePaymentIntentView,ConfirmPaymentView
-
+from .views import (
+    SubscriptionPlanListCreateView,
+    SubscriptionPlanDetailView,
+    SubscriptionPlanToggleActiveView,
+    CheckUserSubscriptionView,
+    CreatePaymentIntentView,
+    ConfirmPaymentView,
+    UserSubscriptionHistoryView,
+    UserTransactionHistoryView,
+)
 urlpatterns = [
     path('subscription/plans/', SubscriptionPlanListCreateView.as_view(), name='plan-list-create'),
     path('subscription/plans/<int:pk>/', SubscriptionPlanDetailView.as_view(), name='plan-detail'),
@@ -8,4 +16,6 @@ urlpatterns = [
     path('subscription/check-subscription/', CheckUserSubscriptionView.as_view(), name='check-subscription'),
     path('subscription/create-payment-intent/', CreatePaymentIntentView.as_view(), name='create-payment-intent'),
     path('subscription/confirm-payment/', ConfirmPaymentView.as_view(), name='confirm-payment'),
+    path('subscription/subscription-history/', UserSubscriptionHistoryView.as_view(), name='subscription-history'),
+    path('subscription/transaction-history/', UserTransactionHistoryView.as_view(), name='transaction-history'),
 ]

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaUsers, FaClock, FaBook, FaPlus } from "react-icons/fa";
+import { FaSearch, FaUsers, FaSpinner, FaBook, FaPlus } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
@@ -18,10 +18,12 @@ const Classrooms = () => {
   const [currentSubscription, setCurrentSubscription] = useState(null); // Store subscription status
   const authToken = useSelector((state) => state.auth.authToken);
   const { studentname } = useParams();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadJoinedClassesAndSubscription = async () => {
       if (!authToken) return;
+      setLoading(true);
       try {
         // Fetch joined classes
         const classData = await fetchJoinedClasses(authToken); // Pass authToken if required
@@ -32,12 +34,26 @@ const Classrooms = () => {
         setCurrentSubscription(subscriptionData);
       } catch (error) {
         toast.error("Failed to fetch data: " + (error.message || "Unknown error"));
+      } finally {
+        setLoading(false);
       }
     };
 
     loadJoinedClassesAndSubscription();
   }, [authToken]);
 
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
   // Handle initiating the join process (show modal)
   const initiateJoinClass = () => {
     if (!classInput.trim()) {

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SubscriptionPlan,UserSubscription
+from .models import SubscriptionPlan,UserSubscription,Transaction
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,3 +24,11 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
         fields = ['id', 'user', 'plan', 'start_date', 'end_date', 'is_active']
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    subscription_plan = SubscriptionPlanSerializer()
+
+    class Meta:
+        model = Transaction
+        fields = ['id', 'subscription_plan', 'transaction_id', 'amount', 'currency', 'status', 'created_at']

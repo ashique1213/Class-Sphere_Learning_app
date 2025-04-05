@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../../Components/Layouts/Navbar";
 import Footer from "../../Components/Layouts/Footer";
-import { FaUserCircle, FaCamera } from "react-icons/fa";
+import { FaUserCircle, FaCamera,FaSpinner } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { fetchUserDetails, updateUserProfile } from "../../api/profileapi";
 import { toast } from "react-toastify";
@@ -113,8 +113,17 @@ const Profile = () => {
   };
 
 
-  if (!user) return <div className="text-center mt-10">Loading...</div>;
-
+  if (!user) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
   return (
     <>
       <Navbar />
@@ -231,6 +240,14 @@ const Profile = () => {
           >
             Subscription Plans
           </Link>
+          <Link
+            to="/subscription-history"
+            className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center"
+          >
+            Subscription history
+          </Link>
+
+          
           
         </div>
 

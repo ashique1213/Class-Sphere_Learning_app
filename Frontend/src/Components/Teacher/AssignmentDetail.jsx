@@ -6,6 +6,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../Layouts/Navbar";
 import Footer from "../Layouts/Footer";
 import { fetchAssignments, updateSubmissionScore } from "../../api/assignmentsapi";
+import { FaSpinner } from "react-icons/fa";
+
 
 const AssignmentDetail = () => {
   const { assignmentId } = useParams();
@@ -51,11 +53,16 @@ const AssignmentDetail = () => {
     }
   };
 
-  if (loading) {
+
+if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-center text-gray-600 text-lg">Loading assignment details...</p>
-      </div>
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
     );
   }
 

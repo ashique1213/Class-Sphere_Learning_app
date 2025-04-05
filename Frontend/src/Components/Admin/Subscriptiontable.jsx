@@ -11,6 +11,8 @@ import {
   toggleActiveSubscriptionPlan,
 } from "../../api/subscriptionapi";
 import ConfirmationModal from "../Layouts/ConfirmationModal";
+import { FaSpinner } from "react-icons/fa";
+
 
 const SubscriptionTable = () => {
   const [plans, setPlans] = useState([]);
@@ -104,7 +106,15 @@ const SubscriptionTable = () => {
   const totalPages = Math.ceil(filteredPlans.length / plansPerPage);
 
   if (loading) {
-    return <div className="p-4 text-center">Loading plans...</div>;
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
+    );
   }
 
   return (

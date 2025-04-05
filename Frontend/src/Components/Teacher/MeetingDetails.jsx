@@ -1,13 +1,32 @@
-import React from "react";
-import { FaVideo, FaUsers, FaArrowLeft } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaVideo, FaUsers, FaArrowLeft, FaSpinner } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../Layouts/Navbar"; // Adjust path
-import Footer from "../Layouts/Footer"; // Adjust path
+import Navbar from "../Layouts/Navbar";
+import Footer from "../Layouts/Footer";
 
 const MeetingDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { meet, slug } = location.state || {};
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (meet && slug) {
+      const timer = setTimeout(() => setLoading(false),100);
+      return () => clearTimeout(timer);
+    } else {
+      setLoading(false); 
+    }
+  }, [meet, slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+      </div>
+    );
+  }
 
   if (!meet || !slug) {
     return (

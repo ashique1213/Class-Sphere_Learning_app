@@ -10,6 +10,7 @@ import { fetchMaterials, createMaterial, updateMaterial, deleteMaterial } from "
 import { useParams, Link } from "react-router-dom";
 import DeleteModal from "../../../Components/Layouts/DeleteModal";
 
+
 const MaterialsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -130,10 +131,17 @@ const MaterialsPage = () => {
             setMaterialToDelete(null);
         }
     };
-
     if (loading) {
-        return <div>Loading...</div>;
-    }
+        return (
+          <>
+            <Navbar />
+            <div className="flex justify-center items-center h-screen">
+              <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+            </div>
+            <Footer />
+          </>
+        );
+      }
 
     return (
         <>

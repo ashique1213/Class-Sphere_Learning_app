@@ -5,11 +5,14 @@ import notificationApi from "../../api/notificationapi";
 import Navbar from "../../Components/Layouts/Navbar";
 import Footer from "../../Components/Layouts/Footer";
 import { toast } from "react-toastify";
+import { FaSpinner } from "react-icons/fa";
+
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const { authToken } = useSelector((state) => state.auth);
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true);
   
 
   useEffect(() => {
@@ -22,14 +25,28 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     try {
+      setLoading(true);
       const response = await notificationApi.getNotifications(authToken);
       setNotifications(response.data);
     } catch (error) {
       toast.error("Failed to fetch notifications");
       console.error(error);
+    }finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
+    );
+  }
   const markAsRead = async (id) => {
     try {
       await notificationApi.markAsRead(id, authToken);

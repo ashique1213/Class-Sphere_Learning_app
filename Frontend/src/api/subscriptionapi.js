@@ -78,3 +78,23 @@ export const confirmPayment = async (token, paymentIntentId, planId) => {
     throw error.response?.data || error.message;
   }
 };
+
+
+export const getSubscriptionHistory = async () => {
+  try {
+    const response = await api.get("/subscription/subscription-history/" );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
+
+// New function to fetch transaction history
+export const getTransactionHistory = async () => {
+  try {
+    const response = await api.get("/subscription/transaction-history/" );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};

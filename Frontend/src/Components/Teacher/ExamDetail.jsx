@@ -6,6 +6,7 @@ import { FaEye } from "react-icons/fa";
 import { fetchExam, fetchExamSubmissionsForTeacher } from "../../api/examsapi";
 import Navbar from "../Layouts/Navbar";
 import Footer from "../Layouts/Footer";
+import { FaSpinner } from "react-icons/fa";
 
 const ExamDetail = () => {
   const { examId } = useParams();
@@ -57,11 +58,13 @@ const ExamDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-center text-gray-600 text-lg">
-          Loading exam details...
-        </p>
-      </div>
+      <>
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <FaSpinner className="animate-spin text-teal-500 text-4xl" />
+        </div>
+        <Footer />
+      </>
     );
   }
 
