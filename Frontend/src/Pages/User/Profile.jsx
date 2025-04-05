@@ -219,11 +219,18 @@ const Profile = () => {
           {user?.role === "student" && (
             <button
               onClick={() => handleClassroomLink(`/classrooms/${user?.username}`)}
-              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center  hover:bg-gray-400 transition"
             >
               Your Classrooms
             </button>
           )}
+
+          <Link
+            to="/plans"
+            className="px-4 py-2 bg-gray-300 text-black rounded-md text-sm w-full sm:w-auto text-center"
+          >
+            Subscription Plans
+          </Link>
           
         </div>
 

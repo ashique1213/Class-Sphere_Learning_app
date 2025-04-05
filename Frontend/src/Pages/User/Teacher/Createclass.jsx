@@ -3,42 +3,49 @@ import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash } from "react-icons/fa";
 import { MdOutlineTopic } from "react-icons/md";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
-import Createclassform from "../../../Components/Teacher/Createclassform"
-import { useParams, Link } from "react-router-dom";
+import Createclassform from "../../../Components/Teacher/Createclassform";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
+import {checkUserSubscription} from "../../../api/subscriptionapi"
 import DeleteModal from "../../../Components/Layouts/DeleteModal";
 
 const Createclass = () => {
   const { teachername } = useParams();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [classrooms, setClassrooms] = useState([]);
   const [deleteId, setDeleteId] = useState(null);
+  const [subscriptionPlan, setSubscriptionPlan] = useState(null); // Store subscription status
   const authToken = useSelector((state) => state.auth.authToken);
   const message = localStorage.getItem("toastMessage");
 
+  useEffect(() => {
+    if (message) {
+      toast.success(message);
+      localStorage.removeItem("toastMessage");
+    }
+  }, []);
 
   useEffect(() => {
-      if (message) {
-        toast.success(message);
-        localStorage.removeItem("toastMessage");
-      }
-    }, []);
-
-  useEffect(() => {
-    const loadClasses = async () => {
+    const loadClassesAndSubscription = async () => {
       try {
-        const data = await fetchClasses(teachername, authToken);
-        setClassrooms(data);
+        // Fetch classrooms
+        const classData = await fetchClasses(teachername, authToken);
+        setClassrooms(classData);
+
+        // Fetch subscription status
+        const subscriptionData = await checkUserSubscription(authToken);
+        setSubscriptionPlan(subscriptionData);
       } catch (error) {
-        toast.error("Failed to fetch classrooms");
+        toast.error("Failed to fetch data: " + (error.error || "Unknown error"));
       }
     };
 
     if (authToken) {
-      loadClasses();
+      loadClassesAndSubscription();
     }
   }, [authToken, teachername]);
 
@@ -65,6 +72,55 @@ const Createclass = () => {
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
     toast.info("Classroom link copied!");
+  };
+
+  const handleCreateClick = () => {
+    // Check subscription plan and classroom count
+    console.log(subscriptionPlan)
+
+    if (!subscriptionPlan || !subscriptionPlan.subscribed || subscriptionPlan.subscription.plan.name === "free") {
+      if (classrooms.length >= 2) {
+        toast.error(
+          <div>
+            You have reached the limit of 2 classrooms with a free plan.{" "}
+            <Link to="/plans" className="text-teal-600 underline">
+              Upgrade Now
+            </Link>{" "}
+            to create more.
+          </div>,
+          { autoClose: 5000 }
+        );
+        return;
+      }
+    }
+    // If paid plan or less than 2 classrooms on free plan, show form
+    setShowForm(true);
+  };
+
+  const handleFormSubmit = async (teacherUsername, token) => {
+    try {
+      const data = await fetchClasses(teacherUsername, token);
+      setClassrooms(data);
+      setShowForm(false);
+      toast.success("Classroom created successfully!");
+    } catch (error) {
+      if (
+        error.error ===
+        "You have reached the limit of 2 classrooms with a free plan. Upgrade to a paid plan to create more."
+      ) {
+        toast.error(
+          <div>
+            {error.error}{" "}
+            <Link to="/plans" className="text-teal-600 underline">
+              Upgrade Now
+            </Link>
+          </div>,
+          { autoClose: 5000 }
+        );
+      } else {
+        toast.error("Failed to save classroom: " + (error.error || "Unknown error"));
+      }
+    }
   };
 
   return (
@@ -101,7 +157,7 @@ const Createclass = () => {
             <div className="mt-4 md:mt-0 md:ml-4">
               <button
                 className="bg-white text-teal-600 font-semibold px-4 py-2 rounded-md shadow-md hover:bg-gray-100 transition w-full md:w-auto"
-                onClick={() => setShowForm(!showForm)}
+                onClick={handleCreateClick}
               >
                 {showForm ? "Close Form" : "Create Class"}
               </button>
@@ -114,7 +170,9 @@ const Createclass = () => {
           <div className="max-w-full sm:max-w-4xl mx-auto mb-6 px-4">
             <Createclassform
               onClose={() => setShowForm(false)}
-              refreshClasses={fetchClasses}
+              refreshClasses={handleFormSubmit}
+              teachername={teachername}
+              authToken={authToken}
             />
           </div>
         )}
@@ -203,9 +261,7 @@ const Createclass = () => {
         )}
       </div>
 
-      {/* Modal */}
-       {/* Delete Modal */}
-       <DeleteModal
+      <DeleteModal
         isOpen={!!deleteId}
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}

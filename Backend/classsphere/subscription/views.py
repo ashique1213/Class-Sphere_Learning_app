@@ -105,13 +105,25 @@ class CreatePaymentIntentView(APIView):
 
         try:
             plan = SubscriptionPlan.objects.get(id=plan_id, is_active=True, is_deleted=False)
+
+            # Check for existing active subscription and deactivate it
+            active_subscription = UserSubscription.objects.filter(
+                user=request.user,
+                is_active=True,
+                end_date__gte=timezone.now()
+            ).first()
+            if active_subscription:
+                active_subscription.is_active = False
+                active_subscription.save()
+
             if plan.price == 0:
                 # Create subscription directly without payment
                 end_date = timezone.now() + timedelta(days=plan.duration_days)
                 subscription = UserSubscription.objects.create(
                     user=request.user,
                     plan=plan,
-                    end_date=end_date
+                    end_date=end_date,
+                    is_active=True
                 )
                 return Response({
                     'message': 'Free plan activated successfully!',
@@ -138,8 +150,6 @@ class CreatePaymentIntentView(APIView):
 
 class ConfirmPaymentView(APIView):
     permission_classes = [IsAuthenticated]
-    print("chk-5")
-
     def post(self, request, *args, **kwargs):
         payment_intent_id = request.data.get('payment_intent_id')
         plan_id = request.data.get('plan_id')
@@ -147,8 +157,6 @@ class ConfirmPaymentView(APIView):
         try:
             intent = stripe.PaymentIntent.retrieve(payment_intent_id)
             if intent.status == 'succeeded':
-                print("chk-7")
-
                 plan = SubscriptionPlan.objects.get(id=plan_id)
                 ttransaction = Transaction.objects.create(
                     user=request.user,

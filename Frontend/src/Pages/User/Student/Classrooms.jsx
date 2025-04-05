@@ -5,6 +5,7 @@ import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { fetchJoinedClasses, joinClass } from "../../../api/classroomapi";
+import { checkUserSubscription } from "../../../api/subscriptionapi"; // Import subscription check
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
@@ -13,22 +14,28 @@ const Classrooms = () => {
   const [joinedClasses, setJoinedClasses] = useState([]);
   const [classInput, setClassInput] = useState("");
   const [showInput, setShowInput] = useState(false);
-  const [showModal, setShowModal] = useState(false); // State for modal visibility
+  const [showModal, setShowModal] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState(null); // Store subscription status
   const authToken = useSelector((state) => state.auth.authToken);
   const { studentname } = useParams();
 
   useEffect(() => {
-    const loadJoinedClasses = async () => {
+    const loadJoinedClassesAndSubscription = async () => {
       if (!authToken) return;
       try {
-        const data = await fetchJoinedClasses();
-        setJoinedClasses(data);
-      } catch {
-        toast.error("Failed to fetch joined classrooms.");
+        // Fetch joined classes
+        const classData = await fetchJoinedClasses(authToken); // Pass authToken if required
+        setJoinedClasses(classData);
+
+        // Fetch subscription status
+        const subscriptionData = await checkUserSubscription(authToken);
+        setCurrentSubscription(subscriptionData);
+      } catch (error) {
+        toast.error("Failed to fetch data: " + (error.message || "Unknown error"));
       }
     };
 
-    loadJoinedClasses();
+    loadJoinedClassesAndSubscription();
   }, [authToken]);
 
   // Handle initiating the join process (show modal)
@@ -37,17 +44,32 @@ const Classrooms = () => {
       toast.error("Please enter a class link.");
       return;
     }
-    setShowModal(true); // Show confirmation modal
+
+    // Check subscription and class limit
+    const currentPlanName = currentSubscription?.subscribed ? currentSubscription.subscription.plan.name : null;
+    if ((!currentPlanName || currentPlanName === "free") && joinedClasses.length >= 2) {
+      toast.error(
+        <div>
+          You have reached the limit of 2 classes on a free plan.{" "}
+          <Link to="/plans" className="text-teal-600 underline">
+            Upgrade Now
+          </Link>{" "}
+          to join more classes.
+        </div>,
+        { autoClose: 5000 }
+      );
+      return;
+    }
+
+    setShowModal(true); // Show confirmation modal if limit not exceeded
   };
 
   // Handle confirmed join class action
   const handleJoinClass = async () => {
     try {
       const newClass = await joinClass(classInput, authToken);
-      
-      const isAlreadyJoined = joinedClasses.some(
-        (cls) => cls.id === newClass.id
-      );
+
+      const isAlreadyJoined = joinedClasses.some((cls) => cls.id === newClass.id);
 
       if (isAlreadyJoined) {
         toast.info("You have already joined this class.");
@@ -55,13 +77,13 @@ const Classrooms = () => {
         setJoinedClasses((prev) => [newClass, ...prev]);
         toast.success("Class joined successfully!");
       }
-      
+
       setClassInput("");
       setShowInput(false);
-      setShowModal(false); // Close modal after joining
+      setShowModal(false);
     } catch (error) {
       toast.error(error.message || "Failed to join class.");
-      setShowModal(false); // Close modal on error
+      setShowModal(false);
     }
   };
 
@@ -126,7 +148,7 @@ const Classrooms = () => {
               />
               <button
                 className="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-md sm:rounded-l-none sm:rounded-r-md w-full sm:w-auto"
-                onClick={initiateJoinClass} // Trigger modal instead of direct join
+                onClick={initiateJoinClass}
               >
                 Join
               </button>
