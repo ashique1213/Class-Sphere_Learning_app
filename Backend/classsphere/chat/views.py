@@ -1,3 +1,4 @@
+# views.py
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -50,7 +51,7 @@ class SendMessageView(APIView):
                 "sender": request.user.username,
                 "message": message_text,
                 "timestamp": message.timestamp.isoformat(),
-                "id": message.id,  # Add message ID
+                "id": message.id,
             }
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -80,7 +81,6 @@ class CreateOrGetChatView(APIView):
         if other_user == request.user:
             return Response({"error": "Cannot chat with yourself"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if other user has a paid subscription
         has_paid_subscription = UserSubscription.objects.filter(
             user=other_user, is_active=True, end_date__gte=timezone.now()
         ).exclude(plan__name__iexact="free").exists()
@@ -89,7 +89,8 @@ class CreateOrGetChatView(APIView):
 
         chat = Chat.objects.filter(participants=request.user).filter(participants=other_user).first()
         if not chat:
-            chat = Chat.objects.create(name=f"{request.user.username} - {other_user.username}")
+            chat = Chat.objects.create()
             chat.participants.add(request.user, other_user)
 
-        return Response({"id": chat.id, "name": chat.name}, status=status.HTTP_201_CREATED)
+        serializer = ChatSerializer(chat, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
