@@ -72,7 +72,8 @@ INSTALLED_APPS = [
     "channels",
     "review",
     "subscription",
-    "chat"
+    "chat",
+    "dashboard"
 ]
 
 MIDDLEWARE = [
