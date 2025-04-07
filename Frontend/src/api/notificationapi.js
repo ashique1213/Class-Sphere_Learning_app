@@ -5,39 +5,37 @@ import api from "./api";
 const notificationApi = {
   // Get all notifications
   getNotifications: (token) =>
-    api.get("/notifications/", {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
+    api.get("/notifications/" ),
 
   // Mark a notification as read
-  markAsRead: (id, token) =>
+  markAsRead: (id) =>
     api.post(
       `/notifications/${id}/mark-as-read/`,
       {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
     ),
 
   // Clear all notifications
-  clearAll: (token) =>
+  clearAll: () =>
     api.post(
       "/notifications/clear/",
       {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
     ),
 
   // Create a test notification (optional, for testing purposes)
-  createTestNotification: (message, token) =>
+  createTestNotification: (message) =>
     api.post(
       "/notifications/",
       { message },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
     ),
+
+    logout: (refreshToken) =>
+      api.post(
+        "/logout/",
+        { refresh: refreshToken },
+        {
+          withCredentials: true,
+        }
+      ),
 };
 
 export default notificationApi;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import logo from "../../assets/Nav_logo.svg";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -17,26 +17,33 @@ const Navbar = () => {
   const { authToken, refreshToken } = useSelector((state) => state.auth);
   const isAuthenticated = !!authToken;
 
-  // WebSocket state
-  const [ws, setWs] = useState(null);
+  // Use ref to persist WebSocket instance across renders
+  const wsRef = useRef(null);
 
-  // Fetch initial notifications, subscription, and set up WebSocket
+  // Fetch initial notifications and subscription
   useEffect(() => {
     if (isAuthenticated && authToken) {
       fetchNotifications();
       fetchSubscriptionStatus();
+    }
+  }, [isAuthenticated, authToken]);
 
+  // Separate WebSocket logic into its own effect
+  useEffect(() => {
+    if (!isAuthenticated || !authToken) return;
+
+    // Only initialize if not already connected
+    if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
       const websocket = new WebSocket(
         `ws://localhost:8000/ws/notifications/?token=${authToken}`
       );
 
       websocket.onopen = () => {
-        console.log("WebSocket connected");
+        console.log("WebSocket connected successfully");
       };
 
       websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("Received WebSocket message:", data);
 
         setNotifications((prev) => [
           {
@@ -58,19 +65,21 @@ const Navbar = () => {
         console.error("WebSocket error:", error);
       };
 
-      setWs(websocket);
-
-      return () => {
-        if (websocket) {
-          websocket.close();
-        }
-      };
+      wsRef.current = websocket;
     }
-  }, [isAuthenticated, authToken]);
+
+    // Cleanup only when component unmounts or authToken changes
+    return () => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        console.log("Closing WebSocket connection");
+        wsRef.current.close();
+      }
+    };
+  }, [authToken, isAuthenticated]); // Only re-run if authToken or isAuthenticated changes
 
   const fetchNotifications = async () => {
     try {
-      const response = await notificationApi.getNotifications(authToken);
+      const response = await notificationApi.getNotifications();
       setNotifications(response.data);
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -89,32 +98,22 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       if (refreshToken) {
-        const response = await notificationApi.post(
-          "/logout/",
-          { refresh: refreshToken },
-          {
-            headers: { Authorization: `Bearer ${authToken}` },
-            withCredentials: true,
-          }
-        );
-        toast.success(response.data.message || "Logged out successfully");
+        const response = await notificationApi.logout(refreshToken, authToken);
+        toast.success("Logged out successfully");
       }
-
       dispatch(logout());
-      await persistor.purge();
       localStorage.clear();
       setNotifications([]);
       setCurrentSubscription(null);
-      if (ws) ws.close();
+      if (wsRef.current) wsRef.current.close();
       navigate("/");
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
       dispatch(logout());
-      await persistor.purge();
       localStorage.clear();
       setNotifications([]);
       setCurrentSubscription(null);
-      if (ws) ws.close();
+      if (wsRef.current) wsRef.current.close();
       navigate("/");
     }
   };

@@ -35,7 +35,6 @@ const About = () => {
   const fetchAllReviews = async () => {
     try {
       const response = await getAllReviews();
-      console.log(response)
       setAllReviews(response);
     } catch (error) {
       console.log("Failed to fetch reviews:", error);

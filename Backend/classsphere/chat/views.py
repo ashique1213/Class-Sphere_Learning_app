@@ -1,4 +1,3 @@
-# views.py
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,6 +10,8 @@ from .serializers import ChatSerializer, MessageSerializer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from authentication.models import User
+from classroom.models import Classroom, Student
+
 
 class RecentChatsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -55,20 +56,67 @@ class SendMessageView(APIView):
             }
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+ 
 class SubscribedUsersView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        subscribed_users = User.objects.filter(
-            subscriptions__is_active=True,
-            subscriptions__end_date__gte=timezone.now()
-        ).exclude(
-            subscriptions__plan__name__iexact="free"
-        ).exclude(id=request.user.id).distinct()
+        user = request.user
+        response_data = {}
 
-        return Response([{"id": user.id, "username": user.username} for user in subscribed_users])
+        user_role = getattr(user, 'role', None) 
 
+        if user_role == "student":
+            try:
+                student_profile = Student.objects.get(user=user)
+                joined_classes = student_profile.joined_classes.all()
+
+                # Get teachers of joined classes with subscription status
+                teachers = User.objects.filter(classrooms__in=joined_classes).distinct()
+                response_data["teachers"] = [
+                    {
+                        "id": t.id,
+                        "username": t.username,
+                        "is_subscribed": t.subscriptions.filter(
+                            is_active=True,
+                            end_date__gte=timezone.now()
+                        ).exclude(plan__name__iexact="free").exists()
+                    }
+                    for t in teachers
+                ]
+
+                # Get fellow students
+                fellow_students = User.objects.filter(
+                    student__joined_classes__in=joined_classes
+                ).exclude(id=user.id).distinct()
+                response_data["fellow_students"] = [
+                    {"id": s.id, "username": s.username} for s in fellow_students
+                ]
+
+            except Student.DoesNotExist:
+                response_data["teachers"] = []
+                response_data["fellow_students"] = []
+
+        elif user_role == "teacher":
+            # Get all classes created by the teacher
+            created_classes = Classroom.objects.filter(teacher=user)
+            if created_classes.exists():
+                # Get all students 
+                students_in_classes = User.objects.filter(
+                    student__joined_classes__in=created_classes
+                ).distinct()
+                response_data["students_in_my_classes"] = [
+                    {"id": s.id, "username": s.username} for s in students_in_classes
+                ]
+            else:
+                response_data["students_in_my_classes"] = []
+
+        else:
+            # where role is undefined or invalid
+            response_data["message"] = "User role not defined or invalid."
+
+        return Response(response_data)
+    
 class CreateOrGetChatView(APIView):
     permission_classes = [IsAuthenticated]
 

@@ -56,4 +56,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': event['message'],
             'sender': event['sender'],
             'timestamp': event['timestamp'],
+            'id': str(event['id']),
+            
         }))

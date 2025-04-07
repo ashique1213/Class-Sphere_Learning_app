@@ -26,7 +26,7 @@ const Notifications = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await notificationApi.getNotifications(authToken);
+      const response = await notificationApi.getNotifications();
       setNotifications(response.data);
     } catch (error) {
       toast.error("Failed to fetch notifications");
@@ -49,7 +49,7 @@ const Notifications = () => {
   }
   const markAsRead = async (id) => {
     try {
-      await notificationApi.markAsRead(id, authToken);
+      await notificationApi.markAsRead(id);
       setNotifications(
         notifications.map((notif) =>
           notif.id === id ? { ...notif, is_read: true } : notif
@@ -64,7 +64,7 @@ const Notifications = () => {
 
   const clearAll = async () => {
     try {
-      await notificationApi.clearAll(authToken);
+      await notificationApi.clearAll();
       setNotifications([]);
       toast.success("All notifications cleared");
     } catch (error) {

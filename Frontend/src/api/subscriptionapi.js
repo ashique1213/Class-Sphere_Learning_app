@@ -42,11 +42,9 @@ export const toggleActiveSubscriptionPlan = async (id) => {
 };
 
 
-export const checkUserSubscription = async (token) => {
+export const checkUserSubscription = async () => {
   try {
-    const response = await api.get("/subscription/check-subscription/", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.get("/subscription/check-subscription/");
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
