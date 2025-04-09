@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../../Components/Layouts/Navbar";
 import Footer from "../../Components/Layouts/Footer";
-import { Send } from "lucide-react";
+import { Send, Paperclip } from "lucide-react";
 import { FaUserCircle, FaChalkboardTeacher, FaUserFriends } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import { checkUserSubscription } from "../../api/subscriptionapi";
 import {
   getChatMessages,
@@ -18,6 +18,7 @@ const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [messageInput, setMessageInput] = useState("");
+  const [mediaFile, setMediaFile] = useState(null);
   const [currentSubscription, setCurrentSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [chatData, setChatData] = useState({
@@ -27,11 +28,12 @@ const ChatWindow = () => {
   });
   const authToken = useSelector((state) => state.auth.authToken);
   const user = useSelector((state) => state.auth.user);
-  const userRole = useSelector((state) => state.auth.user?.role); 
+  const userRole = useSelector((state) => state.auth.user?.role);
   const navigate = useNavigate();
-  const location = useLocation(); // Add useLocation to get route state
+  const location = useLocation();
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null); // Ref for file input
 
   // Auto-scroll to the latest message
   useEffect(() => {
@@ -104,7 +106,7 @@ const ChatWindow = () => {
 
         socket.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          if (data.message && data.sender !== user.username) {
+          if (data.sender !== user.username) {
             setMessages((prev) => {
               const messageExists = prev.some((msg) => msg.id === data.id);
               if (!messageExists) {
@@ -116,10 +118,7 @@ const ChatWindow = () => {
         };
 
         socket.onclose = () => console.log("WebSocket disconnected");
-        socket.onerror = (err) => {
-          console.error("WebSocket error:", err);
-          // toast.error("Chat connection lost.");
-        };
+        socket.onerror = (err) => console.error("WebSocket error:", err);
       } catch (err) {
         toast.error("Failed to load messages.");
       }
@@ -133,12 +132,19 @@ const ChatWindow = () => {
   }, [currentChat, authToken, user?.username]);
 
   const handleSendMessage = async () => {
-    if (!messageInput.trim() || !currentChat) return;
+    if (!currentChat || (!messageInput.trim() && !mediaFile)) return;
 
     try {
-      const serverMessage = await sendChatMessage(currentChat.id, messageInput);
+      const formData = new FormData();
+      formData.append("chat_id", currentChat.id);
+      if (messageInput.trim()) formData.append("message", messageInput);
+      if (mediaFile) formData.append("media", mediaFile);
+
+      const serverMessage = await sendChatMessage(currentChat.id, formData);
       setMessages((prev) => [...prev, { ...serverMessage, isSentByMe: true }]);
       setMessageInput("");
+      setMediaFile(null);
+      fileInputRef.current.value = null; // Reset file input
     } catch (error) {
       toast.error("Failed to send message.");
     }
@@ -158,6 +164,33 @@ const ChatWindow = () => {
       setCurrentChat(chat);
     } catch (err) {
       toast.error("Failed to open chat.");
+    }
+  };
+
+  const renderMedia = (msg) => {
+    if (!msg.media_url) return null;
+
+    switch (msg.media_type) {
+      case "image":
+        return <img src={msg.media_url} alt="Shared media" className="max-w-full h-auto rounded" />;
+      case "video":
+        return (
+          <video controls className="max-w-full h-auto rounded">
+            <source src={msg.media_url} />
+          </video>
+        );
+      case "document":
+        return (
+          <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-teal-600 underline">
+            View Document
+          </a>
+        );
+      default:
+        return (
+          <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-teal-600 underline">
+            Download File
+          </a>
+        );
     }
   };
 
@@ -207,7 +240,10 @@ const ChatWindow = () => {
                         >
                           <FaUserCircle className="text-teal-600 w-6 h-6" />
                           <span className="text-sm font-medium text-gray-800">
-                            {t.username} {t.is_subscribed ? "" : "(Not Active Plan)"}
+                            {t.username}{" "}
+                            {!t.is_subscribed && (
+                              <span className="text-red-500">(Not Active Plan)</span>
+                            )}
                           </span>
                         </li>
                       ))}
@@ -231,7 +267,12 @@ const ChatWindow = () => {
                           }`}
                         >
                           <FaUserCircle className="text-teal-600 w-6 h-6" />
-                          <span className="text-sm font-medium text-gray-800">{s.username}</span>
+                          <span className="text-sm font-medium text-gray-800">
+                            {s.username}{" "}
+                            {!s.is_subscribed && (
+                              <span className="text-red-500">(Not Active Plan)</span>
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -258,7 +299,12 @@ const ChatWindow = () => {
                           }`}
                         >
                           <FaUserCircle className="text-teal-600 w-6 h-6" />
-                          <span className="text-sm font-medium text-gray-800">{s.username}</span>
+                          <span className="text-sm font-medium text-gray-800">
+                            {s.username}{" "}
+                            {!s.is_subscribed && (
+                              <span className="text-red-500">(Not Active Plan)</span>
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -268,11 +314,7 @@ const ChatWindow = () => {
                 )}
               </>
             )}
-
-            {/* Empty State for undefined role */}
-            {!userRole && (
-              <p className="text-gray-500 text-sm">User role not defined.</p>
-            )}
+            {!userRole && <p className="text-gray-500 text-sm">User role not defined.</p>}
           </aside>
 
           {/* Chat Area */}
@@ -303,13 +345,27 @@ const ChatWindow = () => {
                             : "bg-gray-100 text-left"
                         }`}
                       >
-                        <p className="text-sm text-gray-800">{msg.message || msg.text}</p>
+                        {msg.text && <p className="text-sm text-gray-800">{msg.text}</p>}
+                        {renderMedia(msg)}
                         <p className="text-xs text-gray-500 mt-1">{formatDate(msg.timestamp)}</p>
                       </div>
                     </div>
                   ))}
                 </div>
                 <div className="mt-3 flex items-center sticky bottom-0 bg-white pt-2">
+                  <button
+                    onClick={() => fileInputRef.current.click()}
+                    className="p-2 text-teal-600 hover:text-teal-800"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => setMediaFile(e.target.files[0])}
+                    className="hidden"
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                  />
                   <input
                     type="text"
                     placeholder="Type a message..."
@@ -325,6 +381,9 @@ const ChatWindow = () => {
                     <Send className="w-5 h-5" />
                   </button>
                 </div>
+                {mediaFile && (
+                  <p className="text-sm text-gray-600 mt-2">Selected: {mediaFile.name}</p>
+                )}
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-400 text-base text-center">

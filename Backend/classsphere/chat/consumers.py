@@ -2,16 +2,14 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from rest_framework_simplejwt.tokens import AccessToken
-from .models import Chat
+from .models import Chat, Message
 from authentication.models import User
-
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.room_group_name = f'chat_{self.chat_id}'
 
-        # Authenticate user from token
         token = self.scope['query_string'].decode().split('token=')[-1]
         try:
             access_token = AccessToken(token)
@@ -36,25 +34,48 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data.get('message')
-        if not message:
-            return
+        media_url = data.get('media_url')
+        media_type = data.get('media_type')
         message_id = data.get('id', '')
+
+        # Save the message to the database (if not already saved by the API)
+        if message or media_url:
+            await self.save_message(message, media_url, media_type, message_id)
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
                 'message': message,
                 'sender': self.user.username,
+                'media_url': media_url,
+                'media_type': media_type,
                 'timestamp': data.get('timestamp', ''),
                 'id': message_id,
             }
         )
 
+    @database_sync_to_async
+    def save_message(self, message, media_url, media_type, message_id):
+        if not message_id:  # Only save if not already saved by API
+            chat = Chat.objects.get(id=self.chat_id)
+            msg = Message.objects.create(
+                chat=chat,
+                sender=self.user,
+                text=message,
+                media=media_url, 
+                media_type=media_type
+            )
+            return str(msg.id)
+        return message_id
+
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
-            'message': event['message'],
-            'sender': event['sender'],
-            'timestamp': event['timestamp'],
             'id': str(event['id']),
-            
+            'sender': event['sender'],
+            'text': event['message'],
+            'media_url': event['media_url'],
+            'media_type': event['media_type'],
+            'timestamp': event['timestamp'],
+
         }))

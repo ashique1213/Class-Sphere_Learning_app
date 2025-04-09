@@ -4,10 +4,16 @@ from .models import Chat, Message
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(source="sender.username")
+    media_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
-        fields = ["id", "sender", "text", "timestamp"]
+        fields = ["id", "sender", "text", "media", "media_type", "media_url", "timestamp"]
+
+    def get_media_url(self, obj):
+        if obj.media:
+            return obj.media.url
+        return None
 
 class ChatSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
