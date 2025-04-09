@@ -214,7 +214,7 @@ const Meetings = () => {
                     onChange={handleChange}
                     className="w-full mt-1 p-2 border rounded"
                   >
-                    <option value="true">One-to-One</option>
+                    {/* <option value="true">One-to-One</option> */}
                     <option value="false">One-to-Many</option>
                   </select>
                 </div>

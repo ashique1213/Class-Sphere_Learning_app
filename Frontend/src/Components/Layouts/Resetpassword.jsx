@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { sendOtp, verifyotp, resetPassword } from "../../api/authapi";
+import { sendOtp, verifyotppass, resetPassword } from "../../api/authapi";
+import { toast } from 'react-toastify';
 
 const ResetPassword = ({ onClose }) => {
   const [email, setEmail] = useState("");
@@ -36,11 +37,14 @@ const ResetPassword = ({ onClose }) => {
         setError("");
         setTimer(60);
         setOtp(""); // Clear previous OTP
+        toast.success(data.message || "OTP sent to your email!");
       } else {
         setError(data.message || "Failed to send OTP. Try again.");
+        toast.error(data.message || "Failed to send OTP. Try again.");
       }
     } catch (error) {
       setError("Network error. Try again.");
+      toast.error("Network error. Try again.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -55,16 +59,19 @@ const ResetPassword = ({ onClose }) => {
 
     try {
       setLoading(true);
-      const data = await verifyotp(email, otp);
+      const data = await verifyotppass(email, otp);
 
       if (data.success) {
         setStage("reset");
         setError("");
+        toast.success(data.message || "OTP verified successfully!");
       } else {
         setError(data.message || "Invalid OTP. Try again.");
+        toast.error(data.message || "Invalid OTP. Try again.");
       }
     } catch (error) {
       setError("Network error. Try again.");
+      toast.error("Network error. Try again.");
       console.error(error);
     } finally {
       setLoading(false);
@@ -74,11 +81,13 @@ const ResetPassword = ({ onClose }) => {
   const handleResetPassword = async () => {
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (newPassword.length < 8) {
       setError("Password must be at least 8 characters");
+      toast.error("Password must be at least 8 characters");
       return;
     }
 
@@ -88,12 +97,15 @@ const ResetPassword = ({ onClose }) => {
 
       if (data.success) {
         setSuccess("Password reset successfully!");
+        toast.success(data.message || "Password reset successfully!");
         setTimeout(onClose, 2000);
       } else {
         setError(data.message || "Reset failed. Try again.");
+        toast.error(data.message || "Reset failed. Try again.");
       }
     } catch (error) {
       setError("Network error. Try again.");
+      toast.error("Network error. Try again.");
       console.error(error);
     } finally {
       setLoading(false);

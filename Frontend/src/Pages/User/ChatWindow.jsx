@@ -4,7 +4,7 @@ import Footer from "../../Components/Layouts/Footer";
 import { Send } from "lucide-react";
 import { FaUserCircle, FaChalkboardTeacher, FaUserFriends } from "react-icons/fa";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Add useLocation
 import { checkUserSubscription } from "../../api/subscriptionapi";
 import {
   getChatMessages,
@@ -29,6 +29,7 @@ const ChatWindow = () => {
   const user = useSelector((state) => state.auth.user);
   const userRole = useSelector((state) => state.auth.user?.role); 
   const navigate = useNavigate();
+  const location = useLocation(); // Add useLocation to get route state
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -66,6 +67,12 @@ const ChatWindow = () => {
           fellow_students: data.fellow_students || [],
           students_in_my_classes: data.students_in_my_classes || [],
         });
+
+        // Check if a student ID was passed via state
+        const selectedUserId = location.state?.selectedUserId;
+        if (selectedUserId) {
+          handleUserClick(selectedUserId); // Automatically open chat with the selected user
+        }
       } catch (error) {
         toast.error("Failed to load chat data");
       } finally {
@@ -74,7 +81,7 @@ const ChatWindow = () => {
     };
 
     fetchInitialData();
-  }, [authToken, navigate, user]);
+  }, [authToken, navigate, user, location.state]); // Add location.state to dependencies
 
   // Set up WebSocket for real-time messaging
   useEffect(() => {
@@ -111,7 +118,7 @@ const ChatWindow = () => {
         socket.onclose = () => console.log("WebSocket disconnected");
         socket.onerror = (err) => {
           console.error("WebSocket error:", err);
-          toast.error("Chat connection lost.");
+          // toast.error("Chat connection lost.");
         };
       } catch (err) {
         toast.error("Failed to load messages.");

@@ -35,26 +35,26 @@ class SignInView(APIView):
         password = request.data.get("password")
         role = request.data.get("role")
         if not email or not password or not role:
-            return Response({"error": "Email, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"error": "Email, password, and role are required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = authenticate(email=email, password=password)
             if user is None:
-                return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success": False,"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
             
             if not user.is_active:
-                return Response({"error": "Your account has been blocked. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"success": False,"error": "Your account has been blocked. Please contact support."}, status=status.HTTP_403_FORBIDDEN)
 
             # Verify user role
             if user.role.lower() != role.lower():
-                return Response({"error": "Invalid role for this account."}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"success": False,"error": "Invalid role for this account."}, status=status.HTTP_403_FORBIDDEN)
 
             # Generate JWT token
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
 
             is_active= user.is_active
-            return Response({
+            return Response({"success": True,
                 "message": "Login successful.",
                 "access_token": str(access_token),
                 "refresh_token": str(refresh),
@@ -67,16 +67,18 @@ class SignInView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False,"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
          
 class SignupView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         data = request.data
         required_fields = ['username', 'email', 'password', 'role']
 
         for field in required_fields:
             if field not in data or not str(data[field]).strip():
-                return Response({'error': f'{field} is required'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success": False,'error': f'{field} is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         email = data['email'].strip().lower()
         role = data['role'].strip().lower()
@@ -84,21 +86,21 @@ class SignupView(APIView):
         password = data['password'].strip()
 
         if role not in ['student', 'teacher', 'staff']:
-            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
 
         if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,'error': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         email_regex = r'^\S+@\S+\.\S+$'
         if not re.match(email_regex, email):
-            return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not re.match(r'^[a-zA-Z0-9_]{3,20}$', username):
-            return Response({'error': 'Username must be 3-20 characters long and can only contain letters, numbers, and underscores.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,'error': 'Username must be 3-20 characters long and can only contain letters, numbers, and underscores.'}, status=status.HTTP_400_BAD_REQUEST)
 
         password_regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$'
         if not re.match(password_regex, password):
-            return Response({'error': 'Password must be at least 6 characters long and include an uppercase, lowercase, number, and special character.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,'error': 'Password must be at least 6 characters long and include an uppercase, lowercase, number, and special character.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             otp_record = OTP.objects.filter(email=email, is_verified=False).latest("created_at")
@@ -118,10 +120,12 @@ class SignupView(APIView):
 
         send_otp_email(email, username, otp_code)
 
-        return Response({'message': 'OTP sent to your email. Please verify to complete registration.'}, status=status.HTTP_201_CREATED)
+        return Response({"success": True,'message': 'OTP sent to your email. Please verify.'}, status=status.HTTP_201_CREATED)
 
 
 class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+    
     def post(self, request):
         email = request.data.get("email")
         otp_code = request.data.get("otp")
@@ -131,10 +135,10 @@ class VerifyOTPView(APIView):
 
             # Check for OTP expiration
             if otp_record.is_expired():
-                return Response({"error": "OTP expired. Request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success": False,"error": "OTP expired. Request a new one."}, status=status.HTTP_400_BAD_REQUEST)
 
             if str(otp_record.otp_code) != str(otp_code):
-                return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success": False,"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
 
             # OTP verified successfully, create the user
             user = User.objects.create_user(
@@ -151,19 +155,21 @@ class VerifyOTPView(APIView):
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
 
-            return Response({
+            return Response({"success": True,
                 "message": "Email verified successfully! Account created.",
                 "access_token": str(access_token),
                 "refresh_token": str(refresh),
             }, status=status.HTTP_201_CREATED)
 
         except OTP.DoesNotExist:
-            return Response({"error": "OTP not found"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"error": "OTP not found"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False,"error": f"Something went wrong. Try again! {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ResendOTPView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
 
@@ -178,9 +184,9 @@ class ResendOTPView(APIView):
 
                 send_otp_email(email, otp_record.username, otp_code) 
 
-                return Response({"message": "OTP expired. New OTP sent to your email."}, status=status.HTTP_201_CREATED)
+                return Response({"success": True,"message": "OTP expired. New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
-            return Response({"error": "OTP already sent. Please check your email."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"error": "OTP already sent. Please check your email."}, status=status.HTTP_400_BAD_REQUEST)
 
         except OTP.DoesNotExist:
             otp_code = generate_otp()
@@ -188,10 +194,10 @@ class ResendOTPView(APIView):
 
             send_otp_email(email, otp_record.username, otp_code) 
 
-            return Response({"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)
+            return Response({"success": True,"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"success": False,"error": "Something went wrong. Try again!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class GoogleLoginView(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
@@ -355,16 +361,18 @@ class UserProfileView(APIView):
     
 
 class RequestPasswordResetView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
 
         if not email:
-            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False, "error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            return Response({"error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"success": False, "error": "User with this email does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             otp_record = PasswordResetOTP.objects.filter(email=email, is_verified=False).latest("created_at")
@@ -378,52 +386,67 @@ class RequestPasswordResetView(APIView):
 
         send_otp_email(email, user.username, otp_code)
 
-        return Response({"message": "OTP sent to your email."}, status=status.HTTP_200_OK)
+        return Response({"success": True, "message": "OTP sent to your email."}, status=status.HTTP_200_OK)
 
 
 class VerifyPasswordResetOTPView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         otp_code = request.data.get("otp")
+
+        if not email or not otp_code:
+            return Response({"success": False, "error": "Email and OTP are required."},status=status.HTTP_400_BAD_REQUEST)
+
         try:
             otp_record = PasswordResetOTP.objects.filter(email=email, is_verified=False).latest("created_at")
 
             if otp_record.is_expired():
-                return Response({"error": "OTP expired. Request a new one."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"success": False, "error": "OTP expired. Request a new one."},status=status.HTTP_400_BAD_REQUEST)
 
             if str(otp_record.otp_code) != str(otp_code):
-                return Response({"error": "Invalid OTP"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"success": False, "error": "Invalid OTP"},status=status.HTTP_400_BAD_REQUEST)
 
             otp_record.is_verified = True
             otp_record.save()
 
-            return Response({"message": "OTP verified. Proceed to reset password."}, status=status.HTTP_200_OK)
+            return Response(
+                {"success": True, "message": "OTP verified. Proceed to reset password."},status=status.HTTP_200_OK)
 
         except PasswordResetOTP.DoesNotExist:
-            return Response({"error": "Invalid or expired OTP"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"success": False, "error": "Invalid or expired OTP"},status=status.HTTP_400_BAD_REQUEST)
 
 
 class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         new_password = request.data.get("new_password")
 
         if not email or not new_password:
-            return Response({"error": "Email and new password are required."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False, "error": "Email and new password are required."},status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            otp_record = PasswordResetOTP.objects.get(email=email, is_verified=True)
+            # Fetch the latest verified OTP record
+            otp_record = PasswordResetOTP.objects.filter(email=email, is_verified=True).latest("created_at")
 
             user = User.objects.get(email=email)
             user.set_password(new_password)
             user.save()
 
-            otp_record.delete()  # Remove OTP record after successful reset
+            # Delete all OTP records for this email to prevent duplicates
+            PasswordResetOTP.objects.filter(email=email).delete()
 
-            return Response({"message": "Password reset successful. You can now log in with your new password."}, status=status.HTTP_200_OK)
+            return Response({"success": True, "message": "Password reset successful."},status=status.HTTP_200_OK)
 
-        except (PasswordResetOTP.DoesNotExist, User.DoesNotExist):
-            return Response({"error": "Invalid request. Please verify OTP first."}, status=status.HTTP_400_BAD_REQUEST)
+        except PasswordResetOTP.DoesNotExist:
+            return Response({"success": False, "error": "Invalid request. Please verify OTP first."},status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"success": False, "error": "User with this email does not exist."},status=status.HTTP_400_BAD_REQUEST)
 
 
 class AdminLoginView(APIView):

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   FaUsers,
@@ -28,6 +28,7 @@ const ClassDetails = () => {
   const message = localStorage.getItem("toastMessage");
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [studentToRemove, setStudentToRemove] = useState(null);
+  const navigate = useNavigate(); // Add useNavigate hook
 
   useEffect(() => {
     if (message) {
@@ -58,10 +59,9 @@ const ClassDetails = () => {
   }, [slug, authToken]);
 
   const initiateRemoveStudent = (student) => {
-    setStudentToRemove(student)
-    setShowRemoveModal(true)
-  }
-
+    setStudentToRemove(student);
+    setShowRemoveModal(true);
+  };
 
   const handleRemoveStudent = async () => {
     try {
@@ -85,6 +85,11 @@ const ClassDetails = () => {
 
   const handleCloseEditForm = () => {
     setIsEditing(false);
+  };
+
+  // New function to handle messaging a student
+  const handleMessageStudent = (studentId) => {
+    navigate("/chat", { state: { selectedUserId: studentId } });
   };
 
   if (loading) {
@@ -239,12 +244,15 @@ const ClassDetails = () => {
                     </div>
                   </div>
                   <div className="flex flex-wrap justify-center sm:justify-end gap-2 w-full sm:w-auto">
-                    <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
+                    <button
+                      onClick={() => handleMessageStudent(student.id)} 
+                      className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto"
+                    >
                       Message
                     </button>
-                    <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
+                    {/* <button className="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
                       Video Chat
-                    </button>
+                    </button> */}
                     <button onClick={()=> initiateRemoveStudent(student)} className="bg-red-700 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs sm:text-sm w-full sm:w-auto">
                       Remove
                     </button>
@@ -262,8 +270,8 @@ const ClassDetails = () => {
         <ConfirmationModal
           isOpen={showRemoveModal}
           onClose={() => {
-            setShowRemoveModal(false)
-            setStudentToRemove(null)
+            setShowRemoveModal(false);
+            setStudentToRemove(null);
           }}
           onConfirm={handleRemoveStudent}
           title="Confirm Remove Student"

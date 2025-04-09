@@ -53,7 +53,6 @@ const Otp = ({ email, onSuccess }) => {
       setLoading(true);
       setError(null);
       
-      // Include username in the verification request if available
       const payload = { 
         email, 
         otp,
@@ -61,45 +60,41 @@ const Otp = ({ email, onSuccess }) => {
         role: role || undefined
       };
       
-      console.log("OTP verification payload:", payload); // For debugging
-
-      const response = await verifyOtp(payload);
+      console.log("OTP verification payload:", payload);
+      const data = await verifyOtp(payload);
       
-      const data = await response.json();
       setLoading(false);
-  
-      if (response.ok) {
+      if (data.success) {
         setSuccess(true);
-        const authToken = data.access_token;  
-        const refreshToken = data.refresh_token; // Store the refresh token
+        const authToken = data.access_token;
+        const refreshToken = data.refresh_token;
         
         if (authToken) {
-          // Update Redux store with token
           dispatch(loginSuccess({
             user: data.user || { username, email },
             email,
             role,
             authToken,
-            refreshToken, // Include refresh token
+            refreshToken,
           }));
-          
-          onSuccess();  // Proceed with successful login or navigation
+          onSuccess();
         } else {
           setError("Failed to get auth token.");
+          setError("Network error.. please try later!!!");
         }
       } else {
-        setError(data.error || "Invalid OTP, try again.");
+        // setError(data.error || "Invalid OTP, try again.");
+        toast.error(data.error || "Invalid OTP, try again.");
       }
     } catch (err) {
       setLoading(false);
-      setError("Something went wrong. Try again!");
+      setError(err.error || "Something went wrong. Try again!");
     }
   };
 
   const handleResendOtp = async () => {
     if (isExpired) {
       try {
-        // Request a new OTP here
         setLoading(true);
         setError(null);
         
@@ -109,24 +104,24 @@ const Otp = ({ email, onSuccess }) => {
           role: role || undefined
         };
         
-        console.log("Resend OTP payload:", payload); // For debugging
+        console.log("Resend OTP payload:", payload);
+        const data = await resendOtp(payload);
         
-        const response = await resendOtp(payload);
-
-        const data = await response.json();
         setLoading(false);
-
-        if (response.ok) {
-          setTimer(60); // Reset timer
-          setIsExpired(false); // Reset expiration
-          setOtp(""); // Clear OTP input
-          setSuccess(false); // Reset success
+        if (data.success) {
+          setTimer(60);
+          setIsExpired(false);
+          setOtp("");
+          setSuccess(false);
+          toast.success(data.message || "New OTP sent successfully!");
         } else {
           setError(data.error || "Failed to resend OTP.");
+          toast.error(data.error || "Failed to resend OTP.");
         }
       } catch (err) {
         setLoading(false);
-        setError("Something went wrong. Try again!");
+        setError(err.error || "Something went wrong. Try again!");
+        toast.error(err.error || "Something went wrong. Try again!");
       }
     }
   };

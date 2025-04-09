@@ -132,11 +132,11 @@ const Signup = () => {
   // Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) {
       return;
     }
-
+  
     if (isSignUp) {
       const payload = {
         username: formData.username.trim(),
@@ -144,17 +144,16 @@ const Signup = () => {
         password: formData.password,
         role: userType.toLowerCase(),
       };
-
+  
       try {
         dispatch(loginStart());
         setLoading(true);
         setError(null);
-        const response = await signup(payload);
-
-        const data = await response.json();
+        const data = await signup(payload); // Now returns response.data
+  
         setLoading(false);
-
-        if (response.ok) {
+  
+        if (data.success) {
           dispatch(
             loginSuccess({
               user: { username: formData.username },
@@ -163,8 +162,8 @@ const Signup = () => {
               authToken: false, // Will be updated after OTP verification
             })
           );
-
           setIsOtpSent(true); // Show OTP input
+          toast.success(data.message || "OTP sent successfully! Please verify.");
         } else {
           dispatch(loginFailure(data.error || "Signup failed"));
           setError(data.error || "Signup failed");
@@ -172,8 +171,9 @@ const Signup = () => {
         }
       } catch (err) {
         setLoading(false);
-        dispatch(loginFailure("Something went wrong. Try again!"));
-        setError("Something went wrong. Try again!");
+        dispatch(loginFailure(err.error || "Something went wrong. Try again!"));
+        setError(err.error || "Something went wrong. Try again!");
+        toast.error(err.error || "Something went wrong. Try again!");
       }
     } else {
       // Sign in logic
@@ -182,48 +182,48 @@ const Signup = () => {
         password: formData.password,
         role: userType.toLowerCase(),
       };
-      console.log(payload);
+      console.log("Signin payload:", payload);
       try {
         dispatch(loginStart());
         setLoading(true);
         setError(null);
-    
-        const response = await signin(payload);
+  
+        const data = await signin(payload); // Now returns response.data
         setLoading(false);
-    
-        console.log("Signin Response:", response.data); // Debug
-    
-        if (response.status === 200) {
-          const authToken = response.data.access_token;
-          const refreshToken = response.data.refresh_token;
-    
+  
+        console.log("Signin Response:", data);
+  
+        if (data.success) {
+          const authToken = data.access_token;
+          const refreshToken = data.refresh_token;
+  
           if (!authToken || !refreshToken) {
             throw new Error("Missing tokens in response");
           }
-    
+  
           dispatch(
             loginSuccess({
-              user: response.data.user || { email: formData.email },
+              user: data.user || { email: formData.email },
               email: formData.email,
               role: userType.toLowerCase(),
-              authToken: authToken,
-              refreshToken: refreshToken,
-              is_active: response.data.user?.is_active ?? true,
+              authToken,
+              refreshToken,
+              is_active: data.user?.is_active ?? true,
             })
           );
           navigate("/");
         } else {
-          const errorMsg = response.data.error || "Login failed";
+          const errorMsg = data.error || "Login failed";
           dispatch(loginFailure(errorMsg));
           setError(errorMsg);
-          toast.error(errorMsg); 
+          toast.error(errorMsg);
         }
       } catch (err) {
         setLoading(false);
         const errorMsg = err.error || err.message || "Something went wrong. Try again!";
         dispatch(loginFailure(errorMsg));
         setError(errorMsg);
-        toast.error(errorMsg); // Show specific error
+        toast.error(errorMsg);
       }
     }
   };
