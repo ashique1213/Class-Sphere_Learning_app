@@ -34,6 +34,7 @@ const ChatWindow = () => {
   const ws = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null); // Ref for file input
+  const [isSending, setIsSending] = useState(false);
 
   // Auto-scroll to the latest message
   useEffect(() => {
@@ -133,7 +134,8 @@ const ChatWindow = () => {
 
   const handleSendMessage = async () => {
     if (!currentChat || (!messageInput.trim() && !mediaFile)) return;
-
+    
+    setIsSending(true);
     try {
       const formData = new FormData();
       formData.append("chat_id", currentChat.id);
@@ -147,6 +149,8 @@ const ChatWindow = () => {
       fileInputRef.current.value = null; // Reset file input
     } catch (error) {
       toast.error("Failed to send message.");
+    }finally {
+      setIsSending(false);
     }
   };
 
@@ -352,6 +356,9 @@ const ChatWindow = () => {
                     </div>
                   ))}
                 </div>
+                {mediaFile && (
+                  <p className="text-sm text-gray-600 mt-2 ml-10">Selected: {mediaFile.name}</p>
+                )}
                 <div className="mt-3 flex items-center sticky bottom-0 bg-white pt-2">
                   <button
                     onClick={() => fileInputRef.current.click()}
@@ -375,15 +382,20 @@ const ChatWindow = () => {
                     className="flex-1 border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-300"
                   />
                   <button
-                    onClick={handleSendMessage}
-                    className="ml-3 bg-teal-600 hover:bg-teal-700 text-white p-2 rounded-xl transition"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
+                      onClick={handleSendMessage}
+                      disabled={isSending}
+                      className={`ml-3 bg-teal-600 hover:bg-teal-700 text-white p-2 rounded-xl transition flex items-center justify-center w-10 h-10 ${
+                        isSending ? "opacity-75 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {isSending ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                      ) : (
+                        <Send className="w-5 h-5" />
+                      )}
+                    </button>
                 </div>
-                {mediaFile && (
-                  <p className="text-sm text-gray-600 mt-2">Selected: {mediaFile.name}</p>
-                )}
+                
               </>
             ) : (
               <div className="flex-1 flex items-center justify-center text-gray-400 text-base text-center">

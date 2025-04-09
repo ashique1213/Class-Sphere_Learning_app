@@ -83,11 +83,6 @@ class SendMessageView(APIView):
         )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
  
-from django.utils import timezone
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-
 class SubscribedUsersView(APIView):
     permission_classes = [IsAuthenticated]
 
