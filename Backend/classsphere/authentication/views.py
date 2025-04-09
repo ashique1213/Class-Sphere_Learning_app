@@ -11,7 +11,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .models import OTP,PasswordResetOTP
 from rest_framework import generics
-from .utils import generate_otp, send_otp_email
+from .utils import generate_otp
+from .tasks import send_otp_email_task
 from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAdminUser
@@ -118,7 +119,7 @@ class SignupView(APIView):
             role=role
         )
 
-        send_otp_email(email, username, otp_code)
+        send_otp_email_task.delay(email, username, otp_code)
 
         return Response({"success": True,'message': 'OTP sent to your email. Please verify.'}, status=status.HTTP_201_CREATED)
 
@@ -182,7 +183,7 @@ class ResendOTPView(APIView):
                 otp_record.created_at = timezone.now()  # Reset the timestamp
                 otp_record.save()
 
-                send_otp_email(email, otp_record.username, otp_code) 
+                send_otp_email_task.delay(email, otp_record.username, otp_code) 
 
                 return Response({"success": True,"message": "OTP expired. New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
@@ -192,7 +193,7 @@ class ResendOTPView(APIView):
             otp_code = generate_otp()
             otp_record = OTP.objects.create(email=email, otp_code=otp_code)
 
-            send_otp_email(email, otp_record.username, otp_code) 
+            send_otp_email_task.delay(email, otp_record.username, otp_code) 
 
             return Response({"success": True,"message": "New OTP sent to your email."}, status=status.HTTP_201_CREATED)
 
@@ -384,7 +385,7 @@ class RequestPasswordResetView(APIView):
 
         PasswordResetOTP.objects.create(email=email, otp_code=otp_code)
 
-        send_otp_email(email, user.username, otp_code)
+        send_otp_email_task.delay(email, user.username, otp_code)
 
         return Response({"success": True, "message": "OTP sent to your email."}, status=status.HTTP_200_OK)
 

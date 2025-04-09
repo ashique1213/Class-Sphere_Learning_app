@@ -97,6 +97,16 @@ CHANNEL_LAYERS = {
     },
 }
 
+# Celery Configuration
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://127.0.0.1:6379/1")
+CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://127.0.0.1:6379/1")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"  # Align with project TIME_ZONE
+CELERY_TASK_ACKS_LATE = True  # Allow tasks to be re-queued if worker fails
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry connecting to broker on startup
+
 ASGI_APPLICATION = "classsphere.asgi.application"
 
 ROOT_URLCONF = "classsphere.urls"
