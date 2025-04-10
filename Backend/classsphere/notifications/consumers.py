@@ -1,11 +1,7 @@
 # notifications/consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import AccessToken
 from channels.db import database_sync_to_async
-
-User = get_user_model()
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -46,6 +42,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_user_from_token(self, token):
+        from rest_framework_simplejwt.tokens import AccessToken
+        from authentication.models import User
         try:
             access_token = AccessToken(token)
             user_id = access_token['user_id']

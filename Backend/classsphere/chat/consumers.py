@@ -1,12 +1,12 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from rest_framework_simplejwt.tokens import AccessToken
-from .models import Chat, Message
-from authentication.models import User
-
+# 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        from rest_framework_simplejwt.tokens import AccessToken
+        from .models import Chat, Message
+        from authentication.models import User
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.room_group_name = f'chat_{self.chat_id}'
 
@@ -57,6 +57,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, message, media_url, media_type, message_id):
+        from .models import Chat, Message
         if not message_id:  # Only save if not already saved by API
             chat = Chat.objects.get(id=self.chat_id)
             msg = Message.objects.create(
