@@ -36,7 +36,7 @@ import AttendancePage from "./Pages/User/Teacher/AttendancePage";
 import Notifications from "./Pages/User/Notifications";
 import About from "./Pages/User/About";
 import Reviews from "./Pages/Admin/Reviews";
-import Subscription from "./Pages/Admin/subscription";
+import Subscription from "./Pages/Admin/Subscription";
 import Plans from "./Pages/User/Plans";
 import Payment from "./Pages/User/Payment";
 import SubscriptionHistory from "./Pages/User/SubscriptionHistory";
