@@ -28,7 +28,7 @@ const ChatWindow = () => {
   });
   const authToken = useSelector((state) => state.auth.authToken);
   const user = useSelector((state) => state.auth.user);
-  const userRole = useSelector((state) => state.auth.user?.role);
+  // const userRole = useSelector((state) => state.auth.user?.role);
   const navigate = useNavigate();
   const location = useLocation();
   const ws = useRef(null);
@@ -225,7 +225,7 @@ const ChatWindow = () => {
             </p>
 
             {/* Render based on user role */}
-            {userRole === "student" && (
+            {user?.role === "student" && (
               <>
                 {/* Teachers (for students) */}
                 {chatData.teachers.length > 0 && (
@@ -285,7 +285,7 @@ const ChatWindow = () => {
               </>
             )}
 
-            {userRole === "teacher" && (
+            {user?.role === "teacher" && (
               <>
                 {/* Students in My Classes (for teachers) */}
                 {chatData.students_in_my_classes.length > 0 ? (
@@ -318,7 +318,7 @@ const ChatWindow = () => {
                 )}
               </>
             )}
-            {!userRole && <p className="text-gray-500 text-sm">User role not defined.</p>}
+            {!user?.role && <p className="text-gray-500 text-sm">User role not defined.</p>}
           </aside>
 
           {/* Chat Area */}
