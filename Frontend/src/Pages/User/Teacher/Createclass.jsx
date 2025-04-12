@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUsers, FaCalendarAlt, FaShareAlt, FaTrash,FaSpinner } from "react-icons/fa";
+import { FaUsers, FaCalendarAlt, FaShareAlt, FaToggleOn, FaToggleOff, FaSpinner } from "react-icons/fa";
 import { MdOutlineTopic } from "react-icons/md";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
@@ -8,17 +8,17 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { fetchClasses, deleteClassroom } from "../../../api/classroomapi";
-import {checkUserSubscription} from "../../../api/subscriptionapi"
-import DeleteModal from "../../../Components/Layouts/DeleteModal";
+import { fetchClasses, toggleClassroomActive } from "../../../api/classroomapi";
+import { checkUserSubscription } from "../../../api/subscriptionapi";
+import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
 const Createclass = () => {
   const { teachername } = useParams();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [classrooms, setClassrooms] = useState([]);
-  const [deleteId, setDeleteId] = useState(null);
-  const [subscriptionPlan, setSubscriptionPlan] = useState(null); // Store subscription status
+  const [toggleId, setToggleId] = useState(null);
+  const [subscriptionPlan, setSubscriptionPlan] = useState(null);
   const authToken = useSelector((state) => state.auth.authToken);
   const message = localStorage.getItem("toastMessage");
   const [loading, setLoading] = useState(true);
@@ -36,11 +36,11 @@ const Createclass = () => {
       setLoading(true);
       try {
         // Fetch classrooms
-        const classData = await fetchClasses(teachername, authToken);
+        const classData = await fetchClasses(teachername);
         setClassrooms(classData);
 
         // Fetch subscription status
-        const subscriptionData = await checkUserSubscription(authToken);
+        const subscriptionData = await checkUserSubscription();
         setSubscriptionPlan(subscriptionData);
       } catch (error) {
         toast.error("Failed to fetch data: " + (error.error || "Unknown error"));
@@ -66,24 +66,27 @@ const Createclass = () => {
       </>
     );
   }
-  
-  const confirmDelete = (id) => {
-    setDeleteId(id);
+
+  const confirmToggle = (id) => {
+    setToggleId(id);
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
+  const handleToggle = async () => {
+    if (!toggleId) return;
 
     try {
-      await deleteClassroom(deleteId, authToken);
+      await toggleClassroomActive(toggleId);
       setClassrooms((prevClassrooms) =>
-        prevClassrooms.filter((classItem) => classItem.id !== deleteId)
+        prevClassrooms.map((classItem) =>
+          classItem.id === toggleId
+            ? { ...classItem, is_active: !classItem.is_active }
+            : classItem
+        )
       );
-      setDeleteId(null);
-      toast.success("Classroom deleted successfully!");
+      setToggleId(null);
+      toast.success(`Classroom ${classrooms.find(c => c.id === toggleId).is_active ? 'deactivated' : 'activated'} successfully!`);
     } catch (error) {
-      console.error("Error deleting classroom:", error);
-      toast.error("Failed to delete classroom. Please try again.");
+      toast.error("Failed to toggle classroom status. Please try again.");
     }
   };
 
@@ -93,9 +96,6 @@ const Createclass = () => {
   };
 
   const handleCreateClick = () => {
-    // Check subscription plan and classroom count
-    console.log(subscriptionPlan)
-
     if (!subscriptionPlan || !subscriptionPlan.subscribed || subscriptionPlan.subscription.plan.name === "free") {
       if (classrooms.length >= 2) {
         toast.error(
@@ -169,7 +169,7 @@ const Createclass = () => {
                 Class Rooms
               </h2>
               <p className="text-white text-sm sm:text-base opacity-90">
-                Browse and join classes from different teachers
+                Create and manage your classes (inactive classes remain accessible to joined students)
               </p>
             </div>
             <div className="mt-4 md:mt-0 md:ml-4">
@@ -218,11 +218,15 @@ const Createclass = () => {
 
                   {/* Delete Icon */}
                   <button
-                    onClick={() => confirmDelete(classItem.id)}
-                    className="absolute top-3 right-7 sm:right-9 text-gray-500 hover:text-red-700 transition"
-                    title="Delete Classroom"
+                    onClick={() => confirmToggle(classItem.id)}
+                    className="absolute top-3 right-7 sm:right-9 text-gray-500 hover:text-blue-700 transition"
+                    title={classItem.is_active ? "Deactivate Classroom" : "Activate Classroom"}
                   >
-                    <FaTrash className="text-sm sm:text-base" />
+                    {classItem.is_active ? (
+                      <FaToggleOn className="text-md sm:text-base" />
+                    ) : (
+                      <FaToggleOff className="text-md sm:text-base" />
+                    )}
                   </button>
 
                   {/* Share Icon */}
@@ -265,7 +269,10 @@ const Createclass = () => {
                     <strong>Participants:</strong> {classItem.max_participants}
                   </p>
 
-                  {/* View Class Button */}
+                  <p className="text-gray-600 mt-1 sm:mt-2 text-xs sm:text-sm">
+                    <strong>Status:</strong> {classItem.is_active ? "Active" : "Inactive"}
+                  </p>
+
                   <Link
                     to={`/classdetails/${classItem.slug}`}
                     className="mt-3 sm:mt-4 w-full px-4 py-2 bg-teal-500 text-white text-xs sm:text-sm rounded-md hover:bg-teal-600 transition"
@@ -279,11 +286,24 @@ const Createclass = () => {
         )}
       </div>
 
-      <DeleteModal
-        isOpen={!!deleteId}
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteId(null)}
-        message="Are you sure you want to delete this classroom?"
+      <ConfirmationModal
+        isOpen={!!toggleId}
+        onConfirm={handleToggle}
+        onClose={() => setToggleId(null)}
+        title="Toggle Classroom Status"
+        message={
+          <>
+            Are you sure you want to{" "}
+            {classrooms.find(c => c.id === toggleId)?.is_active ? "deactivate" : "activate"} this classroom?
+            {classrooms.find(c => c.id === toggleId)?.is_active ? (
+              <span> Deactivating will prevent new students from joining, but current students can still access it.</span>
+            ) : (
+              <span> Activating will allow new students to join.</span>
+            )}
+          </>
+        }
+        confirmText="Confirm"
+        cancelText="Cancel"
       />
 
       <Footer />

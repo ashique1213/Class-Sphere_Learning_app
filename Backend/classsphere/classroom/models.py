@@ -12,6 +12,7 @@ class Classroom(models.Model):
     end_datetime = models.DateTimeField()
     description = models.TextField(blank=True, null=True)
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='classrooms')
+    is_active = models.BooleanField(default=True)  # New field for active/inactive status
     
     slug = models.SlugField(unique=True, blank=True)  
     created_at = models.DateTimeField(auto_now_add=True)

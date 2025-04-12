@@ -3,9 +3,9 @@ import { FaSearch, FaUsers, FaSpinner, FaBook, FaPlus } from "react-icons/fa";
 import Navbar from "../../../Components/Layouts/Navbar";
 import Footer from "../../../Components/Layouts/Footer";
 import { useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { fetchJoinedClasses, joinClass } from "../../../api/classroomapi";
-import { checkUserSubscription } from "../../../api/subscriptionapi"; // Import subscription check
+import { checkUserSubscription } from "../../../api/subscriptionapi";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../../Components/Layouts/ConfirmationModal";
 
@@ -15,33 +15,45 @@ const Classrooms = () => {
   const [classInput, setClassInput] = useState("");
   const [showInput, setShowInput] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [currentSubscription, setCurrentSubscription] = useState(null); // Store subscription status
-  const authToken = useSelector((state) => state.auth.authToken);
-  const { studentname } = useParams();
+  const [currentSubscription, setCurrentSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
+  const authToken = useSelector((state) => state.auth.authToken);
+  const user = useSelector((state) => state.auth.user); // Added for navigation
+  const { studentname } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadJoinedClassesAndSubscription = async () => {
       if (!authToken) return;
       setLoading(true);
       try {
-        // Fetch joined classes
-        const classData = await fetchJoinedClasses(authToken); // Pass authToken if required
+        const classData = await fetchJoinedClasses(authToken);
         setJoinedClasses(classData);
-
-        // Fetch subscription status
         const subscriptionData = await checkUserSubscription(authToken);
         setCurrentSubscription(subscriptionData);
+
+        const queryParams = new URLSearchParams(location.search);
+        const classSlug = queryParams.get("class");
+        if (classSlug) {
+          setClassInput(`${window.location.origin}/classroom/${classSlug}`);
+          setShowInput(true);
+        }
       } catch (error) {
-        toast.error("Failed to fetch data: " + (error.message || "Unknown error"));
+        toast.error(error.error || "Failed to fetch data.");
       } finally {
         setLoading(false);
       }
     };
 
     loadJoinedClassesAndSubscription();
-  }, [authToken]);
+  }, [authToken, location.search]);
 
+  useEffect(() => {
+    if (classInput && !loading && joinedClasses.length > 0) {
+      initiateJoinClass();
+    }
+  }, [classInput, loading, joinedClasses]);
 
   if (loading) {
     return (
@@ -54,16 +66,30 @@ const Classrooms = () => {
       </>
     );
   }
-  // Handle initiating the join process (show modal)
+
   const initiateJoinClass = () => {
     if (!classInput.trim()) {
       toast.error("Please enter a class link.");
       return;
     }
 
-    // Check subscription and class limit
-    const currentPlanName = currentSubscription?.subscribed ? currentSubscription.subscription.plan.name : null;
-    if ((!currentPlanName || currentPlanName === "free") && joinedClasses.length >= 2) {
+    const slug = classInput.split("/").pop();
+    const isAlreadyJoined = joinedClasses.some((cls) => cls.slug === slug);
+    if (isAlreadyJoined) {
+      toast.info("You are already in this class.");
+      setClassInput("");
+      setShowInput(false);
+      navigate(`/classrooms/${studentname}`);
+      return;
+    }
+
+    const currentPlanName = currentSubscription?.subscribed
+      ? currentSubscription.subscription.plan.name
+      : null;
+    if (
+      (!currentPlanName || currentPlanName === "free") &&
+      joinedClasses.length >= 2
+    ) {
       toast.error(
         <div>
           You have reached the limit of 2 classes on a free plan.{" "}
@@ -74,32 +100,32 @@ const Classrooms = () => {
         </div>,
         { autoClose: 5000 }
       );
+      setClassInput("");
+      setShowInput(false);
+      navigate(`/classrooms/${studentname}`);
       return;
     }
 
-    setShowModal(true); // Show confirmation modal if limit not exceeded
+    setShowModal(true);
   };
 
   // Handle confirmed join class action
   const handleJoinClass = async () => {
     try {
-      const newClass = await joinClass(classInput, authToken);
-
-      const isAlreadyJoined = joinedClasses.some((cls) => cls.id === newClass.id);
-
-      if (isAlreadyJoined) {
-        toast.info("You have already joined this class.");
-      } else {
-        setJoinedClasses((prev) => [newClass, ...prev]);
-        toast.success("Class joined successfully!");
-      }
-
+      const slug = classInput.split("/").pop();
+      const newClass = await joinClass(slug, authToken); // Adjusted to use slug directly
+      setJoinedClasses((prev) => [newClass, ...prev]);
+      toast.success("Class joined successfully!");
+      setShowModal(false);
       setClassInput("");
       setShowInput(false);
-      setShowModal(false);
+      navigate(`/classrooms/${studentname}`);
     } catch (error) {
-      toast.error(error.message || "Failed to join class.");
+      toast.error(error.error || "Failed to join class.");
       setShowModal(false);
+      setClassInput("");
+      setShowInput(false);
+      navigate(`/classrooms/${studentname}`);
     }
   };
 
@@ -175,7 +201,11 @@ const Classrooms = () => {
         {/* Confirmation Modal */}
         <ConfirmationModal
           isOpen={showModal}
-          onClose={() => setShowModal(false)}
+          onClose={() => {
+            setShowModal(false);
+            setClassInput("");
+            setShowInput(false);
+          }}
           onConfirm={handleJoinClass}
           title="Confirm Join Class"
           message={
@@ -218,6 +248,13 @@ const Classrooms = () => {
                 </p>
                 <p className="text-sm text-gray-700">
                   Topic: {classroom.category}
+                </p>
+                <p
+                  className={`text-sm ${
+                    classroom.is_active ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  Status: {classroom.is_active ? "Active" : "Inactive"}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500 pt-1">
                   {classroom.description.length > 200

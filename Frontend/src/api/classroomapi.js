@@ -11,12 +11,12 @@ export const fetchClasses = async (teachername) => {
   }
 };
 
-export const deleteClassroom = async (id) => {
+export const toggleClassroomActive = async (id) => {
   try {
-    await api.delete(`/classrooms/${id}/delete/`);
+    await api.post(`/classrooms/${id}/toggle-active/`, {});
     return true;
   } catch (error) {
-    console.error("Error deleting classroom:", error);
+    console.error("Error toggling classroom:", error);
     throw error.response?.data || error;
   }
 };
@@ -29,7 +29,7 @@ export const fetchJoinedClasses = async () => {
       console.error("Error fetching joined classrooms:", error);
       throw error.response?.data || error;
     }
-  };
+};
   
 export const joinClass = async (classLink) => {
     try {
@@ -44,9 +44,9 @@ export const joinClass = async (classLink) => {
       console.error("Error joining class:", error);
       throw error.response?.data || error;
     }
-  };
+};
   
-  export const fetchClassroom = async (slug) => {
+export const fetchClassroom = async (slug) => {
     try {
       const response = await api.get(`/classrooms/${slug}/`);
       return response.data;
@@ -56,16 +56,15 @@ export const joinClass = async (classLink) => {
     }
 };
 
-
-export const createClassroom = async (formData, userEmail) => {
+export const createClassroom = async (formData) => {
     try {
-      const response = await api.post("/classrooms/", { ...formData, teacher_email: userEmail });
+      const response = await api.post("/classrooms/", formData);
       return response.data;
     } catch (error) {
       console.error("Error creating classroom:", error);
       throw error.response?.data || error;
     }
-  };
+};
   
 export const updateClassroom = async (classId, formData) => {
     try {
@@ -79,7 +78,7 @@ export const updateClassroom = async (classId, formData) => {
   
 export const removeStudent = async (slug, studentId) => {
   try {
-    const response = await api.post(`/classrooms/${slug}/remove-student/`, { student_id: studentId });
+    const response = await api.post(`/classrooms/${slug}/remove-student/`);
     return response.data;
   } catch (error) {
     console.error("Error removing student:", error);

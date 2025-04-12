@@ -15,14 +15,32 @@ class ClassroomListCreateView(APIView):
     def get(self, request):
         teacher_username = request.query_params.get("teacher")
         if teacher_username:
+            # Teachers see all their classrooms (active and inactive)
             classrooms = Classroom.objects.filter(teacher__username=teacher_username)
         else:
-            classrooms = Classroom.objects.all()
+            # Others only see active classrooms
+            classrooms = Classroom.objects.filter(is_active=True)
         
         serializer = ClassroomSerializer(classrooms, many=True)
         return Response(serializer.data)
     
     def post(self, request):
+        # Validate start date
+        start_datetime = request.data.get('start_datetime')
+        if start_datetime and start_datetime < timezone.now().isoformat():
+            return Response(
+                {"error": "Start date must be today or in the future"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate end date
+        end_datetime = request.data.get('end_datetime')
+        if end_datetime and start_datetime and end_datetime <= start_datetime:
+            return Response(
+                {"error": "End date must be after start date"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Check subscription and classroom limit
         active_subscription = UserSubscription.objects.filter(
             user=request.user,
@@ -51,7 +69,17 @@ class ClassroomDetailView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get_object(self, slug):
-        return get_object_or_404(Classroom, slug=slug)
+        classroom = get_object_or_404(Classroom, slug=slug)
+        # Allow access if user is teacher or a joined student, regardless of is_active
+        if self.request.user == classroom.teacher:
+            return classroom
+        student, _ = Student.objects.get_or_create(user=self.request.user)
+        if classroom in student.joined_classes.all():
+            return classroom
+        # For non-joined users, only allow access to active classrooms
+        if not classroom.is_active:
+            raise permissions.PermissionDenied("This classroom is inactive and not accessible.")
+        return classroom
     
     def get(self, request, slug):
         classroom = self.get_object(slug)
@@ -67,6 +95,22 @@ class ClassroomUpdateView(APIView):
     
     def put(self, request, pk):
         classroom = self.get_object(pk)
+        # Validate start date
+        start_datetime = request.data.get('start_datetime')
+        if start_datetime and start_datetime < timezone.now().isoformat():
+            return Response(
+                {"error": "Start date must be today or in the future"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate end date
+        end_datetime = request.data.get('end_datetime')
+        if end_datetime and start_datetime and end_datetime <= start_datetime:
+            return Response(
+                {"error": "End date must be after start date"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = ClassroomSerializer(classroom, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -75,6 +119,22 @@ class ClassroomUpdateView(APIView):
     
     def patch(self, request, pk):
         classroom = self.get_object(pk)
+        # Validate start date
+        start_datetime = request.data.get('start_datetime')
+        if start_datetime and start_datetime < timezone.now().isoformat():
+            return Response(
+                {"error": "Start date must be today or in the future"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate end date
+        end_datetime = request.data.get('end_datetime')
+        if end_datetime and start_datetime and end_datetime <= start_datetime:
+            return Response(
+                {"error": "End date must be after start date"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = ClassroomSerializer(classroom, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -82,16 +142,18 @@ class ClassroomUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ClassroomDeleteView(APIView):
+class ClassroomToggleActiveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_object(self, pk):
         return get_object_or_404(Classroom, pk=pk, teacher=self.request.user)
     
-    def delete(self, request, pk):
+    def post(self, request, pk):
         classroom = self.get_object(pk)
-        classroom.delete()
-        return Response({"message": "Classroom deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        classroom.is_active = not classroom.is_active
+        classroom.save()
+        status_text = "activated" if classroom.is_active else "deactivated"
+        return Response({"message": f"Classroom {status_text} successfully"}, status=status.HTTP_200_OK)
 
 
 class JoinClassView(APIView):
@@ -104,6 +166,29 @@ class JoinClassView(APIView):
             return Response({"error": "Class slug is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         classroom = get_object_or_404(Classroom, slug=class_slug)
+        
+        # Prevent new joins for inactive classrooms
+        if not classroom.is_active:
+            return Response(
+                {"error": "This classroom is currently deactivated and not accepting new students"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check if end date has passed
+        if classroom.end_datetime < timezone.now():
+            return Response(
+                {"error": "This classroom has expired"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Check max participants
+        current_participants = classroom.students.count()
+        if current_participants >= classroom.max_participants:
+            return Response(
+                {"error": "This classroom has reached its maximum participants"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         student, created = Student.objects.get_or_create(user=request.user)
 
         # Check subscription and joined classes limit
@@ -121,7 +206,7 @@ class JoinClassView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
 
-        # Check if already joined (optional, aligns with frontend)
+        # Check if already joined
         if classroom in student.joined_classes.all():
             return Response({"error": "You have already joined this class."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,6 +221,7 @@ class JoinedClassesView(APIView):
     
     def get(self, request):
         student, created = Student.objects.get_or_create(user=request.user)
+        # Return all joined classes, regardless of is_active status
         serializer = StudentSerializer(student)
         return Response(serializer.data["joined_classes"])
 
