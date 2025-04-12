@@ -1,12 +1,5 @@
 {
     "rewrites": [
-      {
-        "source": "/api/:path*",
-        "destination": "https://api.muhammedashique.xyz/api/:path*"
-      }
-    ],
-    "redirects": [],
-    "headers": [],
-    "cleanUrls": true
+      { "source": "/(.*)", "destination": "/" }
+    ]
   }
-  
