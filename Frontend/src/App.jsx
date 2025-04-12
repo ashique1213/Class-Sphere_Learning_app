@@ -59,7 +59,7 @@ function App() {
         <Route
           path="/adminlogin"
           element={
-            authToken !== "null" && role === "staff" ? (
+            authToken && role === "staff" ? (
               <Navigate to="/admindashboard" />
             ) : (
               <AdminLogin />
