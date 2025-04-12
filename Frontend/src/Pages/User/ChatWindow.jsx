@@ -14,6 +14,8 @@ import {
 } from "../../api/chatapi";
 import { toast } from "react-toastify";
 
+const wsBaseUrl = import.meta.env.VITE_WS_URL;
+
 const ChatWindow = () => {
   const [messages, setMessages] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
@@ -35,6 +37,7 @@ const ChatWindow = () => {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null); // Ref for file input
   const [isSending, setIsSending] = useState(false);
+
 
   // Auto-scroll to the latest message
   useEffect(() => {
@@ -98,7 +101,7 @@ const ChatWindow = () => {
         if (ws.current) ws.current.close();
 
         const socket = new WebSocket(
-          `ws://localhost:8000/ws/chat/${currentChat.id}/?token=${authToken}`
+          `${wsBaseUrl}/chat/${currentChat.id}/?token=${authToken}`
         );
 
         ws.current = socket;

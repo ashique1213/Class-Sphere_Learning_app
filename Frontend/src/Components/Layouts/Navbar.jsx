@@ -16,6 +16,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { authToken, refreshToken } = useSelector((state) => state.auth);
   const isAuthenticated = !!authToken;
+  const wsBaseUrl = import.meta.env.VITE_WS_URL;
 
   // Use ref to persist WebSocket instance across renders
   const wsRef = useRef(null);
@@ -35,7 +36,7 @@ const Navbar = () => {
     // Only initialize if not already connected
     if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
       const websocket = new WebSocket(
-        `ws://localhost:8000/ws/notifications/?token=${authToken}`
+        `${wsBaseUrl}/notifications/?token=${authToken}`
       );
 
       websocket.onopen = () => {
