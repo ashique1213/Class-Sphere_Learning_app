@@ -223,9 +223,9 @@ const Createclass = () => {
                     title={classItem.is_active ? "Deactivate Classroom" : "Activate Classroom"}
                   >
                     {classItem.is_active ? (
-                      <FaToggleOn className="text-md sm:text-base" />
+                      <FaToggleOn className="text-lg sm:text-xl" />
                     ) : (
-                      <FaToggleOff className="text-md sm:text-base" />
+                      <FaToggleOff className="text-lg sm:text-xl" />
                     )}
                   </button>
 
