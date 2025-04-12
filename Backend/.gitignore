@@ -31,3 +31,6 @@ migrations/
 # Ignore static and media files (optional)
 staticfiles/
 media/
+
+celerybeat-schedule*
+
