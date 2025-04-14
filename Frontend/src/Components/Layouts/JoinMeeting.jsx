@@ -27,7 +27,7 @@ export default function JoinMeeting() {
         const redirectSlug = slug || meetingData.classroom; // Fallback to classroom ID
 
         const roomID = meetingId;
-        const userID = user.id || `user_${Math.floor(Math.random() * 10000)}`;
+        const userID = user?.id ? String(user.id) : `user_${Math.floor(Math.random() * 10000)}`;
         const userName = user.username || `userName${userID}`;
         
         const serverSecret = import.meta.env.VITE_SERVER_SECRET;
