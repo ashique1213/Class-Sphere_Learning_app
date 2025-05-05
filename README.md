@@ -93,7 +93,7 @@ ClassSphere is an advanced online learning management system designed to facilit
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/classsphere.git
+git clone https://github.com/ashique1213/classsphere.git
 cd classsphere
 ```
 
