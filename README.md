@@ -2,7 +2,6 @@
 
 ClassSphere is an advanced online learning management system designed to facilitate seamless interaction between teachers, students, and administrators. It provides a robust platform for managing classrooms, conducting meetings, handling assignments, exams, and enabling real-time communication through chat and video calls. The project leverages modern technologies to ensure scalability, security, and a user-friendly experience.
 
-This is my second project, and I’m excited to build a comprehensive educational platform with features like JWT-based authentication, Cloudinary for media storage, Zego for video calls, and Stripe/PayPal for payments. Below is an overview of the project, its features, and setup instructions.
 
 ## Features
 
