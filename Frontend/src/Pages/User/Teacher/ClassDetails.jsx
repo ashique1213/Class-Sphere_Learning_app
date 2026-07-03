@@ -214,6 +214,11 @@ const ClassDetails = () => {
             <CreateClassForm
               onClose={handleCloseEditForm}
               existingClass={classroom}
+              authToken={authToken}
+              refreshClasses={async () => {
+                const data = await fetchClassroom(slug);
+                setClassroom(data);
+              }}
             />
           </div>
         )}
