@@ -247,7 +247,7 @@ const Signup = () => {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
 
-      <div className="relative flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl min-h-[600px] border border-white/50 z-10">
+      <div className="relative flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl min-h-[700px] border border-white/50 z-10">
         {/* Home Icon Positioned at Top Right */}
         <Link to="/" className="absolute top-6 right-6 z-20 bg-white/50 p-2 rounded-full backdrop-blur-sm hover:bg-teal-50 transition-all duration-300 shadow-sm">
           <FaHome className="text-teal-700 text-xl" />
@@ -270,7 +270,7 @@ const Signup = () => {
         </div>
 
         {/* Right Side - Signup Form */}
-        <div className="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white">
+        <div className="w-full md:w-7/12 p-10 md:p-16 flex flex-col justify-center bg-white">
           {isResetPassword ? (
             <ResetPassword onClose={handleResetPasswordClose} />
           ) : userType === null ? (
