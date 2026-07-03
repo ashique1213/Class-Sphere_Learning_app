@@ -80,14 +80,18 @@ const About = () => {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-teal-50 via-white to-teal-50">
-        <div className="flex-grow px-4 pt-20 sm:px-6 lg:px-8 md:pt-30">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-teal-50 to-teal-100 relative overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+
+        <div className="flex-grow px-4 pt-20 sm:px-6 lg:px-8 md:pt-30 relative z-10">
           {/* About Us Heading */}
-          <div className="text-center mb-8 sm:mb-5 relative">
-            <h1 className="text-3xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 relative inline-block">
-              About <span className="text-teal-600">Us</span>
+          <div className="text-center mb-12 sm:mb-16 relative">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight relative inline-block drop-shadow-sm">
+              About <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-teal-400">Us</span>
             </h1>
-            <p className="text-gray-600 mt-3 max-w-xl mx-auto text-base sm:text-lg font-medium">
+            <p className="text-teal-800/80 mt-4 max-w-2xl mx-auto text-lg sm:text-xl font-medium">
               Discover how ClassSphere is redefining education management with innovative solutions.
             </p>
           </div>
@@ -137,11 +141,11 @@ const About = () => {
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="bg-white p-4 sm:p-5 rounded-xl shadow-md border border-teal-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  className="bg-white/70 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg border border-teal-100 hover:shadow-2xl hover:shadow-teal-500/20 hover:-translate-y-2 hover:scale-105 transition-all duration-500 group"
                 >
                   <div className="flex flex-col items-center">
-                    <div className="mb-2 sm:mb-3 p-2 sm:p-3 bg-teal-50 rounded-full">
-                      <stat.Icon className="text-teal-600 w-6 h-6 sm:w-7 sm:h-7" />
+                    <div className="mb-4 p-4 bg-gradient-to-br from-teal-100 to-teal-50 rounded-2xl group-hover:bg-teal-500 transition-colors duration-300">
+                      <stat.Icon className="text-teal-600 w-8 h-8 group-hover:text-white transition-colors duration-300" />
                     </div>
                     <h4 className="text-xl sm:text-2xl font-bold text-teal-600">{stat.value}</h4>
                     <p className="text-gray-600 text-xs sm:text-xs uppercase tracking-wide mt-1">{stat.label}</p>
@@ -165,17 +169,18 @@ const About = () => {
 
               <form
                 onSubmit={handleReviewSubmit}
-                className="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-teal-200 flex flex-col gap-5"
+                className="bg-white/60 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-xl border border-white/50 flex flex-col gap-6 relative overflow-hidden"
               >
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="review-content" className="text-gray-700 font-medium text-sm sm:text-base">
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-teal-400 rounded-full filter blur-3xl opacity-20"></div>
+                <div className="flex flex-col gap-3 relative z-10">
+                  <label htmlFor="review-content" className="text-gray-800 font-semibold text-sm sm:text-base">
                     Your Review
                   </label>
                   <textarea
                     id="review-content"
                     value={reviewForm.content}
                     onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
-                    className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all duration-300 shadow-sm"
+                    className="w-full p-4 sm:p-5 border border-teal-100 bg-white/80 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300 shadow-sm text-gray-700"
                     rows="4"
                     placeholder="Tell us about your experience with ClassSphere..."
                     required
@@ -266,7 +271,7 @@ const About = () => {
                 {allReviews.slice(-4).map((review, index) => (
                   <div
                     key={index}
-                    className="bg-white p-5 sm:p-6 rounded-xl shadow-md border border-teal-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                    className="bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-lg border border-teal-100 hover:shadow-2xl hover:shadow-teal-500/10 hover:-translate-y-1 transition-all duration-300"
                   >
                     <div className="flex items-center mb-3 sm:mb-4 capitalize">
                       {review.avatar ? (

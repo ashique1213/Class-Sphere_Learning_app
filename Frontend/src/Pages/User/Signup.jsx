@@ -242,71 +242,78 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <div className="relative flex flex-col md:flex-row bg-white rounded-lg shadow-md overflow-hidden w-full max-w-3xl min-h-[550px]">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-teal-50 to-teal-100 p-4 sm:p-8 relative overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
+
+      <div className="relative flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-4xl min-h-[600px] border border-white/50 z-10">
         {/* Home Icon Positioned at Top Right */}
-        <Link to="/" className="absolute top-4 right-4">
-          <FaHome className="text-black text-2xl hover:text-gray-300 transition" />
+        <Link to="/" className="absolute top-6 right-6 z-20 bg-white/50 p-2 rounded-full backdrop-blur-sm hover:bg-teal-50 transition-all duration-300 shadow-sm">
+          <FaHome className="text-teal-700 text-xl" />
         </Link>
 
         {/* Left Side - Image */}
-        <div className="relative w-full md:w-1/2">
+        <div className="relative w-full md:w-5/12 hidden md:block">
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-900/90 via-teal-900/40 to-transparent z-10"></div>
           <img
             src={Login_image}
             alt="Classroom"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform scale-105"
           />
-          <div className="absolute inset-0 bg-opacity-30 flex flex-col justify-end p-4">
-            <h2 className="text-gray-900 text-lg font-semibold">Join Us</h2>
-            <p className="text-black font-bold text-xs pb-3">
-              Start your learning journey today
+          <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 text-white">
+            <h2 className="text-3xl font-bold tracking-tight mb-2">Join Us</h2>
+            <p className="text-teal-100 font-medium text-sm pb-4">
+              Start your learning journey today with our cutting-edge platform.
             </p>
           </div>
         </div>
 
         {/* Right Side - Signup Form */}
-        <div className="w-full md:w-1/2 p-6 flex flex-col justify-center">
+        <div className="w-full md:w-7/12 p-8 md:p-12 flex flex-col justify-center bg-white">
           {isResetPassword ? (
             <ResetPassword onClose={handleResetPasswordClose} />
           ) : userType === null ? (
-            <>
-              <h2 className="text-lg font-semibold text-gray-700 text-center">
-                Are you joining as a Student or a Teacher?
-              </h2>
+            <div className="max-w-sm mx-auto w-full text-center">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome</h2>
+              <p className="text-gray-500 text-sm mb-8">Are you joining as a Student or a Teacher?</p>
+              
               <button
                 onClick={() => setUserType("Student")}
-                className="w-full mt-4 bg-teal-500 text-white py-2 rounded-md text-sm hover:bg-teal-600"
+                className="w-full mb-4 bg-teal-50 text-teal-700 border border-teal-200 py-4 rounded-xl text-lg font-medium hover:bg-teal-600 hover:text-white hover:border-teal-600 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 I am a <span className="font-bold">STUDENT</span>
               </button>
               <button
                 onClick={() => setUserType("Teacher")}
-                className="w-full mt-4 bg-teal-700 text-white py-2 rounded-md text-sm hover:bg-teal-600"
+                className="w-full bg-teal-700 text-white py-4 rounded-xl text-lg font-medium shadow-md hover:bg-teal-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 I am a <span className="font-bold">TEACHER</span>
               </button>
-            </>
+            </div>
           ) : !isOtpSent ? (
-            <>
-              <h2 className="text-lg font-semibold text-gray-700 text-center">
-                {isSignUp ? `Create ${userType} Account` : "Sign In"}
+            <div className="max-w-sm mx-auto w-full">
+              <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+                {isSignUp ? `Create ${userType} Account` : `Welcome Back, ${userType}`}
               </h2>
-              <div className="flex justify-center gap-3 mt-3">
+              {/* Auth Toggle Switch */}
+              <div className="flex bg-gray-100 p-1 rounded-full mb-6 relative">
+                <div
+                  className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-transform duration-300 ease-in-out ${
+                    isSignUp ? "translate-x-full" : "translate-x-0"
+                  }`}
+                ></div>
                 <button
-                  className={`px-4 py-1.5 rounded-md text-sm ${
-                    !isSignUp
-                      ? "bg-teal-400 text-white"
-                      : "bg-gray-200 text-gray-600"
+                  className={`flex-1 py-2 text-sm font-medium z-10 transition-colors duration-300 ${
+                    !isSignUp ? "text-teal-700" : "text-gray-500 hover:text-gray-700"
                   }`}
                   onClick={() => setIsSignUp(false)}
                 >
                   Login
                 </button>
                 <button
-                  className={`px-4 py-1.5 rounded-md text-sm ${
-                    isSignUp
-                      ? "bg-teal-400 text-white"
-                      : "bg-gray-200 text-gray-600"
+                  className={`flex-1 py-2 text-sm font-medium z-10 transition-colors duration-300 ${
+                    isSignUp ? "text-teal-700" : "text-gray-500 hover:text-gray-700"
                   }`}
                   onClick={() => setIsSignUp(true)}
                 >
@@ -319,7 +326,7 @@ const Signup = () => {
               </button> */}
               <GoogleSignIn isSignUp={isSignUp} userType={userType} />
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-6 space-y-4">
                 {isSignUp && (
                   <input
                     type="text"
@@ -327,7 +334,7 @@ const Signup = () => {
                     value={formData.username}
                     onChange={handleChange}
                     placeholder="Username"
-                    className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                     required
                   />
                 )}
@@ -336,30 +343,31 @@ const Signup = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Email"
-                  className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                  placeholder="Email address"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                   required
                 />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Password"
-                  className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
-                  required
-                />
-
-                {!isSignUp && (
-                  <p className="text-center text-xs text-gray-500">
-                    <span
-                      onClick={handleForgotPassword}
-                      className="text-teal-500 hover:underline cursor-pointer"
-                    >
-                      Forgot Password
-                    </span>
-                  </p>
-                )}
+                <div>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Password"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
+                    required
+                  />
+                  {!isSignUp && (
+                    <div className="flex justify-end mt-2">
+                      <span
+                        onClick={handleForgotPassword}
+                        className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline cursor-pointer transition-colors"
+                      >
+                        Forgot Password?
+                      </span>
+                    </div>
+                  )}
+                </div>
 
                 {isSignUp && (
                   <input
@@ -368,32 +376,39 @@ const Signup = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Re-enter Password"
-                    className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-teal-400"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                     required
                   />
                 )}
               </div>
-              {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
+              
+              {error && <p className="text-red-500 text-xs font-medium mt-3 px-1">{error}</p>}
 
               <button
                 onClick={handleSubmit}
-                className="w-full mt-4 bg-teal-400 text-white py-2 rounded-md text-sm hover:bg-teal-500"
+                className="w-full mt-6 bg-teal-600 text-white py-3.5 rounded-xl text-sm font-semibold shadow-lg hover:shadow-teal-500/30 hover:bg-teal-700 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={loading}
               >
-                {loading ? "Processing..." : isSignUp ? "Sign Up" : "Login"}
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Processing...</span>
+                  </div>
+                ) : isSignUp ? "Sign Up" : "Sign In"}
               </button>
-              <p className="text-center text-xs text-gray-500 mt-3">
+              
+              <p className="text-center text-sm text-gray-500 mt-6 font-medium">
                 {isSignUp
                   ? "Already have an account?"
                   : "Don't have an account?"}{" "}
                 <span
                   onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-teal-500 hover:underline cursor-pointer"
+                  className="text-teal-600 hover:text-teal-700 hover:underline cursor-pointer transition-colors"
                 >
-                  {isSignUp ? "Login here" : "Sign up here"}
+                  {isSignUp ? "Log in here" : "Sign up here"}
                 </span>
               </p>
-            </>
+            </div>
           ) : (
             <Otp email={formData.email} onSuccess={handleOtpSuccess} />
           )}
