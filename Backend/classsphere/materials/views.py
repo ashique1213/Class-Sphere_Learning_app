@@ -14,6 +14,11 @@ class MaterialListCreateView(APIView):
     def get(self, request, classroom_slug):
         try:
             classroom = Classroom.objects.get(slug=classroom_slug)
+            
+            # Security: Ensure user is the teacher or an enrolled student
+            if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+                return Response({"error": "You do not have permission to view materials for this classroom"}, status=status.HTTP_403_FORBIDDEN)
+                
             materials = Material.objects.select_related('teacher').filter(classroom=classroom)
             serializer = MaterialSerializer(materials, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -77,6 +82,12 @@ class MaterialDetailView(APIView):
         material = self.get_object(classroom_slug, pk)
         if material is None:
             return Response({"error": "Material not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Security: Ensure user is the teacher or an enrolled student
+        classroom = material.classroom
+        if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+            return Response({"error": "You do not have permission to view this material"}, status=status.HTTP_403_FORBIDDEN)
+            
         serializer = MaterialSerializer(material, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
