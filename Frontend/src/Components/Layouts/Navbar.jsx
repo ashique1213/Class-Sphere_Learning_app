@@ -1,120 +1,38 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import logo from "../../assets/Nav_logo.svg";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
-import { persistor } from "../../redux/store";
 import notificationApi from "../../api/notificationapi";
-import { checkUserSubscription } from "../../api/subscriptionapi";
 import { toast } from "react-toastify";
+import useNotifications from "../../hooks/useNotifications";
+import useSubscription from "../../hooks/useSubscription";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
-  const [currentSubscription, setCurrentSubscription] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { authToken, refreshToken } = useSelector((state) => state.auth);
   const isAuthenticated = !!authToken;
   const wsBaseUrl = import.meta.env.VITE_WS_URL;
 
-  // Use ref to persist WebSocket instance across renders
-  const wsRef = useRef(null);
-
-  // Fetch initial notifications and subscription
-  useEffect(() => {
-    if (isAuthenticated && authToken) {
-      fetchNotifications();
-      fetchSubscriptionStatus();
-    }
-  }, [isAuthenticated, authToken]);
-
-  // Separate WebSocket logic into its own effect
-  useEffect(() => {
-    if (!isAuthenticated || !authToken) return;
-
-    // Only initialize if not already connected
-    if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
-      const websocket = new WebSocket(
-        `${wsBaseUrl}/notifications/?token=${authToken}`
-      );
-
-      websocket.onopen = () => {
-        console.log("WebSocket connected successfully");
-      };
-
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        setNotifications((prev) => [
-          {
-            id: data.id,
-            message: data.message,
-            notification_type: data.notification_type,
-            time_ago: data.time_ago,
-            is_read: data.is_read,
-          },
-          ...prev,
-        ]);
-      };
-
-      websocket.onclose = () => {
-        console.log("WebSocket disconnected");
-      };
-
-      websocket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      wsRef.current = websocket;
-    }
-
-    // Cleanup only when component unmounts or authToken changes
-    return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        console.log("Closing WebSocket connection");
-        wsRef.current.close();
-      }
-    };
-  }, [authToken, isAuthenticated]); // Only re-run if authToken or isAuthenticated changes
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await notificationApi.getNotifications();
-      setNotifications(response.data);
-    } catch (error) {
-      console.error("Failed to fetch notifications:", error);
-    }
-  };
-
-  const fetchSubscriptionStatus = async () => {
-    try {
-      const subscriptionData = await checkUserSubscription(authToken);
-      setCurrentSubscription(subscriptionData);
-    } catch (error) {
-      console.error("Failed to fetch subscription status:", error);
-    }
-  };
+  const { notifications, clearNotifications, closeWebSocket } = useNotifications(isAuthenticated, authToken, wsBaseUrl);
+  const { currentSubscription, clearSubscription } = useSubscription(isAuthenticated, authToken);
 
   const handleLogout = async () => {
     try {
       if (refreshToken) {
-        const response = await notificationApi.logout(refreshToken, authToken);
+        await notificationApi.logout(refreshToken, authToken);
         toast.success("Logged out successfully");
       }
-      dispatch(logout());
-      localStorage.clear();
-      setNotifications([]);
-      setCurrentSubscription(null);
-      if (wsRef.current) wsRef.current.close();
-      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error.response?.data || error.message);
+    } finally {
       dispatch(logout());
       localStorage.clear();
-      setNotifications([]);
-      setCurrentSubscription(null);
-      if (wsRef.current) wsRef.current.close();
+      clearNotifications();
+      clearSubscription();
+      closeWebSocket();
       navigate("/");
     }
   };
