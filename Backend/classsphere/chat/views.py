@@ -17,7 +17,7 @@ class RecentChatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        chats = Chat.objects.filter(participants=request.user)
+        chats = Chat.objects.prefetch_related('participants').filter(participants=request.user)
         serializer = ChatSerializer(chats, many=True, context={"request": request})
         return Response(serializer.data)
 
@@ -26,7 +26,7 @@ class ChatMessagesView(APIView):
 
     def get(self, request, chat_id):
         chat = get_object_or_404(Chat, id=chat_id, participants=request.user)
-        messages = chat.messages.order_by("timestamp")
+        messages = chat.messages.select_related('sender').order_by("timestamp")
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
 

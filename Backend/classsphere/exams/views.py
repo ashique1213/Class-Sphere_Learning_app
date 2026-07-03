@@ -12,7 +12,7 @@ class ExamListCreateView(APIView):
 
     def get(self, request, slug):
         try:
-            exams = Exam.objects.filter(classroom__slug=slug).order_by('-created_at') 
+            exams = Exam.objects.prefetch_related('questions').filter(classroom__slug=slug).order_by('-created_at') 
             serializer = ExamSerializer(exams, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -40,7 +40,7 @@ class ExamListCreateView(APIView):
                     message=teacher_message,
                     notification_type='SUCCESS'
                 )
-                students = Student.objects.filter(joined_classes=classroom)
+                students = Student.objects.select_related('user').filter(joined_classes=classroom)
                 student_message = f"New Exam '{exam.topic}' added to {classroom.name}"
                 for student in students:
                     create_notification(
@@ -130,7 +130,7 @@ class PublishExamView(APIView):
                 notification_type='SUCCESS'
             )
 
-            students = Student.objects.filter(joined_classes=exam.classroom)
+            students = Student.objects.select_related('user').filter(joined_classes=exam.classroom)
             student_message = f"New Exam '{exam.topic}' is now published in {exam.classroom.name}."
             for student in students:
                 create_notification(
@@ -193,7 +193,7 @@ class StudentExamSubmissionsView(APIView):
     def get(self, request, slug):
         try:
             classroom = Classroom.objects.get(slug=slug)
-            submissions = ExamSubmission.objects.filter(student=request.user, exam__classroom=classroom)
+            submissions = ExamSubmission.objects.select_related('student').filter(student=request.user, exam__classroom=classroom)
             serializer = ExamSubmissionSerializer(submissions, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Classroom.DoesNotExist:
@@ -212,7 +212,7 @@ class TeacherExamSubmissionsView(APIView):
                 return Response({"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN)
             
             # Fetch all submissions for this exam
-            submissions = ExamSubmission.objects.filter(exam=exam)
+            submissions = ExamSubmission.objects.select_related('student').filter(exam=exam)
             serializer = ExamSubmissionSerializer(submissions, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exam.DoesNotExist:

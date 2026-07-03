@@ -14,7 +14,7 @@ class MaterialListCreateView(APIView):
     def get(self, request, classroom_slug):
         try:
             classroom = Classroom.objects.get(slug=classroom_slug)
-            materials = Material.objects.filter(classroom=classroom)
+            materials = Material.objects.select_related('teacher').filter(classroom=classroom)
             serializer = MaterialSerializer(materials, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Classroom.DoesNotExist:
@@ -47,7 +47,7 @@ class MaterialListCreateView(APIView):
                     message=teacher_message,
                     notification_type='SUCCESS'
                 )
-                students = Student.objects.filter(joined_classes=classroom)
+                students = Student.objects.select_related('user').filter(joined_classes=classroom)
                 student_message = f"New {material_type} material '{material.topic}' added to {classroom.name}"
                 for student in students:
                     create_notification(

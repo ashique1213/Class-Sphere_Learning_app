@@ -16,10 +16,10 @@ class ClassroomListCreateView(APIView):
         teacher_username = request.query_params.get("teacher")
         if teacher_username:
             # Teachers see all their classrooms (active and inactive)
-            classrooms = Classroom.objects.filter(teacher__username=teacher_username)
+            classrooms = Classroom.objects.select_related('teacher').prefetch_related('students__user').filter(teacher__username=teacher_username)
         else:
             # Others only see active classrooms
-            classrooms = Classroom.objects.filter(is_active=True)
+            classrooms = Classroom.objects.select_related('teacher').prefetch_related('students__user').filter(is_active=True)
         
         serializer = ClassroomSerializer(classrooms, many=True)
         return Response(serializer.data)
@@ -69,7 +69,10 @@ class ClassroomDetailView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get_object(self, slug):
-        classroom = get_object_or_404(Classroom, slug=slug)
+        classroom = get_object_or_404(
+            Classroom.objects.select_related('teacher').prefetch_related('students__user'), 
+            slug=slug
+        )
         # Allow access if user is teacher or a joined student, regardless of is_active
         if self.request.user == classroom.teacher:
             return classroom
@@ -220,7 +223,10 @@ class JoinedClassesView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        student, created = Student.objects.get_or_create(user=request.user)
+        student, created = Student.objects.prefetch_related(
+            'joined_classes__teacher', 
+            'joined_classes__students__user'
+        ).get_or_create(user=request.user)
         # Return all joined classes, regardless of is_active status
         serializer = StudentSerializer(student)
         return Response(serializer.data["joined_classes"])

@@ -27,7 +27,7 @@ class CreateMeetingView(APIView):
                 notification_type='SUCCESS'
             )
 
-            students = Student.objects.filter(joined_classes=classroom)
+            students = Student.objects.select_related('user').filter(joined_classes=classroom)
             student_message = f"New meeting '{meeting.title}' scheduled for {classroom.name}"
             for student in students:
                 create_notification(
@@ -52,7 +52,7 @@ class GetMeetingView(APIView):
 class MeetingListView(APIView):
     def get(self, request, slug):
         classroom = get_object_or_404(Classroom, slug=slug)
-        meetings = Meeting.objects.filter(classroom=classroom).order_by('-created_at') 
+        meetings = Meeting.objects.select_related('host').filter(classroom=classroom).order_by('-created_at') 
         serializer = MeetingSerializer(meetings, many=True)
         return Response(serializer.data)
 
