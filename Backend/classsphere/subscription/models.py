@@ -3,13 +3,12 @@ from django.db import models
 from authentication.models import User
 
 class SubscriptionPlan(models.Model):
-    PLAN_CHOICES = (
-        ('free', 'Free'),
-        ('pro', 'Pro'),
-        ('premium', 'Premium'),
-    )
-    
-    name = models.CharField(max_length=20, choices=PLAN_CHOICES, unique=True)
+    class PlanName(models.TextChoices):
+        FREE = 'free', 'Free'
+        PRO = 'pro', 'Pro'
+        PREMIUM = 'premium', 'Premium'
+        
+    name = models.CharField(max_length=20, choices=PlanName.choices, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration_days = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
@@ -41,7 +40,11 @@ class Transaction(models.Model):
     transaction_id = models.CharField(max_length=255, unique=True) 
     amount = models.DecimalField(max_digits=10, decimal_places=2) 
     currency = models.CharField(max_length=10, default="INR")
-    status = models.CharField(max_length=50, choices=[("succeeded", "Succeeded"), ("failed", "Failed")])
+    class Status(models.TextChoices):
+        SUCCEEDED = "succeeded", "Succeeded"
+        FAILED = "failed", "Failed"
+
+    status = models.CharField(max_length=50, choices=Status.choices)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

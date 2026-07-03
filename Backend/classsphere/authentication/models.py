@@ -6,14 +6,13 @@ from django.utils import timezone
 
 
 class User(AbstractUser):
-    ROLE_CHOICES = (
-        ('teacher', 'Teacher'),
-        ('student', 'Student'),
-        ('staff', 'Staff')
-    )
+    class Role(models.TextChoices):
+        TEACHER = 'teacher', 'Teacher'
+        STUDENT = 'student', 'Student'
+        STAFF = 'staff', 'Staff'
 
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=10, choices=Role.choices)
     gender = models.CharField(max_length=10, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     phone = models.CharField(max_length=15, blank=True, null=True)
@@ -38,7 +37,7 @@ class OTP(models.Model):
     otp_code = models.CharField(max_length=6)
     username = models.CharField(max_length=150)
     password = models.CharField(max_length=128)  
-    role = models.CharField(max_length=10, choices=User.ROLE_CHOICES)
+    role = models.CharField(max_length=10, choices=User.Role.choices)
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
 
@@ -50,7 +49,7 @@ class OTP(models.Model):
 
 
 class PasswordResetOTP(models.Model):
-    email = models.EmailField()
+    email = models.EmailField(db_index=True)
     otp_code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
