@@ -59,113 +59,122 @@ const features = [
 
 const FeatureDetails = () => {
   return (
-    <>
-      <div className="text-center px-5 md:px-[25%] md:py-5">
+    <div className="bg-slate-50 py-16 md:py-24">
+      <div className="text-center px-5 md:px-[25%] mb-16">
         {/* Title Section */}
-        <h1 className="text-xl md:text-3xl font-bold">
-          <span className="text-blue-800">What is </span>
-          <span className="text-teal-500">ClassSphere?</span>
+        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+          <span className="text-slate-800">What is </span>
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-cyan-500">ClassSphere?</span>
         </h1>
-        <p className="text-gray-700 mt-3 text-lg">
-          <b>ClassSphere</b> is a platform that allows educators to create
+        <p className="text-slate-600 mt-6 text-lg md:text-xl leading-relaxed">
+          <b className="text-slate-800">ClassSphere</b> is a platform that allows educators to create
           online classes whereby they can store the course materials online;
           manage assignments, quizzes and exams; monitor due dates; grade
-          results and provide students with feedback all in one place.
+          results and provide students with feedback all in one seamless place.
         </p>
       </div>
-      <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-6">
+
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-stretch justify-center gap-8 px-6">
         {/* Instructor Card */}
-        <div className="relative w-full md:w-[40%] h-64 rounded-xl overflow-hidden shadow-lg">
+        <div className="group relative w-full md:w-1/2 h-80 rounded-3xl overflow-hidden shadow-xl transform hover:-translate-y-2 transition-all duration-500 cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent z-10 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
           <img
             src={Teacher}
             alt="Instructor"
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
           />
-          <div className="absolute inset-0  bg-opacity-50 flex flex-col items-center justify-center">
-            <h2 className="text-white text-lg md:text-xl font-bold">
+          <div className="absolute inset-0 z-20 p-8 flex flex-col items-center justify-end">
+            <h2 className="text-white text-2xl font-bold tracking-wide mb-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
               FOR INSTRUCTORS
             </h2>
-            <button className="mt-4 px-6 py-2 border border-white text-white rounded-full hover:bg-white hover:text-black transition">
+            <button className="px-8 py-3 bg-white/20 backdrop-blur-md border border-white/50 text-white rounded-full font-semibold hover:bg-white hover:text-slate-900 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)]">
               I am Teacher
             </button>
           </div>
         </div>
 
         {/* Student Card */}
-        <div className="relative w-full md:w-[40%] h-64 rounded-xl overflow-hidden shadow-lg">
+        <div className="group relative w-full md:w-1/2 h-80 rounded-3xl overflow-hidden shadow-xl transform hover:-translate-y-2 transition-all duration-500 cursor-pointer">
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-900 via-teal-900/40 to-transparent z-10 opacity-80 group-hover:opacity-90 transition-opacity duration-300"></div>
           <img
-            src={Student} // Replace with actual student image
+            src={Student} 
             alt="Student"
-            className="w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-opacity-50 flex flex-col items-center justify-center">
-            <h2 className="text-white text-lg md:text-xl font-bold">
+          <div className="absolute inset-0 z-20 p-8 flex flex-col items-center justify-end">
+            <h2 className="text-white text-2xl font-bold tracking-wide mb-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
               FOR STUDENTS
             </h2>
-            <button className="mt-4 px-6 py-2 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition">
+            <button className="px-8 py-3 bg-teal-500 text-white rounded-full font-semibold hover:bg-teal-400 hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] transition-all duration-300">
               I am Student
             </button>
           </div>
         </div>
       </div>
 
-      <div className="text-center px-10 md:px-30 py-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 py-20">
         {/* Title Section */}
-        <h1 className="text-xl md:text-3xl font-bold">
-          <span className="text-blue-800">Our </span>
-          <span className="text-teal-500">Features</span>
-        </h1>
-        <p className="text-gray-700 mt-3 text-lg">
-          The extraordinary feature can make learning activities more
-          interactive.
-        </p>
+        <div className="text-center mb-20">
+          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+            <span className="text-slate-800">Our </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-cyan-500">Features</span>
+          </h1>
+          <p className="text-slate-500 mt-4 text-lg md:text-xl">
+            Extraordinary features that make learning activities more interactive.
+          </p>
+        </div>
 
         {/* Features List */}
-        {features.map((feature, index) => (
-          <div
-            key={feature.id}
-            className={`flex flex-col ${
-              feature.reverse ? "md:flex-row-reverse" : "md:flex-row"
-            } items-center gap-8 mt-12`}
-          >
-            {/* Image */}
-            <div className="w-full md:w-1/2 flex justify-center">
-              <img
-                className="w-full max-w-md md:max-w-full rounded-lg shadow-lg"
-                src={feature.image}
-                alt="Feature"
-              />
-            </div>
+        <div className="space-y-24">
+          {features.map((feature, index) => (
+            <div
+              key={feature.id}
+              className={`flex flex-col ${
+                feature.reverse ? "md:flex-row-reverse" : "md:flex-row"
+              } items-center gap-12 lg:gap-20`}
+            >
+              {/* Image */}
+              <div className="w-full md:w-1/2 flex justify-center relative group">
+                <div className="absolute -inset-2 bg-gradient-to-r from-teal-200 to-blue-200 rounded-3xl blur opacity-30 group-hover:opacity-70 transition duration-500"></div>
+                <img
+                  className="relative w-full max-w-lg rounded-2xl shadow-2xl shadow-slate-200 ring-1 ring-slate-900/5 transform group-hover:scale-[1.02] transition-transform duration-500"
+                  src={feature.image}
+                  alt="Feature"
+                />
+              </div>
 
-            {/* Feature Description */}
-            <div className="w-full md:w-1/2 text-center md:text-left">
-              <h2 className="text-xl md:text-2xl font-bold leading-snug">
-                {feature.title.split(" ").map((word, i) => (
-                  <span
-                    key={i}
-                    className={i % 2 === 0 ? "text-teal-500" : "text-blue-800"}
-                  >
-                    {word}{" "}
-                  </span>
-                ))}
-              </h2>
-
-              {/* Feature Points */}
-              <div className="mt-6 space-y-4">
-                {feature.points.map((point, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <span className="w-10 h-10 flex items-center justify-center bg-gray-200 rounded-full">
-                      🎤
+              {/* Feature Description */}
+              <div className="w-full md:w-1/2 text-center md:text-left">
+                <h2 className="text-2xl md:text-4xl font-bold leading-tight">
+                  {feature.title.split(" ").map((word, i) => (
+                    <span
+                      key={i}
+                      className={i % 2 === 0 ? "text-teal-600" : "text-slate-800"}
+                    >
+                      {word}{" "}
                     </span>
-                    <p className="leading-relaxed text-gray-700">{point}</p>
-                  </div>
-                ))}
+                  ))}
+                </h2>
+
+                {/* Feature Points */}
+                <div className="mt-8 space-y-6">
+                  {feature.points.map((point, i) => (
+                    <div key={i} className="flex items-start gap-5">
+                      <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-teal-50 rounded-full shadow-inner shadow-teal-100">
+                        <svg className="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                      </div>
+                      <p className="leading-relaxed text-slate-600 text-lg mt-2">{point}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
