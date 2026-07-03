@@ -12,9 +12,17 @@ class ExamListCreateView(APIView):
 
     def get(self, request, slug):
         try:
-            exams = Exam.objects.prefetch_related('questions').filter(classroom__slug=slug).order_by('-created_at') 
+            classroom = Classroom.objects.get(slug=slug)
+            
+            # Security: Ensure only the teacher or enrolled students can view the exams
+            if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+                return Response({"error": "You do not have permission to view exams for this classroom"}, status=status.HTTP_403_FORBIDDEN)
+                
+            exams = Exam.objects.prefetch_related('questions').filter(classroom=classroom).order_by('-created_at') 
             serializer = ExamSerializer(exams, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except Classroom.DoesNotExist:
+            return Response({"error": "Classroom not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -156,6 +164,14 @@ class ExamSubmissionView(APIView):
     def post(self, request, exam_id):
         try:
             exam = Exam.objects.get(id=exam_id)
+            
+            # Security: Verify enrollment
+            if not Student.objects.filter(user=request.user, joined_classes=exam.classroom).exists():
+                return Response(
+                    {"error": "You must be enrolled in this classroom to submit an exam"}, 
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
             if ExamSubmission.objects.filter(student=request.user, exam=exam).exists():
                 return Response(
                     {"error": "You have already submitted this exam"},
@@ -182,6 +198,15 @@ class ExamSubmissionView(APIView):
             serializer = ExamSubmissionSerializer(data=data)
             if serializer.is_valid():
                 serializer.save(student=request.user)  # Explicitly pass student
+                
+                # Notify Teacher
+                teacher_message = f"{request.user.username} submitted exam '{exam.topic}' in {exam.classroom.name}"
+                create_notification(
+                    user=exam.classroom.teacher,
+                    message=teacher_message,
+                    notification_type='INFO'
+                )
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exam.DoesNotExist:
