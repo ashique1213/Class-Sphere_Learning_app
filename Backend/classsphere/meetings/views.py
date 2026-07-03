@@ -41,17 +41,31 @@ class CreateMeetingView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetMeetingView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, meeting_id):
         try:
             meeting = Meeting.objects.get(meeting_id=meeting_id)
+            # Security: Ensure user is the host or an enrolled student
+            classroom = meeting.classroom
+            if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+                return Response({"error": "You do not have permission to view this meeting"}, status=status.HTTP_403_FORBIDDEN)
+                
             serializer = MeetingSerializer(meeting)
             return Response(serializer.data)
         except Meeting.DoesNotExist:
             return Response({"error": "Meeting not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class MeetingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, slug):
         classroom = get_object_or_404(Classroom, slug=slug)
+        
+        # Security: Ensure user is the host or an enrolled student
+        if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+            return Response({"error": "You do not have permission to view meetings for this classroom"}, status=status.HTTP_403_FORBIDDEN)
+            
         meetings = Meeting.objects.select_related('host').filter(classroom=classroom).order_by('-created_at') 
         serializer = MeetingSerializer(meetings, many=True)
         return Response(serializer.data)
@@ -62,6 +76,12 @@ class JoinMeetingView(APIView):
     def post(self, request, meeting_id):
         try:
             meeting = Meeting.objects.get(meeting_id=meeting_id, is_active=True)
+            classroom = meeting.classroom
+            
+            # Security: Ensure user is the host or an enrolled student
+            if request.user != classroom.teacher and not Student.objects.filter(user=request.user, joined_classes=classroom).exists():
+                return Response({"error": "You do not have permission to join this meeting"}, status=status.HTTP_403_FORBIDDEN)
+                
             participant, created = MeetingParticipant.objects.get_or_create(
                 meeting=meeting,
                 user=request.user
