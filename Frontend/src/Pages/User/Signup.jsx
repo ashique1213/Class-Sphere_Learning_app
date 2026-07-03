@@ -247,10 +247,10 @@ const Signup = () => {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
 
-      <div className="relative flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-5xl min-h-[700px] border border-white/50 z-10">
+      <div className="relative flex flex-col md:flex-row bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-3xl min-h-[500px] border border-white/50 z-10">
         {/* Home Icon Positioned at Top Right */}
-        <Link to="/" className="absolute top-6 right-6 z-20 bg-white/50 p-2 rounded-full backdrop-blur-sm hover:bg-teal-50 transition-all duration-300 shadow-sm">
-          <FaHome className="text-teal-700 text-xl" />
+        <Link to="/" className="absolute top-4 right-4 z-20 bg-white/50 p-2 rounded-full backdrop-blur-sm hover:bg-teal-50 transition-all duration-300 shadow-sm">
+          <FaHome className="text-teal-700 text-lg" />
         </Link>
 
         {/* Left Side - Image */}
@@ -261,43 +261,43 @@ const Signup = () => {
             alt="Classroom"
             className="w-full h-full object-cover transform scale-105"
           />
-          <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 text-white">
-            <h2 className="text-3xl font-bold tracking-tight mb-2">Join Us</h2>
-            <p className="text-teal-100 font-medium text-sm pb-4">
+          <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
+            <h2 className="text-2xl font-bold tracking-tight mb-2">Join Us</h2>
+            <p className="text-teal-100 font-medium text-xs pb-2">
               Start your learning journey today with our cutting-edge platform.
             </p>
           </div>
         </div>
 
         {/* Right Side - Signup Form */}
-        <div className="w-full md:w-7/12 p-10 md:p-16 flex flex-col justify-center bg-white">
+        <div className="w-full md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white">
           {isResetPassword ? (
             <ResetPassword onClose={handleResetPasswordClose} />
           ) : userType === null ? (
             <div className="max-w-sm mx-auto w-full text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome</h2>
-              <p className="text-gray-500 text-sm mb-8">Are you joining as a Student or a Teacher?</p>
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Welcome</h2>
+              <p className="text-gray-500 text-xs mb-6">Are you joining as a Student or a Teacher?</p>
               
               <button
                 onClick={() => setUserType("Student")}
-                className="w-full mb-4 bg-teal-50 text-teal-700 border border-teal-200 py-4 rounded-xl text-lg font-medium hover:bg-teal-600 hover:text-white hover:border-teal-600 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                className="w-full mb-3 bg-teal-50 text-teal-700 border border-teal-200 py-3 rounded-xl text-base font-medium hover:bg-teal-600 hover:text-white hover:border-teal-600 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 I am a <span className="font-bold">STUDENT</span>
               </button>
               <button
                 onClick={() => setUserType("Teacher")}
-                className="w-full bg-teal-700 text-white py-4 rounded-xl text-lg font-medium shadow-md hover:bg-teal-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                className="w-full bg-teal-700 text-white py-3 rounded-xl text-base font-medium shadow-md hover:bg-teal-800 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
               >
                 I am a <span className="font-bold">TEACHER</span>
               </button>
             </div>
           ) : !isOtpSent ? (
             <div className="max-w-sm mx-auto w-full">
-              <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
                 {isSignUp ? `Create ${userType} Account` : `Welcome Back, ${userType}`}
               </h2>
               {/* Auth Toggle Switch */}
-              <div className="flex bg-gray-100 p-1 rounded-full mb-6 relative">
+              <div className="flex bg-gray-100 p-1 rounded-full mb-4 relative">
                 <div
                   className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-sm transition-transform duration-300 ease-in-out ${
                     isSignUp ? "translate-x-full" : "translate-x-0"
@@ -326,7 +326,7 @@ const Signup = () => {
               </button> */}
               <GoogleSignIn isSignUp={isSignUp} userType={userType} />
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 {isSignUp && (
                   <input
                     type="text"
@@ -334,7 +334,7 @@ const Signup = () => {
                     value={formData.username}
                     onChange={handleChange}
                     placeholder="Username"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                     required
                   />
                 )}
@@ -344,7 +344,7 @@ const Signup = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email address"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                   required
                 />
                 <div>
@@ -354,14 +354,14 @@ const Signup = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Password"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                     required
                   />
                   {!isSignUp && (
-                    <div className="flex justify-end mt-2">
+                    <div className="flex justify-end mt-1.5">
                       <span
                         onClick={handleForgotPassword}
-                        className="text-xs font-medium text-teal-600 hover:text-teal-700 hover:underline cursor-pointer transition-colors"
+                        className="text-[11px] font-medium text-teal-600 hover:text-teal-700 hover:underline cursor-pointer transition-colors"
                       >
                         Forgot Password?
                       </span>
@@ -376,17 +376,17 @@ const Signup = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Re-enter Password"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all shadow-sm"
                     required
                   />
                 )}
               </div>
               
-              {error && <p className="text-red-500 text-xs font-medium mt-3 px-1">{error}</p>}
+              {error && <p className="text-red-500 text-[11px] font-medium mt-2 px-1">{error}</p>}
 
               <button
                 onClick={handleSubmit}
-                className="w-full mt-6 bg-teal-600 text-white py-3.5 rounded-xl text-sm font-semibold shadow-lg hover:shadow-teal-500/30 hover:bg-teal-700 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full mt-4 bg-teal-600 text-white py-3 rounded-xl text-sm font-semibold shadow-lg hover:shadow-teal-500/30 hover:bg-teal-700 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
                 disabled={loading}
               >
                 {loading ? (
@@ -397,7 +397,7 @@ const Signup = () => {
                 ) : isSignUp ? "Sign Up" : "Sign In"}
               </button>
               
-              <p className="text-center text-sm text-gray-500 mt-6 font-medium">
+              <p className="text-center text-xs text-gray-500 mt-4 font-medium">
                 {isSignUp
                   ? "Already have an account?"
                   : "Don't have an account?"}{" "}
