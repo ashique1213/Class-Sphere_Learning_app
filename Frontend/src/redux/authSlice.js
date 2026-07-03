@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-// Assuming SIMPLE_JWT ACCESS_TOKEN_LIFETIME is 10 minutes 
-const ACCESS_TOKEN_LIFETIME = 10 * 60 * 1000; 
+import { jwtDecode } from "jwt-decode";
 
 const initialState = {
   user: null,
@@ -31,9 +29,17 @@ const authSlice = createSlice({
       state.email = action.payload.email || null;
       state.role = action.payload.role || null;
       state.is_active = action.payload.is_active ?? true;
-      state.tokenExpiry = action.payload.authToken
-        ? new Date().getTime() + ACCESS_TOKEN_LIFETIME
-        : null;
+      
+      if (action.payload.authToken) {
+        try {
+          const decoded = jwtDecode(action.payload.authToken);
+          state.tokenExpiry = decoded.exp * 1000;
+        } catch (e) {
+          state.tokenExpiry = null;
+        }
+      } else {
+        state.tokenExpiry = null;
+      }
     },
     loginFailure: (state, action) => {
       state.isLoading = false;
@@ -50,7 +56,12 @@ const authSlice = createSlice({
     updateTokens: (state, action) => {
       if (action.payload.authToken) {
         state.authToken = action.payload.authToken;
-        state.tokenExpiry = new Date().getTime() + ACCESS_TOKEN_LIFETIME;
+        try {
+          const decoded = jwtDecode(action.payload.authToken);
+          state.tokenExpiry = decoded.exp * 1000;
+        } catch (e) {
+          state.tokenExpiry = null;
+        }
       }
       if (action.payload.refreshToken) {
         state.refreshToken = action.payload.refreshToken;
