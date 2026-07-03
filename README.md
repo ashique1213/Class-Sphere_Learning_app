@@ -151,9 +151,13 @@ cd classsphere
    npm run dev
    ```
 
-### 4. Docker Setup
+### 4. Docker Setup (Backend)
 1. Ensure Docker and Docker Compose are installed.
-2. Build and run the services:
+2. Navigate to the backend directory where the Docker config resides:
+   ```bash
+   cd Backend/classsphere
+   ```
+3. Build and run the services:
    ```bash
    docker-compose up --build
    ```
