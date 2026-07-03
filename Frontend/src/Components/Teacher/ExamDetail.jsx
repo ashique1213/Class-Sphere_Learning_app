@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,6 +7,8 @@ import { fetchExam, fetchExamSubmissionsForTeacher } from "../../api/examsapi";
 import Navbar from "../Layouts/Navbar";
 import Footer from "../Layouts/Footer";
 import { FaSpinner } from "react-icons/fa";
+import ExamSubmissions from "./ExamSubmissions";
+import ExamQuestions from "./ExamQuestions";
 
 const ExamDetail = () => {
   const { examId } = useParams();
@@ -24,7 +26,6 @@ const ExamDetail = () => {
     const loadExam = async () => {
       try {
         const data = await fetchExam(examId);
-        console.log("Fetched Exam:", data);
         setExam(data);
       } catch (error) {
         toast.error("Failed to fetch exam details.");
@@ -36,17 +37,11 @@ const ExamDetail = () => {
     loadExam();
   }, [examId]);
 
-  const handleViewSubmissions = async () => {
+  const handleViewSubmissions = useCallback(async () => {
     try {
-      console.log("Fetching submissions for examId:", examId);
       const examSubmissions = await fetchExamSubmissionsForTeacher(examId);
-      console.log("Submissions Fetched:", examSubmissions);
       setSubmissions(examSubmissions);
       setShowSubmissions(true);
-      console.log(
-        "Show Submissions Set to True, Submissions:",
-        examSubmissions
-      );
     } catch (error) {
       toast.error("Failed to fetch submissions.");
       console.error(
@@ -54,7 +49,7 @@ const ExamDetail = () => {
         error.response?.data || error.message
       );
     }
-  };
+  }, [examId]);
 
   if (loading) {
     return (
@@ -103,10 +98,8 @@ const ExamDetail = () => {
 
         <div className="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
-            {/* Exam Title */}
             <h2 className="text-xl font-bold text-gray-800">{exam.topic}</h2>
 
-            {/* Buttons Container */}
             <div className="flex gap-4">
               <button
                 onClick={handleViewSubmissions}
@@ -125,50 +118,10 @@ const ExamDetail = () => {
           </div>
 
           {showSubmissions && (
-            <div className="mt-6 bg-gray-100 p-4 mb-4 rounded-lg shadow-sm">
-              <h3 className="text-md font-semibold text-gray-900 mb-4">
-                📋 Student Submissions
-              </h3>
-              {submissions.length === 0 ? (
-                <p className="text-gray-500">
-                  No students have submitted this exam yet.
-                </p>
-              ) : (
-                <ul className="space-y-2">
-                  {submissions.map((submission, index) => {
-                    const studentName =
-                      `${submission.student.first_name || ""} ${
-                        submission.student.last_name || ""
-                      }`.trim() || submission.student.username; // Fallback to username if name is empty
-                    return (
-                      <li
-                        key={submission.id || index}
-                        className="p-2 bg-white rounded-md shadow-sm flex justify-between items-center"
-                      >
-                        <span className="text-gray-700 ml-5 capitalize font-bold">
-                          {studentName}
-                        </span>
-                        <span>
-                          Submitted on{" "}
-                          {new Date(submission.submitted_at).toLocaleString()}
-                        </span>
-                        <span className="text-teal-600 pr-5 font-medium">
-                          Score: {submission.score || "N/A"}
-                        </span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowSubmissions(false)}
-                  className="mt-4 bg-gray-300 text-gray-800 px-5 py-1 rounded-lg hover:bg-gray-400 transition"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
+            <ExamSubmissions 
+              submissions={submissions} 
+              setShowSubmissions={setShowSubmissions} 
+            />
           )}
 
           <p className="text-gray-600 mb-2">
@@ -192,72 +145,13 @@ const ExamDetail = () => {
           <h3 className="text-md font-semibold text-gray-900 mt-6">
             📌 Questions
           </h3>
-          {exam.questions.length === 0 ? (
-            <p className="text-gray-500 mt-2">No questions available.</p>
-          ) : (
-            <>
-              <div className="space-y-4 mt-4">
-                {currentQuestions.map((q, index) => (
-                  <div
-                    key={q.id || index}
-                    className="bg-gray-100 p-4 rounded-lg shadow-sm"
-                  >
-                    <p className="font-semibold text-gray-800">
-                      Q{indexOfFirstQuestion + index + 1}: {q.question_text}
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      {q.options.map((opt, optIndex) => (
-                        <li
-                          key={optIndex}
-                          className={`p-2 rounded-md ${
-                            opt === q.correct_answer
-                              ? "bg-teal-100 text-teal-700 font-medium"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {opt} {opt === q.correct_answer && "✔"}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center space-x-4 mt-6">
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === 1
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-teal-500 text-white hover:bg-teal-600"
-                    }`}
-                  >
-                    ← Previous
-                  </button>
-                  <span className="text-gray-700 font-semibold">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === totalPages
-                        ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                        : "bg-teal-500 text-white hover:bg-teal-600"
-                    }`}
-                  >
-                    Next →
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+          <ExamQuestions 
+            questions={currentQuestions}
+            indexOfFirstQuestion={indexOfFirstQuestion}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
         </div>
       </div>
       <Footer />
