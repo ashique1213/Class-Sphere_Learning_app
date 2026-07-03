@@ -105,13 +105,33 @@ class SubmissionCreateView(APIView):
     def post(self, request, classroom_slug, assignment_id):
         try:
             classroom = Classroom.objects.get(slug=classroom_slug)
+            
+            # Verify user is enrolled
+            is_student = Student.objects.filter(user=request.user, joined_classes=classroom).exists()
+            if not is_student:
+                return Response({"error": "You must be enrolled in this classroom to submit assignments"}, status=status.HTTP_403_FORBIDDEN)
+
             assignment = Assignment.objects.get(classroom=classroom, pk=assignment_id)
             if timezone.now() > assignment.last_date:
                 return Response({"error": "Submission deadline has expired"}, status=status.HTTP_400_BAD_REQUEST)
             
-            serializer = SubmissionSerializer(data=request.data, context={'request': request})
+            # Prevent duplicate submissions by updating existing one if it exists
+            try:
+                submission = Submission.objects.get(assignment=assignment, student=request.user)
+                serializer = SubmissionSerializer(submission, data=request.data, context={'request': request}, partial=True)
+            except Submission.DoesNotExist:
+                serializer = SubmissionSerializer(data=request.data, context={'request': request})
+                
             if serializer.is_valid():
-                serializer.save(assignment=assignment, student=request.user)
+                submission = serializer.save(assignment=assignment, student=request.user)
+                
+                # Notify Teacher
+                create_notification(
+                    user=classroom.teacher,
+                    message=f"{request.user.username} submitted '{assignment.topic}' in {classroom.name}",
+                    notification_type='INFO'
+                )
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except (Classroom.DoesNotExist, Assignment.DoesNotExist):
@@ -138,5 +158,14 @@ class SubmissionUpdateView(APIView):
         serializer = SubmissionSerializer(submission, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
+            
+            # Notify Student if score is provided
+            if 'score' in request.data:
+                create_notification(
+                    user=submission.student,
+                    message=f"Your submission for '{submission.assignment.topic}' has been graded. Score: {request.data['score']}",
+                    notification_type='INFO'
+                )
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -87,24 +87,26 @@ const AssignmentTab = ({ assignments = [], onSubmit }) => { // Added onSubmit pr
                             )}
                         </div>
                         <div className="mt-4">
-                            {assignment.file_url ? (
-                                <div className="text-sm text-gray-500 mb-2">
+                            {assignment.file_url && (
+                                <div className="text-sm text-gray-500 mb-4">
                                     <p>
                                         Submitted:{" "}
                                         <a
                                             href={assignment.file_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-teal-600 hover:underline"
+                                            className="text-teal-600 hover:underline font-semibold"
                                         >
                                             View Submission
                                         </a>
                                     </p>
                                 </div>
-                            ) : !isExpired ? (
+                            )}
+
+                            {!isExpired ? (
                                 <>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Upload your assignment:
+                                        {assignment.file_url ? "Resubmit your assignment:" : "Upload your assignment:"}
                                     </label>
                                     <div className="border-2 border-dashed border-gray-300 rounded-md p-4 flex flex-col items-center gap-2 hover:border-teal-500 transition">
                                         <FaFileUpload className="text-gray-400 text-3xl" />
@@ -145,11 +147,11 @@ const AssignmentTab = ({ assignments = [], onSubmit }) => { // Added onSubmit pr
                                                 Submitting...
                                             </>
                                         ) : (
-                                            "Submit Assignment"
+                                            assignment.file_url ? "Resubmit Assignment" : "Submit Assignment"
                                         )}
                                     </button>
                                 </>
-                            ) : (
+                            ) : !assignment.file_url && (
                                 <p className="text-sm text-gray-500">No submission made.</p>
                             )}
                         </div>
