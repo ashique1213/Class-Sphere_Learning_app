@@ -1,7 +1,11 @@
 import json
+import logging
+from urllib.parse import parse_qs
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-# 
+
+logger = logging.getLogger(__name__)
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from rest_framework_simplejwt.tokens import AccessToken
@@ -10,7 +14,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.room_group_name = f'chat_{self.chat_id}'
 
-        token = self.scope['query_string'].decode().split('token=')[-1]
+        query_params = parse_qs(self.scope['query_string'].decode())
+        token = query_params.get('token', [None])[0]
+
+        if not token:
+            await self.close()
+            return
+
         try:
             access_token = AccessToken(token)
             user_id = access_token['user_id']
@@ -21,7 +31,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
                 return
         except Exception as e:
-            print(f"Authentication error: {e}")
+            logger.error(f"Authentication error in ChatConsumer: {e}")
             await self.close()
             return
 
